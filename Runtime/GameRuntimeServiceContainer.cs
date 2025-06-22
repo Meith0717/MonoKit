@@ -5,7 +5,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Engine.Runtime
+namespace GameEngine.Runtime
 {
     public class GameRuntimeServiceContainer
     {

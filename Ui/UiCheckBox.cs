@@ -2,7 +2,7 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
-namespace Engine.Ui
+namespace GameEngine.Ui
 {
     public class UiCheckBox : UiButton
     {

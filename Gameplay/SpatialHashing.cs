@@ -2,7 +2,7 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
-using Engine.Extensions;
+using GameEngine.Extensions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Engine.Gameplay
+namespace GameEngine.Gameplay
 {
     public class SpatialHashing(int cellSize)
     {

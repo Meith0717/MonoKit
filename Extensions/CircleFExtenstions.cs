@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 using MonoGame.Extended;
 using System;
 
-namespace Engine.Extensions
+namespace GameEngine.Extensions
 {
     public static class CircleFExtensions
     {

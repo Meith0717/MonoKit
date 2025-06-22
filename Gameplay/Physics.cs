@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 using MonoGame.Extended;
 using System;
 
-namespace Engine.Gameplay
+namespace GameEngine.Gameplay
 {
     public class Physics
     {

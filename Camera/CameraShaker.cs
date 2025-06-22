@@ -5,7 +5,7 @@
 using Microsoft.Xna.Framework;
 using System;
 
-namespace Engine.Camera
+namespace GameEngine.Camera
 {
     public class CameraShaker
     {

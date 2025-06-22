@@ -4,7 +4,7 @@
 
 using System;
 
-namespace Engine.Core
+namespace GameEngine.Core
 {
     public static class RNG
     {

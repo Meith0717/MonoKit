@@ -5,7 +5,7 @@
 using Microsoft.Xna.Framework;
 using System;
 
-namespace Engine.Gameplay
+namespace GameEngine.Gameplay
 {
     public static class CollisionDetection
     {

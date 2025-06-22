@@ -2,17 +2,17 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
-using Engine.Camera;
-using Engine.Content;
-using Engine.Gameplay;
-using Engine.Input;
+using GameEngine.Camera;
+using GameEngine.Content;
+using GameEngine.Gameplay;
+using GameEngine.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace Engine.Runtime
+namespace GameEngine.Runtime
 {
     public class GameRuntime
     {

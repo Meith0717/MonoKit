@@ -4,7 +4,7 @@
 
 using System;
 
-namespace Engine.Content
+namespace GameEngine.Content
 {
     public sealed class AudioService
     {

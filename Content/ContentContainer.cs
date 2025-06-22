@@ -2,23 +2,23 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
-using Engine.Core;
+using GameEngine.Core;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
 
-namespace Engine.Content
+namespace GameEngine.Content
 {
     public class ContentContainer<T>
     {
         private readonly Dictionary<string, T> _content = new();
         public string[] Loaded => _content.Keys.ToArray();
 
-        public Dictionary<string, T> Content => _content;
+        public ImmutableDictionary<string, T> Content => _content.ToImmutableDictionary();
 
         public T Get(string key)
         {
@@ -50,36 +50,6 @@ namespace Engine.Content
                 T content = contentManager.Load<T>(contentPath);
                 Add(contentId, content);
                 contentLoadingState?.AddLoaded(file);
-            }
-        }
-    }
-
-    public static class ContentContainerExtension
-    {
-        public static void LoadJsonDocuments(this ContentContainer<JsonDocument> contentContainer, ContentManager contentManager, string contentDirectory, ContentLoadingState contentLoadingState = null)
-        {
-            return;
-            string fullContentDirectory = Path.Combine(contentManager.RootDirectory, contentDirectory);
-            string[] files = FileHandler.GetAllFilesInDirectory(fullContentDirectory, SearchOption.AllDirectories);
-
-            foreach (string prefabConfig in files)
-            {
-                string prefabConfigName = Path.GetFileNameWithoutExtension(prefabConfig);
-                string jsonString = FileHandler.ReadFile(prefabConfig);
-                var json = JsonDocument.Parse(jsonString);
-
-                try
-                {
-                    json.RootElement.GetProperty("Type").ToString();
-                    json.RootElement.GetProperty("Id").ToString();
-                }
-                catch
-                {
-                    throw new Exception($"Your json {prefabConfig} is missing an correct Type or Id property!");
-                }
-
-                contentContainer.Add(prefabConfigName, json);
-                contentLoadingState?.AddLoaded(prefabConfig);
             }
         }
     }

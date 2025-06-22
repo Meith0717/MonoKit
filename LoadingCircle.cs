@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
 using System;
 
-namespace Engine
+namespace GameEngine
 {
     public static class LoadingCircle
     {

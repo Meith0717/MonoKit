@@ -2,12 +2,12 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
-using Engine.Input;
+using GameEngine.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 
-namespace Engine.Ui
+namespace GameEngine.Ui
 {
     public class UiTabview : UiElement
     {

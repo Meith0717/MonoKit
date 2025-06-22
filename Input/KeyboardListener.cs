@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Engine.Input
+namespace GameEngine.Input
 {
     public class KeyboardListener
     {

@@ -2,11 +2,11 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
-using Engine.Extensions;
+using GameEngine.Extensions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace Engine.Core
+namespace GameEngine.Core
 {
     public class FrameCounter()
     {

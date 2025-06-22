@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
 
-namespace Engine.Input
+namespace GameEngine.Input
 {
     internal class MouseListener
     {

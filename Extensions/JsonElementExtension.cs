@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using System.Text.Json;
 
-namespace Engine.Extensions
+namespace GameEngine.Extensions
 {
     public static class JsonElementExtension
     {

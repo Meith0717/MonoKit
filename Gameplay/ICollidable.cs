@@ -2,10 +2,10 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
-using Engine.Runtime;
+using GameEngine.Runtime;
 using Microsoft.Xna.Framework;
 
-namespace Engine.Gameplay
+namespace GameEngine.Gameplay
 {
     public interface ICollidable
     {

@@ -2,11 +2,11 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
-using Engine.Graphics;
+using GameEngine.Graphics;
 using Newtonsoft.Json;
 using System;
 
-namespace Engine.Runtime
+namespace GameEngine.Runtime
 {
     [Serializable]
     public class SettingsManager

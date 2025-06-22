@@ -2,15 +2,15 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
-using Engine.Content;
-using Engine.Extensions;
-using Engine.Gameplay;
+using GameEngine.Content;
+using GameEngine.Extensions;
+using GameEngine.Gameplay;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
 using System;
 
-namespace Engine.Extensions
+namespace GameEngine.Extensions
 {
     public static class SpriteBatchExtension
     {

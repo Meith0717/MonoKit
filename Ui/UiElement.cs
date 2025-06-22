@@ -2,13 +2,13 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
-using Engine.Input;
+using GameEngine.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
 using System.Diagnostics;
 
-namespace Engine.Ui
+namespace GameEngine.Ui
 {
     public enum Anchor { N, NE, E, SE, S, SW, W, NW, Center, None, Left, Right, Top, Bottom, CenterH, CenterV }
 

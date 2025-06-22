@@ -2,7 +2,7 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
-using Engine.Core;
+using GameEngine.Core;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using System;
@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace Engine.Content
+namespace GameEngine.Content
 {
     public sealed class SoundManager(int maxInstances)
     {

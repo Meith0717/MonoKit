@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
 using System;
 
-namespace Engine.Graphics
+namespace GameEngine.Graphics
 {
     public enum WindowMode { FullScreen, Borderless, Windowed }
 

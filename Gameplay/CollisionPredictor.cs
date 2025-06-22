@@ -2,11 +2,11 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
-using Engine.Core;
-using Engine.Extensions;
+using GameEngine.Core;
+using GameEngine.Extensions;
 using Microsoft.Xna.Framework;
 
-namespace Engine.Gameplay
+namespace GameEngine.Gameplay
 {
 
     public enum MovementState

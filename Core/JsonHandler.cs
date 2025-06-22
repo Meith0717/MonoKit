@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Text.Json;
 
-namespace Engine.Core
+namespace GameEngine.Core
 {
     internal static class JsonHandler
     {

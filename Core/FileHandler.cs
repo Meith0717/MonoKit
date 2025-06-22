@@ -5,7 +5,7 @@
 using System;
 using System.IO;
 
-namespace Engine.Core
+namespace GameEngine.Core
 {
     public class FileHandler
     {

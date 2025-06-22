@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 
-namespace Engine.Input
+namespace GameEngine.Input
 {
     public enum ActionType
     {

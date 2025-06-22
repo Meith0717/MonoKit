@@ -5,7 +5,7 @@
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 
-namespace Engine.Ui
+namespace GameEngine.Ui
 {
     public class UiVariableSelector<T> : UiFrame
     {

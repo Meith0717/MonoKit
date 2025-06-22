@@ -5,7 +5,7 @@
 using System;
 using System.Threading;
 
-namespace Engine.Core
+namespace GameEngine.Core
 {
     public static class DataIO
     {

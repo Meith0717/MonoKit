@@ -2,12 +2,12 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
-using Engine.Input;
+using GameEngine.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using MonoGame.Extended;
 
-namespace Engine.Camera
+namespace GameEngine.Camera
 {
     public class CameraMover(Camera2d camera)
     {

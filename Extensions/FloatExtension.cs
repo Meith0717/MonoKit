@@ -5,7 +5,7 @@
 using Microsoft.Xna.Framework;
 using System;
 
-namespace Engine.Extensions
+namespace GameEngine.Extensions
 {
     public static class FloatExtension
     {

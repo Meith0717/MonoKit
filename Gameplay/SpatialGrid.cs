@@ -2,14 +2,14 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
-using Engine.Content;
+using GameEngine.Content;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Engine.Gameplay
+namespace GameEngine.Gameplay
 {
     internal class SpatialGrid((int, int) hash, int size)
     {

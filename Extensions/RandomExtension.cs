@@ -7,7 +7,7 @@ using MonoGame.Extended;
 using System;
 using System.Collections.Generic;
 
-namespace Engine.Extensions
+namespace GameEngine.Extensions
 {
     public static class RandomExtension
     {

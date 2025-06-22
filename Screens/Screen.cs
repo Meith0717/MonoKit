@@ -2,14 +2,14 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
-using Engine.Input;
-using Engine.Ui;
+using GameEngine.Input;
+using GameEngine.Ui;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
 using System;
 
-namespace Engine.Screens
+namespace GameEngine.Screens
 {
     [Serializable]
     public abstract class Screen : IDisposable

@@ -5,7 +5,7 @@
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 
-namespace Engine.Input
+namespace GameEngine.Input
 {
     public class InputManager
     {
