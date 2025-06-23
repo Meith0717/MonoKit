@@ -78,7 +78,7 @@ namespace GameEngine.Ui
             base.Drawer(spriteBatch);
             if (Tooltip is null) return;
             if (!_isHovered) return;
-            var font = ContentProvider.Fonts.Get("defaultFont");
+            var font = ContentProvider.Fonts.Get("default_font");
             var pos = new Vector2(Bounds.Left, Bounds.Bottom);
             spriteBatch.DrawString(font, Tooltip, pos, Color.White, 0, Vector2.Zero, .1f, SpriteEffects.None, 1);
         }

@@ -29,7 +29,7 @@ namespace GameEngine.Camera
 
         public void RenderCulledObjects(SpriteBatch spriteBatch, Matrix matrix, GameRuntime runtime)
         {
-            var font = ContentProvider.Fonts.Get("defaultFont");
+            var font = ContentProvider.Fonts.Get("default_font");
             foreach (GameObject obj in _objects)
             {
                 if (Debugger.IsAttached)

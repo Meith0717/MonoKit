@@ -34,7 +34,7 @@ namespace GameEngine.Ui
         }
 
         public void Add(string tabDescription, UiFrame tabFrame)
-            => _tabs.Add(new UiButton("defaultFont", tabDescription), tabFrame);
+            => _tabs.Add(new UiButton("default_font", tabDescription), tabFrame);
 
         public void Initialize()
         {

@@ -51,7 +51,7 @@ namespace GameEngine.Core
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.DrawString("defaultFont", $"{double.Round(CurrentFramesPerSecond)} fps", new Vector2(1, 1), Color.White, .12f);
+            spriteBatch.DrawString("default_font", $"{double.Round(CurrentFramesPerSecond)} fps", new Vector2(1, 1), Color.White, .12f);
         }
     }
 }
