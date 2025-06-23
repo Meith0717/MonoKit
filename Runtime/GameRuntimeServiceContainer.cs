@@ -11,7 +11,7 @@ namespace GameEngine.Runtime
     {
         private readonly Dictionary<Type, object> _services = new();
 
-        public void Register<T>(T service)
+        public void AddService<T>(T service)
             => _services[typeof(T)] = service!;
 
         public T Get<T>()

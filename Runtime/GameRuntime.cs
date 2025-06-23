@@ -20,7 +20,7 @@ namespace GameEngine.Runtime
         private readonly SpatialHashing _spatialHashing;
         private HashSet<GameObject> _gameObjects;
 
-        public readonly GameRuntimeServiceContainer RuntimeServices;
+        public readonly GameRuntimeServiceContainer Services;
         public readonly Camera.Camera2d Camera;
         public readonly CameraMover CameraMover;
 
@@ -33,10 +33,10 @@ namespace GameEngine.Runtime
             _graphicsDevice = graphicsDevice;
             _spatialHashing = new(spatialHashingCellSize);
             Camera = new(_graphicsDevice);
-            RuntimeServices = new();
-            RuntimeServices.Register(this);
-            RuntimeServices.Register(_spatialHashing);
-            RuntimeServices.Register(Camera);
+            Services = new();
+            Services.AddService(this);
+            Services.AddService(_spatialHashing);
+            Services.AddService(Camera);
             CameraMover = new(Camera);
         }
 
@@ -91,13 +91,13 @@ namespace GameEngine.Runtime
             if (_gameObjects is null) return;
             if (_gameObjects.Count == 0) return;
 
-            var spatialHashing = RuntimeServices.Get<SpatialHashing>();
+            var spatialHashing = Services.Get<SpatialHashing>();
             var objs = _gameObjects.ToArray();
 
             foreach (var obj in objs)
             {
                 if (obj == null) continue;
-                obj.Update(elapsedMs, RuntimeServices);
+                obj.Update(elapsedMs, Services);
                 obj.Position += obj.MovingDirection * obj.Velocity * (float)elapsedMs;
 
                 if (!obj.IsDisposed) continue;
