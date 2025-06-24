@@ -45,12 +45,14 @@ namespace GameEngine.Graphics
             if (!_game.IsFixedTimeStep) return;
             _game.TargetElapsedTime = TimeSpan.FromTicks(TimeSpan.TicksPerSecond / value);
             _graphicsDeviceManager.ApplyChanges();
+            _resolutionWasResized = true;
         }
 
         public void ApplyVSync(bool value)
         {
             _graphicsDeviceManager.SynchronizeWithVerticalRetrace = value;
             _graphicsDeviceManager.ApplyChanges();
+            _resolutionWasResized = true;
         }
 
         public void ApplyMode(WindowMode mode)
@@ -68,6 +70,7 @@ namespace GameEngine.Graphics
                     break;
             }
             _graphicsDeviceManager.ApplyChanges();
+            _resolutionWasResized = true;
         }
 
         private void DoFullScreen()
