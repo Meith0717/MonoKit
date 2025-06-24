@@ -92,8 +92,8 @@ namespace GameEngine.Runtime
             if (_gameObjects.Count == 0) return;
 
             var spatialHashing = Services.Get<SpatialHashing>();
-            var objs = _gameObjects.ToArray();
 
+            var objs = _gameObjects.ToArray();
             foreach (var obj in objs)
             {
                 if (obj == null) continue;
