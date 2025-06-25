@@ -21,11 +21,12 @@ public class ScreenManager(Game game)
     private readonly List<Screen> _addedScreens = new();
     private RenderTarget2D _lowerScreens;
     private Effect _blurEffect;
+    private float _blurIntensity;
+    private float _topLayerAlpha;
 
     public void Initialize()
     {
-        _blurEffect = ContentProvider.Effects.Get("Blur");
-        _blurEffect.Parameters["kernel"].SetValue(GaussianBlur.GetGaussianKernel1D(20, 8));
+        _blurEffect = ContentProvider.Effects.Get("GaussianBlur");
     }
 
     // add and remove layers from stack
@@ -36,6 +37,7 @@ public class ScreenManager(Game game)
         if (_screenStack.First is null) return;
         _screenStack.First.Value.Dispose();
         _screenStack.RemoveFirst();
+        _topLayerAlpha = 0;
     }
 
     public void PopScreensUntil(Screen layer)
@@ -61,6 +63,7 @@ public class ScreenManager(Game game)
             _screenStack.AddFirst(layer);
             layer.Initialize();
             layer.ApplyResolution(gameTime, uiScale);
+            _topLayerAlpha = 0;
         }
 
         foreach (Screen layer in _screenStack.ToList())
@@ -68,6 +71,13 @@ public class ScreenManager(Game game)
             layer.Update(gameTime, inputState);
             if (!layer.UpdateBelow) break;
         }
+
+        var topScreen = _screenStack.FirstOrDefault();
+        if (topScreen == null) return;
+        _topLayerAlpha = float.Min(1, _topLayerAlpha +(float)(.01 * gameTime.ElapsedGameTime.TotalMilliseconds));
+        _blurIntensity += (topScreen.BlurBelow ? 1 : -1) * (float)(.05 * gameTime.ElapsedGameTime.TotalMilliseconds);
+        _blurIntensity = float.Clamp(_blurIntensity, .01f, 8);
+        _blurEffect.Parameters["kernel"].SetValue(GaussianBlur.GetGaussianKernel1D(20, _blurIntensity));
     }
 
     // draw layers
@@ -108,7 +118,7 @@ public class ScreenManager(Game game)
         }
 
         spriteBatch.Begin();
-        spriteBatch.Draw(topScreenTexture, Vector2.Zero, Color.White);
+        spriteBatch.Draw(topScreenTexture, Vector2.Zero, Color.White * _topLayerAlpha);
         spriteBatch.End();
     }
 
