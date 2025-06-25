@@ -3,6 +3,7 @@
 // All rights reserved.
 
 using GameEngine.Content;
+using GameEngine.Graphics;
 using GameEngine.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -18,14 +19,13 @@ public class ScreenManager(Game game)
     // layer stack
     private readonly LinkedList<Screen> _screenStack = new();
     private readonly List<Screen> _addedScreens = new();
-    private RenderTarget2D _blurRenderTarget;
+    private RenderTarget2D _lowerScreens;
     private Effect _blurEffect;
 
     public void Initialize()
     {
         _blurEffect = ContentProvider.Effects.Get("Blur");
-        _blurEffect.Parameters["texelSize"].SetValue(new Vector2(1.0f / _game.GraphicsDevice.Viewport.Width, 1.0f / _game.GraphicsDevice.Viewport.Height));
-        _blurRenderTarget = new(_game.GraphicsDevice, _game.GraphicsDevice.Viewport.Width, _game.GraphicsDevice.Viewport.Height);
+        _blurEffect.Parameters["kernel"].SetValue(GaussianBlur.GetGaussianKernel1D(20, 8));
     }
 
     // add and remove layers from stack
@@ -72,46 +72,43 @@ public class ScreenManager(Game game)
 
     // draw layers
     private readonly LinkedList<RenderTarget2D> _renderTargets = new();
-    private readonly Dictionary<RenderTarget2D, Effect> _layerEffects = new();
+
     public void Draw(SpriteBatch spriteBatch)
     {
+        _renderTargets.Clear();
         if (_screenStack.Count == 0) return;
-        Screen topLayer = _screenStack.First();
-        RenderTarget2D topRenderTarget = topLayer.RenderTarget(spriteBatch);
 
-        if (topLayer.DrawBelow)
+        var topScreen = _screenStack.First();
+        var topScreenTexture = topScreen.RenderTarget(spriteBatch);
+
+        if (topScreen.DrawBelow)
         {
-            foreach (Screen layer in _screenStack)
+            // Render all renderTargets of lower screens
+            foreach (var screen in _screenStack)
             {
-                if (layer == topLayer) continue;
-                RenderTarget2D renderTarget = layer.RenderTarget(spriteBatch);
-                _renderTargets.AddFirst(renderTarget);
-                _layerEffects.Add(renderTarget, layer.Effect);
-                if (!layer.DrawBelow) break;
+                if (screen == topScreen) continue;
+                _renderTargets.AddFirst(screen.RenderTarget(spriteBatch));
+                if (!screen.DrawBelow) break;
             }
 
-            // Set Blur Render Target
-            _game.GraphicsDevice.SetRenderTarget(_blurRenderTarget);
+            // Set draw all on lower renderTarget
+            _blurEffect.CurrentTechnique = _blurEffect.Techniques["GaussianBlurH"];
+            _game.GraphicsDevice.SetRenderTarget(_lowerScreens);
             _game.GraphicsDevice.Clear(Color.Black);
-            foreach (RenderTarget2D renderTarget in _renderTargets)
-            {
-                spriteBatch.Begin(effect: topLayer.BlurBelow ? _blurEffect : _layerEffects[renderTarget]);
-                // Draw on Blur Render Target
-                spriteBatch.Draw(renderTarget, _game.GraphicsDevice.Viewport.Bounds, Color.White);
-                spriteBatch.End();
-            }
-            // Free GraphicsDevice
-            _game.GraphicsDevice.SetRenderTarget(null);
+            spriteBatch.Begin(effect: topScreen.BlurBelow ? _blurEffect : null);
+            foreach (var screen in _renderTargets)
+                spriteBatch.Draw(screen, Vector2.Zero, Color.White);
+            spriteBatch.End();
 
-            _renderTargets.Clear();
-            _layerEffects.Clear();
-            spriteBatch.Begin();
-            spriteBatch.Draw(_blurRenderTarget, _game.GraphicsDevice.Viewport.Bounds, Color.White);
+            _blurEffect.CurrentTechnique = _blurEffect.Techniques["GaussianBlurV"];
+            _game.GraphicsDevice.SetRenderTarget(null);
+            spriteBatch.Begin(effect: topScreen.BlurBelow ? _blurEffect : null);
+            spriteBatch.Draw(_lowerScreens, Vector2.Zero, Color.White);
             spriteBatch.End();
         }
 
-        spriteBatch.Begin(effect: topLayer.Effect);
-        spriteBatch.Draw(topRenderTarget, _game.GraphicsDevice.Viewport.Bounds, Color.White);
+        spriteBatch.Begin();
+        spriteBatch.Draw(topScreenTexture, Vector2.Zero, Color.White);
         spriteBatch.End();
     }
 
@@ -126,10 +123,11 @@ public class ScreenManager(Game game)
     // fullScreen stuff
     public void OnResolutionChanged(GameTime gameTime, float uiScale)
     {
-        _blurRenderTarget.Dispose();
+        _lowerScreens?.Dispose();
         foreach (Screen layer in _screenStack)
             layer.ApplyResolution(gameTime, uiScale);
-        _blurRenderTarget = new(_game.GraphicsDevice, _game.GraphicsDevice.Viewport.Width, _game.GraphicsDevice.Viewport.Height);
+        _lowerScreens = new(_game.GraphicsDevice, _game.GraphicsDevice.Viewport.Width, _game.GraphicsDevice.Viewport.Height);
+        _blurEffect.Parameters["texelSize"].SetValue(new Vector2(1.0f / _lowerScreens.Width, 1.0f / _lowerScreens.Height));
     }
 
     public bool ContainsLayer(Screen layer) => _screenStack.Contains(layer);
