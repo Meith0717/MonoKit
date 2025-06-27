@@ -37,7 +37,6 @@ public class ScreenManager(Game game)
         if (_screenStack.First is null) return;
         _screenStack.First.Value.Dispose();
         _screenStack.RemoveFirst();
-        _topLayerAlpha = 0;
     }
 
     public void PopScreensUntil(Screen layer)
@@ -75,8 +74,8 @@ public class ScreenManager(Game game)
         var topScreen = _screenStack.FirstOrDefault();
         if (topScreen == null) return;
         _topLayerAlpha = float.Min(1, _topLayerAlpha +(float)(.01 * gameTime.ElapsedGameTime.TotalMilliseconds));
-        _blurIntensity += (topScreen.BlurBelow ? 1 : -1) * (float)(.05 * gameTime.ElapsedGameTime.TotalMilliseconds);
-        _blurIntensity = float.Clamp(_blurIntensity, .01f, 8);
+        _blurIntensity += (topScreen.BlurBelow ? 1 : -1) * (float)(.075 * gameTime.ElapsedGameTime.TotalMilliseconds);
+        _blurIntensity = float.Clamp(_blurIntensity, .01f, 10);
         _blurEffect.Parameters["kernel"].SetValue(GaussianBlur.GetGaussianKernel1D(20, _blurIntensity));
     }
 

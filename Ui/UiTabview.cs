@@ -9,14 +9,14 @@ using System.Collections.Generic;
 
 namespace GameEngine.Ui
 {
-    public class UiTabview : UiElement
+    public class UiTabView : UiElement
     {
         private readonly Dictionary<UiButton, UiFrame> _tabs = new();
         private readonly UiButton _leftButton;
         private readonly UiButton _rightButton;
         private UiFrame _activeFrame;
 
-        public UiTabview()
+        public UiTabView()
         {
             _leftButton = new UiButton("arrowL")
             {
