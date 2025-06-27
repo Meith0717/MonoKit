@@ -17,6 +17,7 @@ namespace GameEngine.Input
         Accelerate,
         Boost,
         Break,
+        OpenCargo,
         MoveCameraLeft,
         MoveCameraRight,
         MoveCameraUp,

@@ -19,6 +19,9 @@ namespace GameEngine.Ui
         public string Texture { private get; set; }
         public float TextureScale { private get; set; } = 1;
 
+        public void Clear()
+            => _elementChilds.Clear();
+
         public void Add(UiElement child)
             => _elementChilds.Add(child);
 

@@ -27,6 +27,7 @@ namespace GameEngine.Input
                 { Keys.Escape, ActionType.ESC },
                 { Keys.Space, ActionType.Space },
                 { Keys.LeftShift, ActionType.Boost },
+                { Keys.I, ActionType.OpenCargo },
             };
 
             mActionOnHold = new()
