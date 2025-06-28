@@ -28,7 +28,7 @@ namespace GameEngine.Ui
         public Color TextureIdleColor { private get; set; } = Color.White;
         public Color TextureHoverColor { private get; set; } = Color.Cyan;
         public Color TextureDisableColor { private get; set; } = Color.DarkGray;
-        public bool Disable { private get; set; } = false;
+        public bool Disable { get; set; } = false;
         public string Tooltip { private get; set; }
 
         public UiButton(string spriteFont, string text, string texture)

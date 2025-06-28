@@ -24,11 +24,11 @@ namespace GameEngine.Screens
         [JsonIgnore] protected readonly UiFrame UiRoot;
         [JsonIgnore] private RenderTarget2D _renderTarget2D;
 
-        protected Screen(GameServiceContainer gameServices, GraphicsDevice graphicsDevice, ScreenManager screenManager, bool updateBelow, bool drawBelow, bool blurBelow)
+        protected Screen(GameServiceContainer gameServices, bool updateBelow, bool drawBelow, bool blurBelow)
         {
             GameServices = gameServices;
-            GraphicsDevice = graphicsDevice;
-            ScreenManager = screenManager;
+            GraphicsDevice = gameServices.GetService<GraphicsDevice>();
+            ScreenManager = gameServices.GetService<ScreenManager>();
             UpdateBelow = updateBelow;
             DrawBelow = drawBelow;
             BlurBelow = blurBelow;
