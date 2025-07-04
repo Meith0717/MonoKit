@@ -12,26 +12,7 @@ namespace GameEngine.Ui
     public class UiTabView : UiElement
     {
         private readonly Dictionary<UiButton, UiFrame> _tabs = new();
-        private readonly UiButton _leftButton;
-        private readonly UiButton _rightButton;
         private UiFrame _activeFrame;
-
-        public UiTabView()
-        {
-            _leftButton = new UiButton("arrowL")
-            {
-                Anchor = Anchor.NW,
-                HSpace = 10,
-                VSpace = 10
-
-            };
-            _rightButton = new UiButton("arrowR")
-            {
-                Anchor = Anchor.NE,
-                HSpace = 10,
-                VSpace = 10
-            };
-        }
 
         public void Add(string tabDescription, UiFrame tabFrame)
             => _tabs.Add(new UiButton("default_font", tabDescription), tabFrame);
@@ -43,23 +24,22 @@ namespace GameEngine.Ui
 
             foreach (var tab in _tabs)
             {
-                var tabButton = tab.Key;
                 var tabFrame = tab.Value;
                 tabFrame.RelWidth = 1;
                 tabFrame.RelHeight = .95f;
 
+                var tabButton = tab.Key;
                 tabButton.OnClickAction = () => _activeFrame = tabFrame;
                 tabButton.RelY = 0;
-                tabButton.RelWidth = .8f / tabCount;
+                tabButton.RelWidth = 1f / tabCount;
                 tabButton.RelHeight = .05f;
-                tabButton.RelX = i * (.8f / (tabCount)) + .1f;
+                tabButton.RelX = i * (1f / tabCount);
                 tabButton.Color = Color.Transparent;
                 tabButton.TextScale = .2f;
                 tabButton.Alpha = 0;
                 i++;
 
-                if (_activeFrame is null)
-                    _activeFrame = tabFrame;
+                _activeFrame ??= tabFrame;
             }
         }
 
@@ -79,28 +59,25 @@ namespace GameEngine.Ui
             if (_activeFrame is null) return;
             _activeFrame.Anchor = Anchor.S;
             _activeFrame.Update(inputState, Bounds);
-            _leftButton.Update(inputState, Bounds);
-            _rightButton.Update(inputState, Bounds);
         }
 
         protected override void Drawer(SpriteBatch spriteBatch)
         {
+            _activeFrame?.Draw(spriteBatch);
+
             foreach (var button in _tabs.Keys)
                 button.Draw(spriteBatch);
-            _activeFrame?.Draw(spriteBatch);
-            _leftButton.Draw(spriteBatch);
-            _rightButton.Draw(spriteBatch);
         }
 
         public override void ApplyScale(Rectangle root, float uiScale)
         {
             base.ApplyScale(root, uiScale);
+
             foreach (var button in _tabs.Keys)
                 button.ApplyScale(Bounds, uiScale);
+
             foreach (var tab in _tabs.Values)
                 tab.ApplyScale(Bounds, uiScale);
-            _leftButton.ApplyScale(Bounds, uiScale);
-            _rightButton.ApplyScale(Bounds, uiScale);
         }
     }
 }

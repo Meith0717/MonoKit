@@ -28,6 +28,7 @@ namespace GameEngine.Input
                 { Keys.Space, ActionType.Space },
                 { Keys.LeftShift, ActionType.Boost },
                 { Keys.I, ActionType.OpenCargo },
+                { Keys.O, ActionType.OpenShop },
             };
 
             mActionOnHold = new()

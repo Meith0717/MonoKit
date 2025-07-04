@@ -53,19 +53,19 @@ namespace GameEngine.Ui
         protected override void Updater(InputState inputState)
         {
             base.Updater(inputState);
+            _isHovered = Bounds.Contains(inputState.MousePosition);
+            _isClicked = _isHovered && inputState.HasAction(ActionType.LeftWasClicked);
+            _IsDisabled = OnClickAction is null || Disable;
 
             if (_uiText is not null)
                 _uiText.Color = _IsDisabled ? TextDisableColor : _isHovered ? TextHoverColor : TextIdleColor;
             Color = _IsDisabled ? TextureDisableColor : _isHovered ? TextureHoverColor : TextureIdleColor;
 
-            if (_IsDisabled || Disable) return;
+            if (_IsDisabled) 
+                return;
 
             if (Bounds.Contains(inputState.MousePosition) && !_isHovered)
                 AudioService.SFX.PlaySound("hoverButton");
-
-            _isHovered = Bounds.Contains(inputState.MousePosition);
-            _isClicked = _isHovered && inputState.HasAction(ActionType.LeftWasClicked);
-            _IsDisabled = OnClickAction is null;
 
             if (!_isClicked) return;
             AudioService.SFX.PlaySound("clickButton");

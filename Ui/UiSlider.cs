@@ -9,33 +9,57 @@ using MonoGame.Extended;
 
 namespace GameEngine.Ui
 {
-    public class UiSlider(bool hoverable) : UiElement
+    public class UiSlider(bool interactive) : UiElement
     {
         private float _sliderValue;
         private bool _hovered;
         private bool _pressed;
-        private readonly bool _hoverable = hoverable;
+        private readonly bool _interactive = interactive;
 
-        public float Value { get => _sliderValue; set => _sliderValue = value; }
+        public float Value { get => _sliderValue; set => _sliderValue = float.Round(float.Clamp(value, 0, 1), 2); }
 
         protected override void Updater(InputState inputState)
         {
-            if (!_hoverable) return;
-            float relativeMousePosition = inputState.MousePosition.X - Bounds.X;
+            if (!_interactive) return;
             _hovered = Bounds.Contains(inputState.MousePosition);
-            _pressed = _hovered && inputState.HasAction(ActionType.LeftClickHold) || _pressed;
-            if (!_pressed) return;
-            if (inputState.HasAction(ActionType.LeftReleased)) _pressed = false;
+            _pressed = _pressed || (_hovered && inputState.HasAction(ActionType.LeftClickHold));
             if (_pressed)
-                _sliderValue = float.Round(float.Clamp(relativeMousePosition / Bounds.Width, 0, 1), 1);
+            {
+                var rectangle = Bounds;
+                var ratio = rectangle.Width / rectangle.Height;
+                if (ratio < 1) // Vertical
+                {
+                    float relativeMousePosition = Bounds.Bottom - inputState.MousePosition.Y;
+                    _sliderValue = relativeMousePosition / Bounds.Height;
+                }
+                else // Horizontal
+                {
+                    float relativeMousePosition = inputState.MousePosition.X - Bounds.X;
+                    _sliderValue = relativeMousePosition / Bounds.Width;
+                }
+                _sliderValue = float.Round(float.Clamp(_sliderValue, 0, 1), 2);
+                _pressed = !inputState.HasAction(ActionType.LeftReleased); 
+            }
         }
 
         protected override void Drawer(SpriteBatch spriteBatch)
         {
-            Rectangle recangle = Bounds;
-            spriteBatch.FillRectangle(recangle, BgColor);
-            recangle.Width = (int)(recangle.Width * _sliderValue);
-            spriteBatch.FillRectangle(recangle, _hovered || _pressed ? HoverColor : IdeColor);
+            var rectangle = Bounds;
+            spriteBatch.FillRectangle(rectangle, BgColor);
+
+            var ratio = rectangle.Width / rectangle.Height;
+            if (ratio < 1) // Vertical
+            { 
+                var bottom = rectangle.Bottom;
+                rectangle.Height = (int)(rectangle.Height * _sliderValue);
+                rectangle.Y = bottom - rectangle.Height;
+            }
+            else // Horizontal
+            { 
+                rectangle.Width = (int)(rectangle.Width * _sliderValue); 
+            }
+
+            spriteBatch.FillRectangle(rectangle, _hovered || _pressed ? HoverColor : IdeColor);
         }
 
         public Color IdeColor { private get; set; } = Color.DarkOrange;

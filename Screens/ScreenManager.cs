@@ -135,7 +135,12 @@ public class ScreenManager(Game game)
         _lowerScreens?.Dispose();
         foreach (Screen layer in _screenStack)
             layer.ApplyResolution(gameTime, uiScale);
-        _lowerScreens = new(_game.GraphicsDevice, _game.GraphicsDevice.Viewport.Width, _game.GraphicsDevice.Viewport.Height);
+        _lowerScreens = new(_game.GraphicsDevice,
+                            _game.GraphicsDevice.Viewport.Width,
+                            _game.GraphicsDevice.Viewport.Height,
+                            false,
+                            SurfaceFormat.HdrBlendable,
+                           DepthFormat.None);
         _blurEffect.Parameters["texelSize"].SetValue(new Vector2(1.0f / _lowerScreens.Width, 1.0f / _lowerScreens.Height));
     }
 
