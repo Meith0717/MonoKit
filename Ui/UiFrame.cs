@@ -23,7 +23,10 @@ namespace GameEngine.Ui
             => _elementChilds.Clear();
 
         public void Add(UiElement child)
-            => _elementChilds.Add(child);
+        {
+            _elementChilds.Add(child);
+            child.ApplyScale(Bounds, UiScale);
+        }
 
         protected override void Updater(InputState inputState)
         {

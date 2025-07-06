@@ -56,11 +56,9 @@ namespace GameEngine.Ui
             _isHovered = Bounds.Contains(inputState.MousePosition);
             _isClicked = _isHovered && inputState.HasAction(ActionType.LeftWasClicked);
             _IsDisabled = OnClickAction is null || Disable;
-
             if (_uiText is not null)
                 _uiText.Color = _IsDisabled ? TextDisableColor : _isHovered ? TextHoverColor : TextIdleColor;
             Color = _IsDisabled ? TextureDisableColor : _isHovered ? TextureHoverColor : TextureIdleColor;
-
             if (_IsDisabled) 
                 return;
 
