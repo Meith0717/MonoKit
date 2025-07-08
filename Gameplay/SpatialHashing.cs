@@ -10,6 +10,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace GameEngine.Gameplay
@@ -20,6 +21,8 @@ namespace GameEngine.Gameplay
         public readonly int CellSize = cellSize;
         private readonly ConcurrentDictionary<(int, int), SpatialGrid> _grids = new();
         private readonly ConcurrentDictionary<GameObject, List<(int, int)>> _hashes = new();
+        private readonly ThreadLocal<List<(int, int)>> _scratchHashes = new(() => new List<(int, int)>(16));
+
 
         public void Add(GameObject obj)
         {
@@ -51,14 +54,64 @@ namespace GameEngine.Gameplay
 
         public void Rearrange()
         {
-            var keyValuePairs = _hashes.ToArray();
-            Parallel.ForEach(keyValuePairs, kvp =>
+            var movedObjects = new ConcurrentBag<(GameObject obj, List<(int, int)> newHashes)>();
+
+            Parallel.ForEach(_hashes, kvp =>
             {
                 var obj = kvp.Key;
-                RemoveObject(obj);
-                Add(obj);
+                var oldHashes = kvp.Value;
+                var newHashes = GetHashesForObject(obj);
+
+                if (!HashesEqual(oldHashes, newHashes))
+                    movedObjects.Add((obj, newHashes));
             });
+
+            foreach (var (obj, newHashes) in movedObjects)
+            {
+                RemoveObject(obj);
+
+                foreach (var hash in newHashes)
+                    _grids.GetOrAdd(hash, _ => new SpatialGrid(hash, CellSize)).Add(obj);
+
+                _hashes[obj] = newHashes;
+            }
+
         }
+
+        private List<(int, int)> GetHashesForObject(GameObject obj)
+        {
+            var rect = obj.BoundBox.ToRectangleF();
+            var start = Vector2.Floor(rect.TopLeft / CellSize);
+            var end = Vector2.Ceiling(rect.BottomRight / CellSize);
+
+            var hashes = _scratchHashes.Value!;
+            hashes.Clear();
+
+            for (int x = (int)start.X; x < (int)end.X; x++)
+            {
+                for (int y = (int)start.Y; y < (int)end.Y; y++)
+                {
+                    hashes.Add((x, y));
+                }
+            }
+
+            return hashes;
+        }
+
+
+
+        private static bool HashesEqual(List<(int, int)> a, List<(int, int)> b)
+        {
+            if (ReferenceEquals(a, b)) return true;
+            if (a.Count != b.Count) return false;
+
+            for (int i = 0; i < a.Count; i++)
+                if (a[i] != b[i])
+                    return false;
+
+            return true;
+        }
+
 
         public void Clear() => _grids.Clear();
 

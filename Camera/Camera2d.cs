@@ -43,7 +43,7 @@ namespace GameEngine.Camera
 
         public void Draw(SpriteBatch spriteBatch, GameRuntime scene)
         {
-            _renderer.RenderCulledObjects(spriteBatch, TransformationMatrix, scene);
+            _renderer.RenderCulledObjects(spriteBatch, scene);
         }
 
         private static Matrix CreateViewTransformationMatrix(Vector2 cameraPosition, float cameraZoom, float cameraRotation, int screenWidth, int screenHeight)

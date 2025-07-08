@@ -38,6 +38,8 @@ namespace GameEngine.Camera
                 _camera.Zoom = _zoomTarget;
         }
 
+        public void Zoom(float value) => _zoomTarget = value;
+
         private void UpdatePositoin(float smothFactor)
         {
             if (_positionTarget == _camera.Position)
