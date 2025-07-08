@@ -16,9 +16,10 @@ namespace GameEngine.Ui
         private string _text;
         private bool _dirty;
 
-        public string Text { 
-            get => _text; 
-            set 
+        public string Text
+        {
+            get => _text;
+            set
             {
                 _text = value;
                 _dirty = true;
@@ -43,7 +44,7 @@ namespace GameEngine.Ui
 
         protected override void Updater(InputState inputState)
         {
-            if (_dirty) 
+            if (_dirty)
             {
                 UpdateSize();
                 _dirty = false;

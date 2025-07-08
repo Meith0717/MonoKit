@@ -38,7 +38,7 @@ namespace GameEngine.Ui
                     _sliderValue = relativeMousePosition / Bounds.Width;
                 }
                 _sliderValue = float.Round(float.Clamp(_sliderValue, 0, 1), 2);
-                _pressed = !inputState.HasAction(ActionType.LeftReleased); 
+                _pressed = !inputState.HasAction(ActionType.LeftReleased);
             }
         }
 
@@ -49,14 +49,14 @@ namespace GameEngine.Ui
 
             var ratio = rectangle.Width / rectangle.Height;
             if (ratio < 1) // Vertical
-            { 
+            {
                 var bottom = rectangle.Bottom;
                 rectangle.Height = (int)(rectangle.Height * _sliderValue);
                 rectangle.Y = bottom - rectangle.Height;
             }
             else // Horizontal
-            { 
-                rectangle.Width = (int)(rectangle.Width * _sliderValue); 
+            {
+                rectangle.Width = (int)(rectangle.Width * _sliderValue);
             }
 
             spriteBatch.FillRectangle(rectangle, _hovered || _pressed ? HoverColor : IdeColor);

@@ -59,7 +59,7 @@ namespace GameEngine.Ui
             if (_uiText is not null)
                 _uiText.Color = _IsDisabled ? TextDisableColor : _isHovered ? TextHoverColor : TextIdleColor;
             Color = _IsDisabled ? TextureDisableColor : _isHovered ? TextureHoverColor : TextureIdleColor;
-            if (_IsDisabled) 
+            if (_IsDisabled)
                 return;
 
             if (Bounds.Contains(inputState.MousePosition) && !_isHovered)

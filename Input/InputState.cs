@@ -79,7 +79,7 @@ namespace GameEngine.Input
             MousePosition = mousePosition;
         }
 
-        public readonly bool HasAction(ActionType action) 
+        public readonly bool HasAction(ActionType action)
             => Actions.Remove(action);
 
         public readonly void DoAction(ActionType action, Action function)
