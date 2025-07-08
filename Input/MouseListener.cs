@@ -51,7 +51,6 @@ namespace GameEngine.Input
             if (_midCounter > _clickHoldTeshholld && !MidMouseButtonJustReleased)
                 actions.Add(ActionType.MidClickHold);
 
-
             // Check for Mouse Key Pressed
             if (LeftMouseButtonJustReleased)
                 actions.Add(ActionType.LeftReleased);

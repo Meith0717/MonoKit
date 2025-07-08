@@ -19,13 +19,16 @@ namespace GameEngine.Ui
         public Rectangle Bounds { get; private set; } = new();
         protected float UiScale;
 
+        public int? X = null;
+        public int? Y = null;
         public float RelX = 0;
         public float RelY = 0;
-        public float RelWidth = .1f;
-        public float RelHeight = .1f;
 
         public int? Width = null;
         public int? Height = null;
+        public float RelWidth = .1f;
+        public float RelHeight = .1f;
+
         public int? HSpace = null;
         public int? VSpace = null;
 
@@ -57,8 +60,8 @@ namespace GameEngine.Ui
 
         private void UpdateBounds(Rectangle root)
         {
-            int x = (int)(root.Width * RelX);
-            int y = (int)(root.Height * RelY);
+            int x = X ?? (int)(root.Width * RelX);
+            int y = Y ?? (int)(root.Height * RelY);
 
             int width = (int)(Width * UiScale ?? root.Width * RelWidth);
             int height = (int)(Height * UiScale ?? root.Height * RelHeight);

@@ -14,6 +14,8 @@ namespace GameEngine.Ui
     public class UiFrame() : UiElement
     {
         private readonly List<UiElement> _elementChilds = new();
+        private readonly RenderTarget2D _renderTarget;
+
         public Color Color { private get; set; } = Color.White;
         public float Alpha { private get; set; } = 1;
         public string Texture { private get; set; }
@@ -45,6 +47,8 @@ namespace GameEngine.Ui
         public override void ApplyScale(Rectangle root, float uiScale)
         {
             base.ApplyScale(root, uiScale);
+            _renderTarget?.Dispose();
+
             foreach (UiElement child in _elementChilds)
                 child.ApplyScale(Bounds, uiScale);
         }

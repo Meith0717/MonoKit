@@ -45,12 +45,12 @@ namespace GameEngine.Screens
 
         public virtual void Initialize() {; }
 
+        public virtual void Draw(SpriteBatch spriteBatch) {; }
+
         public virtual void Update(GameTime gameTime, InputState inputState)
         {
             UiRoot.Update(inputState, GraphicsDevice.Viewport.Bounds);
         }
-
-        public virtual void Draw(SpriteBatch spriteBatch) {; }
 
         public RenderTarget2D RenderTarget(SpriteBatch spriteBatch)
         {

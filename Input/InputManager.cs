@@ -18,6 +18,7 @@ namespace GameEngine.Input
 
             _MouseListener.Listen(gameTime, ref actions, out Vector2 mousePosition);
             _KeyboardListener.Listener(ref actions, out string typedString);
+
             return new(actions, typedString, mousePosition);
         }
     }
