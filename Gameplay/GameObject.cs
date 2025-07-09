@@ -5,6 +5,7 @@
 using GameEngine.Content;
 using GameEngine.Runtime;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
 using Newtonsoft.Json;
 using System;
@@ -60,5 +61,7 @@ namespace GameEngine.Gameplay
         }
 
         public abstract void Update(double elapsedMs, GameRuntimeServiceContainer runtimeServices);
+
+        public abstract void Draw(SpriteBatch spriteBatch, GameRuntimeServiceContainer runtimeServices);
     }
 }

@@ -37,7 +37,7 @@ namespace GameEngine.Camera
                     spriteBatch.DrawString(font, $"{obj.GetType().Name}", obj.BoundBox.ToRectangleF().TopLeft, Color.Purple, 0, Vector2.Zero, 0.2f, SpriteEffects.None, 1);
                 }
 
-                spriteBatch.DrawGameObject(obj);
+                obj.Draw(spriteBatch, runtime.Services);
             }
         }
     }
