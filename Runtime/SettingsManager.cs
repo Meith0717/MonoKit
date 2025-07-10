@@ -12,7 +12,7 @@ namespace GameEngine.Runtime
     public class SettingsManager
     {
         [JsonProperty]
-        private SettingsState _settings = new(1, .9f, 1, 60, true, 4, false, WindowMode.Borderless, .9f, 1);
+        private SettingsState _settings = new(1, .9f, 1, 60, true, 4, false, WindowMode.Windowed, .9f, 1);
 
         public SettingsState GetSettings() => _settings;
 

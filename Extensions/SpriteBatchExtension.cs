@@ -42,9 +42,6 @@ namespace GameEngine.Extensions
         public static void DrawRectangleF(this SpriteBatch spriteBatch, RectangleF rectangle, Color color, float thicknessScale = 1, int depth = 1)
             => spriteBatch.DrawRectangle(rectangle, color, 1 / thicknessScale, GetDepth(depth));
 
-        public static void DrawLine(this SpriteBatch spriteBatch, Vector2 start, Vector2 end, Color color, float thicknessScale = 1, int depth = 1)
-            => spriteBatch.DrawLine(start, end, color, 1 / thicknessScale, GetDepth(depth));
-
         public static void DrawString(this SpriteBatch spriteBatch, string font, string text, Vector2 position, Color color, float scale)
         {
             SpriteFont spriteFont = ContentProvider.Fonts.Get(font);

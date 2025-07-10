@@ -33,7 +33,7 @@ namespace GameEngine.Camera
                 if (Debugger.IsAttached)
                 {
                     spriteBatch.DrawCircleF(obj.BoundBox.Position, obj.BoundBox.Radius, Color.Purple, .5f * runtime.Camera.Zoom);
-                    spriteBatch.DrawLine(obj.Position, obj.Position.InDirection(obj.MovingDirection, obj.Velocity * 500), Color.Blue, .5f * runtime.Camera.Zoom, 1);
+                    spriteBatch.DrawLine(obj.Position, obj.Position.InDirection(obj.MovingDirection, obj.Velocity * 500), Color.Blue, 2f / runtime.Camera.Zoom, 1);
                     spriteBatch.DrawString(font, $"{obj.GetType().Name}", obj.BoundBox.ToRectangleF().TopLeft, Color.Purple, 0, Vector2.Zero, 0.2f, SpriteEffects.None, 1);
                 }
 

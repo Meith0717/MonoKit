@@ -67,7 +67,7 @@ namespace GameEngine.Runtime
         {
             Camera.Update(_spatialHashing);
 
-            spriteBatch.Begin(transformMatrix: Camera.TransformationMatrix);
+            spriteBatch.Begin(transformMatrix: Camera.TransformationMatrix, sortMode: SpriteSortMode.BackToFront);
             if (Debugger.IsAttached)
             {
                 var font = ContentProvider.Fonts.Get("default_font");

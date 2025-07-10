@@ -56,16 +56,17 @@ namespace GameEngine.Camera
             return translationMatrix * rotationMatrix * scaleMatrix * screenCenterMatrix;
         }
 
-        private static RectangleF TransformRectangle(Rectangle worldBounds, Matrix ViewTransformationMatrix)
+        private static RectangleF TransformRectangle(Rectangle screenRect, Matrix viewMatrix)
         {
-            Point position = worldBounds.Location;
-            int screenWidth = worldBounds.Width;
-            int screenHeight = worldBounds.Height;
+            Matrix inverse = Matrix.Invert(viewMatrix);
+            Vector2 topLeft = Vector2.Transform(screenRect.Location.ToVector2(), inverse);
+            Vector2 bottomRight = Vector2.Transform(new Vector2(screenRect.Right, screenRect.Bottom), inverse);
 
-            Matrix inverse = Matrix.Invert(ViewTransformationMatrix);
-            Vector2 LeftTopEdge = Vector2.Transform(position.ToVector2(), inverse);
-            Vector2 RightBottomEdge = Vector2.Transform(new Vector2(screenWidth, screenHeight), inverse) - LeftTopEdge;
-            return new(LeftTopEdge.X, LeftTopEdge.Y, RightBottomEdge.X, RightBottomEdge.Y);
+            return new RectangleF(
+                topLeft.X,
+                topLeft.Y,
+                bottomRight.X - topLeft.X,
+                bottomRight.Y - topLeft.Y);
         }
     }
 }

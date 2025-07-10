@@ -76,7 +76,7 @@ namespace GameEngine.Camera
 
         public void SetPosition(Vector2 position)
         {
-            _camera.Position = position;
+            // _camera.Position = position;
             _positionTarget = position;
         }
 
