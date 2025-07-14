@@ -9,19 +9,21 @@ namespace GameEngine.Ui
 {
     public class UiVariableSelector<T> : UiFrame
     {
+        private readonly UiButton _arrowL;
+        private readonly UiButton _arrowR;
         private readonly UiText _text;
         private List<T> _items = new();
         private int _selectedIndex;
 
         public UiVariableSelector(string spriteFont)
         {
-            Add(new UiButton("arrowL")
+            Add(_arrowL = new UiButton("arrowL")
             {
                 OnClickAction = DecreaseIndex,
                 Anchor = Anchor.W
             });
 
-            Add(new UiButton("arrowR")
+            Add(_arrowR = new UiButton("arrowR")
             {
                 OnClickAction = IncreaseIndex,
                 Anchor = Anchor.E
@@ -56,6 +58,14 @@ namespace GameEngine.Ui
         public float ButtonScale { set { _text.Scale = value; } }
         public Color TextColor { set { _text.Color = value; } }
         public float TextAlpha { set { _text.Alpha = value; } }
+        public bool Disable
+        {
+            set
+            {
+                _arrowL.Disable = _arrowR.Disable = value;
+                _text.Color = value ? _arrowL.TextureDisableColor : Color.White;
+            }
+        }
         public List<T> Values
         {
             set

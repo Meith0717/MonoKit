@@ -22,12 +22,12 @@ namespace GameEngine.Ui
         public float TextScale { set { _uiText.Scale = value; } }
         public float TextAlpha { set { _uiText.Alpha = value; } }
 
-        public Color TextIdleColor { private get; set; } = Color.White;
-        public Color TextHoverColor { private get; set; } = Color.Cyan;
-        public Color TextDisableColor { private get; set; } = Color.DarkRed;
-        public Color TextureIdleColor { private get; set; } = Color.White;
-        public Color TextureHoverColor { private get; set; } = Color.Cyan;
-        public Color TextureDisableColor { private get; set; } = Color.DarkGray;
+        public Color TextIdleColor { get; set; } = Color.White;
+        public Color TextHoverColor { get; set; } = Color.Cyan;
+        public Color TextDisableColor { get; set; } = Color.DarkRed;
+        public Color TextureIdleColor { get; set; } = Color.White;
+        public Color TextureHoverColor { get; set; } = Color.Cyan;
+        public Color TextureDisableColor { get; set; } = Color.DarkGray;
         public bool Disable { get; set; } = false;
         public string Tooltip { private get; set; }
 

@@ -2,10 +2,12 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
+using MathNet.Numerics.Distributions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
 using System;
+using System.Linq;
 
 namespace GameEngine.Graphics
 {
@@ -25,34 +27,32 @@ namespace GameEngine.Graphics
         {
             _game = game;
             _graphicsDeviceManager = graphicsManager;
+            _graphicsDeviceManager.GraphicsProfile = GraphicsProfile.HiDef;
             _graphicsDeviceManager.ApplyChanges();
-            window.ClientSizeChanged += delegate { _resolutionWasResized = true; };
             _window = window;
+            _window.ClientSizeChanged += delegate 
+            {
+                _oldWidth = _window.ClientBounds.Width;
+                _oldHeight = _window.ClientBounds.Height;
+                _resolutionWasResized = true; 
+            };
 
             _oldWidth = 800;
             _oldHeight = 400;
         }
 
-        private Size MonitorSize
-            => new(GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width, GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height);
-
-        public bool ResolutionWasResized
-            => (_resolutionWasResized, _resolutionWasResized = false).Item1;
-
-        public void ApplyRefreshRate(int value)
+        public void ApplyRefreshRate(int value, bool vSync)
         {
-            _game.IsFixedTimeStep = value > 0;
-            if (!_game.IsFixedTimeStep) return;
-            _game.TargetElapsedTime = TimeSpan.FromTicks(TimeSpan.TicksPerSecond / value);
-            _graphicsDeviceManager.ApplyChanges();
-            _resolutionWasResized = true;
-        }
 
-        public void ApplyVSync(bool value)
-        {
-            _graphicsDeviceManager.SynchronizeWithVerticalRetrace = value;
+            if (value <= 0) throw new InvalidCastException();
+
+            _graphicsDeviceManager.SynchronizeWithVerticalRetrace = vSync;
+            _game.IsFixedTimeStep = !vSync;
+
+            if (!vSync)
+                _game.TargetElapsedTime = TimeSpan.FromTicks(TimeSpan.TicksPerSecond / value);
+
             _graphicsDeviceManager.ApplyChanges();
-            _resolutionWasResized = true;
         }
 
         public void ApplyMode(WindowMode mode)
@@ -73,14 +73,14 @@ namespace GameEngine.Graphics
             _resolutionWasResized = true;
         }
 
+        public bool ResolutionWasResized => (_resolutionWasResized, _resolutionWasResized = false).Item1;
+
+        private static Size MonitorSize => new(GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width, GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height);
+
+        private static int QualityLevels => 0;
+
         private void DoFullScreen()
         {
-            if (!_graphicsDeviceManager.IsFullScreen)
-            {
-                _oldWidth = _window.ClientBounds.Width;
-                _oldHeight = _window.ClientBounds.Height;
-            }
-
             _graphicsDeviceManager.PreferredBackBufferHeight = MonitorSize.Height;
             _graphicsDeviceManager.PreferredBackBufferWidth = MonitorSize.Width;
 
@@ -90,12 +90,6 @@ namespace GameEngine.Graphics
 
         private void DoBorderlessWindowed()
         {
-            if (!_graphicsDeviceManager.IsFullScreen)
-            {
-                _oldWidth = _window.ClientBounds.Width;
-                _oldHeight = _window.ClientBounds.Height;
-            }
-
             _graphicsDeviceManager.PreferredBackBufferHeight = MonitorSize.Height;
             _graphicsDeviceManager.PreferredBackBufferWidth = MonitorSize.Width;
 
