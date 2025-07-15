@@ -74,10 +74,15 @@ namespace GameEngine.Camera
             _lastMousePosition = inputState.MousePosition;
         }
 
+        public void MoveToPosition(Vector2 position)
+        {
+            _positionTarget = position;
+        }
+
         public void SetPosition(Vector2 position)
         {
-            // _camera.Position = position;
             _positionTarget = position;
+            _camera.Position = position;
         }
 
         public void EdgeScrolling(Vector2 mousePosition, Rectangle screenBound, float amount = 2)
