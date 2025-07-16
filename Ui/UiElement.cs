@@ -6,6 +6,7 @@ using GameEngine.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
+using System;
 using System.Diagnostics;
 
 namespace GameEngine.Ui
@@ -14,10 +15,11 @@ namespace GameEngine.Ui
 
     public enum FillScale { X, Y, Both, FillIn, Fit, None }
 
-    public abstract class UiElement
+    public abstract class UiElement : IDisposable
     {
         public Rectangle Bounds { get; private set; } = new();
-        protected float UiScale;
+        public bool IsDisposed { get; private set; }
+        protected float UiScale { get; private set; }
 
         public int? X = null;
         public int? Y = null;
@@ -39,10 +41,10 @@ namespace GameEngine.Ui
 
         protected abstract void Drawer(SpriteBatch spriteBatch);
 
-        public void Update(InputState inputState, Rectangle root)
+        public void Update(InputState inputState, Rectangle root, float uiScale)
         {
             Updater(inputState);
-            UpdateBounds(root);
+            ApplyScale(root, uiScale);
         }
 
         public void Draw(SpriteBatch spriteBatch)
@@ -56,6 +58,12 @@ namespace GameEngine.Ui
         {
             UiScale = uiScale;
             UpdateBounds(root);
+        }
+
+        public virtual void Dispose()
+        {
+            IsDisposed = true;
+            GC.SuppressFinalize(this);
         }
 
         private void UpdateBounds(Rectangle root)
@@ -75,6 +83,8 @@ namespace GameEngine.Ui
 
         private static void ManageFillScale(Rectangle root, FillScale fillScale, ref int x, ref int y, ref int width, ref int height)
         {
+            if (fillScale == FillScale.None) return;
+            
             float rootAspectRatio = root.Width / (float)root.Height;
             float aspectRatio = width / (float)height;
 

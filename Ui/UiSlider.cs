@@ -47,7 +47,7 @@ namespace GameEngine.Ui
             var rectangle = Bounds;
             spriteBatch.FillRectangle(rectangle, BgColor);
 
-            var ratio = rectangle.Width / rectangle.Height;
+            var ratio = rectangle.Height == 0 ? 0 : rectangle.Width / rectangle.Height;
             if (ratio < 1) // Vertical
             {
                 var bottom = rectangle.Bottom;

@@ -49,7 +49,7 @@ namespace GameEngine.Ui
             {
                 var button = tab.Key;
                 var frame = tab.Value;
-                button.Update(inputState, Bounds);
+                button.Update(inputState, Bounds, UiScale);
 
                 button.TextIdleColor = Color.White;
                 if (ReferenceEquals(_activeFrame, frame))
@@ -58,7 +58,7 @@ namespace GameEngine.Ui
 
             if (_activeFrame is null) return;
             _activeFrame.Anchor = Anchor.S;
-            _activeFrame.Update(inputState, Bounds);
+            _activeFrame.Update(inputState, Bounds, UiScale);
         }
 
         protected override void Drawer(SpriteBatch spriteBatch)

@@ -64,10 +64,11 @@ public class ScreenManager(Game game)
             layer.ApplyResolution(gameTime, uiScale);
             _topLayerAlpha = 0;
         }
+        _addedScreens.Clear();
 
         foreach (Screen layer in _screenStack.ToList())
         {
-            layer.Update(gameTime, inputState);
+            layer.Update(gameTime, inputState, uiScale);
             if (!layer.UpdateBelow) break;
         }
 

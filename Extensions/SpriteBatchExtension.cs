@@ -14,11 +14,11 @@ namespace GameEngine.Extensions
 {
     public static class SpriteBatchExtension
     {
+        public const float MaxLayerDepth = 1000;
 
         private static float GetDepth(int depth)
         {
-            float maxLayerDepth = 1000f;
-            float fDepth = depth / maxLayerDepth;
+            float fDepth = depth / MaxLayerDepth;
             if (fDepth > 1)
                 throw new Exception();
             return fDepth;

@@ -14,7 +14,7 @@ namespace GameEngine.Ui
     public class UiFrame() : UiElement
     {
         private readonly List<UiElement> _elementChilds = new();
-        private readonly RenderTarget2D _renderTarget;
+        private readonly List<UiElement> _disposedChilds = new();
 
         public Color Color { private get; set; } = Color.White;
         public float Alpha { private get; set; } = 1;
@@ -27,30 +27,44 @@ namespace GameEngine.Ui
         public void Add(UiElement child)
         {
             _elementChilds.Add(child);
-            child.ApplyScale(Bounds, UiScale);
         }
 
         protected override void Updater(InputState inputState)
         {
+            foreach (var child in _disposedChilds)
+                _elementChilds.Remove(child);
+            _disposedChilds.Clear();
+
             UpdateSizeIfTextureNotNull();
-            foreach (UiElement child in _elementChilds)
-                child.Update(inputState, Bounds);
+
+            foreach (var child in _elementChilds)
+            {
+                child.Update(inputState, Bounds, UiScale);
+                if (child.IsDisposed)
+                    _disposedChilds.Add(child);
+            }
         }
 
         protected override void Drawer(SpriteBatch spriteBatch)
         {
             DrawTextureOrRectangle(spriteBatch);
-            foreach (UiElement child in _elementChilds)
+            foreach (var child in _elementChilds)
                 child.Draw(spriteBatch);
         }
 
         public override void ApplyScale(Rectangle root, float uiScale)
         {
             base.ApplyScale(root, uiScale);
-            _renderTarget?.Dispose();
 
-            foreach (UiElement child in _elementChilds)
+            foreach (var child in _elementChilds)
                 child.ApplyScale(Bounds, uiScale);
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            foreach(var child in _elementChilds)
+                child.Dispose();
         }
 
         private void DrawTextureOrRectangle(SpriteBatch spriteBatch)
