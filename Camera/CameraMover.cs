@@ -59,8 +59,8 @@ namespace GameEngine.Camera
             float zoom = 0f; int multiplier = 1;
             amount /= _elapsedMilliseconds;
 
-            inputState.DoAction(ActionType.CameraZoomIn, () => zoom += amount);
-            inputState.DoAction(ActionType.CameraZoomOut, () => zoom -= amount);
+            inputState.DoAction(ActionType.MouseWheelForward, () => zoom += amount);
+            inputState.DoAction(ActionType.MouseWheelBackward, () => zoom -= amount);
             if (zoom == 0) return;
 
             _zoomTarget *= 1 + zoom * multiplier * 0.001f * _elapsedMilliseconds;
@@ -96,19 +96,6 @@ namespace GameEngine.Camera
             int x = (int)MathHelper.Clamp(mousePosition.X, screenBound.Left, screenBound.Right);
             int y = (int)MathHelper.Clamp(mousePosition.Y, screenBound.Top, screenBound.Bottom);
             Mouse.SetPosition(x, y);
-        }
-
-        public void MoveByKeys(InputState inputState, float amount = 5)
-        {
-            float x = 0f; float y = 0f;
-            amount *= _elapsedMilliseconds / _camera.Zoom;
-            inputState.DoAction(ActionType.MoveCameraLeft, () => x -= amount);
-            inputState.DoAction(ActionType.MoveCameraUp, () => y -= amount);
-            inputState.DoAction(ActionType.MoveCameraRight, () => x += amount);
-            inputState.DoAction(ActionType.MoveCameraDown, () => y += amount);
-
-            if (x + y != 0)
-                _positionTarget.X += x; _positionTarget.Y += y;
         }
     }
 }

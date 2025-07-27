@@ -26,13 +26,6 @@ namespace GameEngine.Input
         private bool RightMouseButtonJustReleased => _currentState.RightButton == ButtonState.Released && _previousState.RightButton == ButtonState.Pressed;
         private bool MidMouseButtonJustReleased => _currentState.MiddleButton == ButtonState.Released && _previousState.MiddleButton == ButtonState.Pressed;
 
-
-        private readonly Dictionary<ActionType, ActionType> mKeyBindingsMouse = new()
-            {
-                { ActionType.MouseWheelBackward, ActionType.CameraZoomOut },
-                { ActionType.MouseWheelForward, ActionType.CameraZoomIn },
-            };
-
         public void Listen(GameTime gameTime, ref List<ActionType> actions, out Vector2 mousePosition)
         {
             _previousState = _currentState;
@@ -81,12 +74,6 @@ namespace GameEngine.Input
 
             if (_currentState.ScrollWheelValue < _previousState.ScrollWheelValue)
                 actions.Add(ActionType.MouseWheelBackward);
-
-            foreach (ActionType key in mKeyBindingsMouse.Keys)
-            {
-                if (!actions.Contains(key)) continue;
-                actions.Add(mKeyBindingsMouse[key]);
-            }
         }
     }
 }

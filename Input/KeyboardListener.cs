@@ -30,6 +30,8 @@ namespace GameEngine.Input
                 { Keys.I, ActionType.OpenCargo },
                 { Keys.O, ActionType.OpenShop },
                 { Keys.M, ActionType.OpenMap },
+                { Keys.Up, ActionType.ScrollUp },
+                { Keys.Down, ActionType.ScrollDown }
             };
 
             mActionOnHold = new()

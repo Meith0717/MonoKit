@@ -10,23 +10,16 @@ namespace GameEngine.Input
 {
     public enum ActionType
     {
-        None,
         ESC,
-        CameraZoomIn,
-        CameraZoomOut,
         Accelerate,
         Boost,
         Break,
         OpenCargo,
         OpenShop,
         OpenMap,
-        MoveCameraLeft,
-        MoveCameraRight,
-        MoveCameraUp,
-        MoveCameraDown,
         Space,
-        MoveButtonUp,
-        MoveButtonDown,
+        ScrollUp,
+        ScrollDown,
 
         // Mouse
         LeftReleased,
