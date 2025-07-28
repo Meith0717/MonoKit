@@ -29,6 +29,7 @@ namespace GameEngine.Input
                 { Keys.LeftShift, ActionType.Boost },
                 { Keys.I, ActionType.OpenCargo },
                 { Keys.O, ActionType.OpenShop },
+                { Keys.P, ActionType.OpenShip },
                 { Keys.M, ActionType.OpenMap },
                 { Keys.Up, ActionType.ScrollUp },
                 { Keys.Down, ActionType.ScrollDown }

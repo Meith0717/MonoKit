@@ -17,6 +17,7 @@ namespace GameEngine.Input
         OpenCargo,
         OpenShop,
         OpenMap,
+        OpenShip,
         Space,
         ScrollUp,
         ScrollDown,

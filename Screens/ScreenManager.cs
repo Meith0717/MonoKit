@@ -30,7 +30,8 @@ public class ScreenManager(Game game)
     }
 
     // add and remove layers from stack
-    public void AddScreen(Screen layer) => _addedScreens.Add(layer);
+    public void AddScreen(Screen layer)
+        => _addedScreens.Add(layer);
 
     public void PopScreen()
     {
@@ -64,7 +65,6 @@ public class ScreenManager(Game game)
             layer.ApplyResolution(gameTime, uiScale);
             _topLayerAlpha = 0;
         }
-        _addedScreens.Clear();
 
         foreach (Screen layer in _screenStack.ToList())
         {
