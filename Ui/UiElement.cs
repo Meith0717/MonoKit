@@ -43,6 +43,7 @@ namespace GameEngine.Ui
 
         public void Update(InputState inputState, Rectangle root, float uiScale)
         {
+            ApplyScale(root, uiScale);
             Updater(inputState);
             ApplyScale(root, uiScale);
         }
@@ -54,7 +55,7 @@ namespace GameEngine.Ui
                 spriteBatch.DrawRectangle(Bounds, Color.Red, 1);
         }
 
-        public virtual void ApplyScale(Rectangle root, float uiScale = 1)
+        public virtual void ApplyScale(Rectangle root, float uiScale)
         {
             UiScale = uiScale;
             UpdateBounds(root);
