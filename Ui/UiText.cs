@@ -56,7 +56,7 @@ namespace GameEngine.Ui
             Vector2 textSize = _text == null ? Vector2.Zero : _font.MeasureString(_text) * Scale;
             var textDimension = textSize.ToPoint();
             Width = textDimension.X;
-            Height = textDimension.Y;
+            Height = (int)(textDimension.Y * .85f);
         }
     }
 }

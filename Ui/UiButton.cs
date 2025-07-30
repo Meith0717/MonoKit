@@ -46,6 +46,8 @@ namespace GameEngine.Ui
 
         public UiButton(string texture) => Texture = texture;
 
+        public UiButton() { }
+
         private bool _isHovered;
         private bool _isClicked;
         private bool _IsDisabled;
