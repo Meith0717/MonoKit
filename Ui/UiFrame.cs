@@ -63,7 +63,7 @@ namespace GameEngine.Ui
         public override void Dispose()
         {
             base.Dispose();
-            foreach(var child in _elementChilds)
+            foreach (var child in _elementChilds)
                 child.Dispose();
         }
 

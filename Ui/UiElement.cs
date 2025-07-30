@@ -5,7 +5,6 @@
 using GameEngine.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using MonoGame.Extended;
 using System;
 using System.Diagnostics;
 
@@ -53,7 +52,7 @@ namespace GameEngine.Ui
             Drawer(spriteBatch);
             if (Debugger.IsAttached)
             {
-               // spriteBatch.DrawRectangle(Bounds, Color.Red, 1);
+                // spriteBatch.DrawRectangle(Bounds, Color.Red, 1);
             }
         }
 
@@ -87,7 +86,7 @@ namespace GameEngine.Ui
         private static void ManageFillScale(Rectangle root, FillScale fillScale, ref int x, ref int y, ref int width, ref int height)
         {
             if (fillScale == FillScale.None) return;
-            
+
             float rootAspectRatio = root.Width / (float)root.Height;
             float aspectRatio = width / (float)height;
 

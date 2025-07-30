@@ -2,12 +2,10 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
-using MathNet.Numerics.Distributions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
 using System;
-using System.Linq;
 
 namespace GameEngine.Graphics
 {
@@ -30,11 +28,11 @@ namespace GameEngine.Graphics
             _graphicsDeviceManager.GraphicsProfile = GraphicsProfile.HiDef;
             _graphicsDeviceManager.ApplyChanges();
             _window = window;
-            _window.ClientSizeChanged += delegate 
+            _window.ClientSizeChanged += delegate
             {
                 _oldWidth = _window.ClientBounds.Width;
                 _oldHeight = _window.ClientBounds.Height;
-                _resolutionWasResized = true; 
+                _resolutionWasResized = true;
             };
 
             _oldWidth = 800;

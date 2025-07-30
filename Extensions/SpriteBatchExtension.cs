@@ -3,7 +3,6 @@
 // All rights reserved.
 
 using GameEngine.Content;
-using GameEngine.Extensions;
 using GameEngine.Gameplay;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;

@@ -19,7 +19,7 @@ namespace GameEngine.Core
         {
             get
             {
-                if (index >= Count || index < 0) 
+                if (index >= Count || index < 0)
                     throw new ArgumentOutOfRangeException();
 
                 return _items[index];
@@ -37,7 +37,7 @@ namespace GameEngine.Core
 
         public void RemoveAt(int index)
         {
-            if (index >= Count || index < 0) 
+            if (index >= Count || index < 0)
                 throw new ArgumentOutOfRangeException();
 
             for (int i = index; i < Count - 1; i++)
@@ -73,7 +73,7 @@ namespace GameEngine.Core
             Count = 0;
         }
 
-        public T[] ToArray() 
+        public T[] ToArray()
             => _items;
     }
 }
