@@ -5,6 +5,7 @@
 using GameEngine.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Extended;
 using System;
 using System.Diagnostics;
 
@@ -52,7 +53,7 @@ namespace GameEngine.Ui
             Drawer(spriteBatch);
             if (Debugger.IsAttached)
             {
-                // spriteBatch.DrawRectangle(Bounds, Color.Red, 1);
+                spriteBatch.DrawRectangle(Bounds, Color.Red, 1);
             }
         }
 
