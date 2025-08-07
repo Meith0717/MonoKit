@@ -69,7 +69,15 @@ namespace GameEngine.Screens
             UiRoot.ApplyScale(GraphicsDevice.Viewport.Bounds, uiScale);
 
             _renderTarget2D?.Dispose();
-            _renderTarget2D = new(GraphicsDevice, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
+            _renderTarget2D = new(GraphicsDevice,
+                                  GraphicsDevice.Viewport.Width,
+                                  GraphicsDevice.Viewport.Height,
+                                  false,
+                                  SurfaceFormat.Color,
+                                  DepthFormat.Depth24Stencil8,
+                                  4,
+                                  RenderTargetUsage.PreserveContents);
+
         }
 
         public virtual void Dispose()
