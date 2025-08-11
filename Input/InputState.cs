@@ -15,6 +15,7 @@ namespace GameEngine.Input
         Boost,
         Break,
         OpenCargo,
+        ObjectInteraction,
         OpenShop,
         OpenMap,
         OpenShip,

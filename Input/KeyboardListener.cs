@@ -27,6 +27,7 @@ namespace GameEngine.Input
                 { Keys.Escape, ActionType.ESC },
                 { Keys.Space, ActionType.Space },
                 { Keys.LeftShift, ActionType.Boost },
+                { Keys.E, ActionType.ObjectInteraction },
                 { Keys.I, ActionType.OpenCargo },
                 { Keys.O, ActionType.OpenShop },
                 { Keys.P, ActionType.OpenShip },

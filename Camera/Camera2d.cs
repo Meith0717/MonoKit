@@ -38,7 +38,7 @@ namespace GameEngine.Camera
             _viewport = _graphicsDevice.Viewport.Bounds;
             TransformationMatrix = CreateViewTransformationMatrix(Position, Zoom, Rotation, _viewport.Width, _viewport.Height);
             Frustum = TransformRectangle(_viewport, TransformationMatrix);
-            _renderer.FrustumCulling(Frustum, spatialHashing);
+            _renderer.FrustumCuller(Frustum, spatialHashing);
         }
 
         public void Draw(SpriteBatch spriteBatch, GameRuntime scene)

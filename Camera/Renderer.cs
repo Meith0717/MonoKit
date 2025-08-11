@@ -18,7 +18,7 @@ namespace GameEngine.Camera
     {
         private List<GameObject> _objects = new();
 
-        public void FrustumCulling(RectangleF viewFrustum, SpatialHashing spatialHashing)
+        public void FrustumCuller(RectangleF viewFrustum, SpatialHashing spatialHashing)
         {
             _objects.Clear();
             spatialHashing.GetObjectsInRectangle(viewFrustum, ref _objects);
