@@ -72,6 +72,7 @@ namespace GameEngine.Runtime
 
         public void DrawGameObjects(SpriteBatch spriteBatch)
         {
+            Camera.Draw(spriteBatch, this);
             if (Debugger.IsAttached)
             {
                 var font = ContentProvider.Fonts.Get("default_font");
@@ -82,7 +83,6 @@ namespace GameEngine.Runtime
 
                 spriteBatch.Draw(ContentProvider.Textures.Get("crosshair"), Camera.Position, null, Color.White, 0, new Vector2(512 / 2), .05f / Camera.Zoom, SpriteEffects.None, 1);
             }
-            Camera.Draw(spriteBatch, this);
         }
 
         private void UpdateGameObjects(double elapsedMs)

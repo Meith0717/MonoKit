@@ -33,7 +33,7 @@ namespace GameEngine.Gameplay
         public float Scale
         {
             get => _boundBox.Radius * 2 / _maxTextureSize;
-            set => _boundBox.Radius = _maxTextureSize / 2 * value;
+            set => _boundBox.Radius = _maxTextureSize / 2 * float.Max(0, value);
         }
 
         // Texture Stuff
