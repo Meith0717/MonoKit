@@ -14,8 +14,8 @@ namespace GameEngine
         private static Vector2[] CreateCircle(double radius, int sides)
         {
             var array = new Vector2[sides];
-            double num = Math.PI * 2 / (double)sides;
-            double num2 = -Math.PI / 2;
+            double num = double.Pi * 2 / sides;
+            double num2 = -double.Pi / 2;
             for (int i = 0; i < sides; i++)
             {
                 array[i] = new Vector2((float)(radius * double.Cos(num2)), (float)(radius * double.Sin(num2)));
@@ -28,9 +28,15 @@ namespace GameEngine
         public static void DrawLoadingCircle(this SpriteBatch spriteBatch, Vector2 position, float radius, double percentage, float thickness)
         {
             const int Sides = 100;
-            percentage -= Math.Truncate(percentage);
-
             var circle = CreateCircle(radius, Sides);
+            percentage -= double.Truncate(percentage);
+
+            if (percentage < 0)
+            {
+                Array.Reverse(circle);
+                percentage = -percentage;
+            }
+
             var value = (int)double.Ceiling(Sides * percentage);
             for (var i = 0; i < value; i++)
             {

@@ -7,6 +7,8 @@ using GameEngine.Graphics;
 using GameEngine.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -17,8 +19,8 @@ public class ScreenManager(Game game)
     private readonly Game _game = game;
 
     // layer stack
-    private readonly LinkedList<Screen> _screenStack = new();
-    private readonly List<Screen> _addedScreens = new();
+    private readonly Stack<Screen> _screens = new();
+    private readonly ConcurrentQueue<Action<GameTime, float>> _pendingActions = new();
     private RenderTarget2D _lowerScreens;
     private Effect _blurEffect;
     private float _blurIntensity;
@@ -30,49 +32,54 @@ public class ScreenManager(Game game)
     }
 
     // add and remove layers from stack
-    public void AddScreen(Screen layer)
-        => _addedScreens.Add(layer);
+    public void AddScreen(Screen screen)
+    {
+        _pendingActions.Enqueue((gT, uI) => 
+        {
+            _screens.Push(screen);
+            screen.Initialize();
+            screen.ApplyResolution(gT, uI);
+        });
+    }
 
     public void PopScreen()
     {
-        if (_screenStack.First is null) return;
-        _screenStack.First.Value.Dispose();
-        _screenStack.RemoveFirst();
+        _pendingActions.Enqueue((_, _) =>
+        {
+            var removedScreen = _screens.Pop();
+            removedScreen?.Dispose();
+        });
     }
 
-    public void PopScreensUntil(Screen layer)
+    public void PopScreensUntil(Screen screen)
     {
-        if (layer == null) return;
-        if (!_screenStack.Contains(layer)) return;
-        Screen firstLayer = _screenStack.First();
-        while (firstLayer != layer)
+        if (!_screens.Contains(screen)) 
+            return;
+
+        for (var i = 0; i < _screens.Count; i++)
         {
             PopScreen();
-            firstLayer = _screenStack.First();
+            if (_screens.ElementAt(i) == screen)
+                break;
         }
-        PopScreen();
     }
 
     // update layers
     public void Update(GameTime gameTime, InputState inputState, float uiScale)
     {
-        List<Screen> addedLayers = _addedScreens.ToList();
-        _addedScreens.Clear();
-        foreach (Screen layer in addedLayers)
+        while (_pendingActions.TryDequeue(out var action))
         {
-            _screenStack.AddFirst(layer);
-            layer.Initialize();
-            layer.ApplyResolution(gameTime, uiScale);
+            action(gameTime, uiScale);
             _topLayerAlpha = 0;
         }
 
-        foreach (Screen layer in _screenStack.ToList())
+        foreach (Screen layer in _screens.ToList())
         {
             layer.Update(gameTime, inputState, uiScale);
             if (!layer.UpdateBelow) break;
         }
 
-        var topScreen = _screenStack.FirstOrDefault();
+        var topScreen = _screens.FirstOrDefault();
         if (topScreen == null) return;
         _topLayerAlpha = float.Min(1, _topLayerAlpha + (float)(.005 * gameTime.ElapsedGameTime.TotalMilliseconds));
         _blurIntensity += (topScreen.BlurBelow ? 1 : -1) * (float)(.075 * gameTime.ElapsedGameTime.TotalMilliseconds);
@@ -86,15 +93,15 @@ public class ScreenManager(Game game)
     public void Draw(SpriteBatch spriteBatch)
     {
         _renderTargets.Clear();
-        if (_screenStack.Count == 0) return;
+        if (_screens.Count == 0) return;
 
-        var topScreen = _screenStack.First();
+        var topScreen = _screens.First();
         var topScreenTexture = topScreen.RenderTarget(spriteBatch);
 
         if (topScreen.DrawBelow)
         {
             // Render all renderTargets of lower screens
-            foreach (var screen in _screenStack)
+            foreach (var screen in _screens)
             {
                 if (screen == topScreen) continue;
                 _renderTargets.AddFirst(screen.RenderTarget(spriteBatch));
@@ -125,7 +132,7 @@ public class ScreenManager(Game game)
     // lifecycle methods
     public void Exit()
     {
-        foreach (Screen layer in _screenStack)
+        foreach (Screen layer in _screens)
             layer.Dispose();
         _game.Exit();
     }
@@ -134,7 +141,7 @@ public class ScreenManager(Game game)
     public void OnResolutionChanged(GameTime gameTime, float uiScale)
     {
         _lowerScreens?.Dispose();
-        foreach (Screen layer in _screenStack)
+        foreach (Screen layer in _screens)
             layer.ApplyResolution(gameTime, uiScale);
         _lowerScreens = new(_game.GraphicsDevice,
                             _game.GraphicsDevice.Viewport.Width,
@@ -144,6 +151,4 @@ public class ScreenManager(Game game)
                            DepthFormat.None);
         _blurEffect.Parameters["texelSize"].SetValue(new Vector2(1.0f / _lowerScreens.Width, 1.0f / _lowerScreens.Height));
     }
-
-    public bool ContainsLayer(Screen layer) => _screenStack.Contains(layer);
 }
