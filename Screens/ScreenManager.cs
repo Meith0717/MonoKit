@@ -34,7 +34,7 @@ public class ScreenManager(Game game)
     // add and remove layers from stack
     public void AddScreen(Screen screen)
     {
-        _pendingActions.Enqueue((gT, uI) => 
+        _pendingActions.Enqueue((gT, uI) =>
         {
             _screens.Push(screen);
             screen.Initialize();
@@ -53,7 +53,7 @@ public class ScreenManager(Game game)
 
     public void PopScreensUntil(Screen screen)
     {
-        if (!_screens.Contains(screen)) 
+        if (!_screens.Contains(screen))
             return;
 
         for (var i = 0; i < _screens.Count; i++)
