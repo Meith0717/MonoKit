@@ -3,35 +3,36 @@
 // All rights reserved.
 
 using GameEngine.Input;
+using GameEngine.Rendering;
 using GameEngine.Ui;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Newtonsoft.Json;
 using System;
 
 namespace GameEngine.Screens
 {
-    [Serializable]
     public abstract class Screen : IDisposable
     {
-        [JsonIgnore] public Effect Effect { get; protected set; }
-        [JsonIgnore] public readonly bool UpdateBelow;
-        [JsonIgnore] public readonly bool DrawBelow;
-        [JsonIgnore] public readonly bool BlurBelow;
-        [JsonIgnore] protected readonly GameServiceContainer GameServices;
-        [JsonIgnore] protected readonly ScreenManager ScreenManager;
-        [JsonIgnore] protected readonly GraphicsDevice GraphicsDevice;
-        [JsonIgnore] protected readonly UiFrame UiRoot;
-        [JsonIgnore] private RenderTarget2D _renderTarget2D;
+        public readonly bool UpdateBelow;
+        public readonly bool DrawBelow;
 
-        protected Screen(GameServiceContainer gameServices, bool updateBelow, bool drawBelow, bool blurBelow)
+        protected readonly GameServiceContainer ApplicationServices;
+        protected readonly ScreenManager ScreenManager;
+        protected readonly GraphicsDevice GraphicsDevice;
+        protected readonly UiFrame UiRoot;
+
+        private readonly PostProcessing _postProcessing;
+        private RenderTarget2D _renderTarget;
+
+
+        protected Screen(GameServiceContainer applicationServices, bool updateBelow, bool drawBelow)
         {
-            GameServices = gameServices;
-            GraphicsDevice = gameServices.GetService<GraphicsDevice>();
-            ScreenManager = gameServices.GetService<ScreenManager>();
+            ApplicationServices = applicationServices;
+            GraphicsDevice = applicationServices.GetService<GraphicsDevice>();
+            ScreenManager = applicationServices.GetService<ScreenManager>();
             UpdateBelow = updateBelow;
             DrawBelow = drawBelow;
-            BlurBelow = blurBelow;
+            _postProcessing = new(GraphicsDevice);
 
             UiRoot = new()
             {
@@ -45,31 +46,18 @@ namespace GameEngine.Screens
 
         public virtual void Initialize() {; }
 
-        public virtual void Draw(SpriteBatch spriteBatch) {; }
-
         public virtual void Update(GameTime gameTime, InputState inputState, float uiScale)
         {
             UiRoot.Update(inputState, GraphicsDevice.Viewport.Bounds, uiScale);
         }
 
-        public RenderTarget2D RenderTarget(SpriteBatch spriteBatch)
-        {
-            GraphicsDevice.SetRenderTarget(_renderTarget2D);
-            GraphicsDevice.Clear(Color.Transparent);
-            Draw(spriteBatch);
-            spriteBatch.Begin();
-            UiRoot.Draw(spriteBatch);
-            spriteBatch.End();
-            GraphicsDevice.SetRenderTarget(null);
-            return _renderTarget2D;
-        }
+        public virtual void Draw(SpriteBatch spriteBatch) {; }
 
         public virtual void ApplyResolution(GameTime gameTime, float uiScale)
         {
             UiRoot.ApplyScale(GraphicsDevice.Viewport.Bounds, uiScale);
-
-            _renderTarget2D?.Dispose();
-            _renderTarget2D = new(GraphicsDevice,
+            _renderTarget?.Dispose();
+            _renderTarget = new(GraphicsDevice,
                                   GraphicsDevice.Viewport.Width,
                                   GraphicsDevice.Viewport.Height,
                                   false,
@@ -77,13 +65,31 @@ namespace GameEngine.Screens
                                   DepthFormat.Depth24Stencil8,
                                   4,
                                   RenderTargetUsage.PreserveContents);
-
+            _postProcessing.ApplyResolution(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
         }
 
         public virtual void Dispose()
         {
-            _renderTarget2D.Dispose();
+            _renderTarget.Dispose();
             GC.SuppressFinalize(this);
+        }
+
+        public PostProcessingDelegate PostProcessing { get; set; }
+
+        public RenderTarget2D RenderTarget(SpriteBatch spriteBatch)
+        {
+            GraphicsDevice.SetRenderTarget(_renderTarget);
+            GraphicsDevice.Clear(Color.Transparent);
+            Draw(spriteBatch);
+            spriteBatch.Begin();
+            UiRoot.Draw(spriteBatch);
+            spriteBatch.End();
+            GraphicsDevice.SetRenderTarget(null);
+
+            if (PostProcessing is not null)
+                return PostProcessing.Invoke(spriteBatch, _postProcessing, _renderTarget);
+
+            return _renderTarget;
         }
     }
 }

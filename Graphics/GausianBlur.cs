@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GameEngine.Graphics
 {
-    internal class GaussianBlur
+    public class GaussianBlur
     {
         private static float[] GaussianBlurMap(float[] map, int size, int radius, float sigma)
         {
