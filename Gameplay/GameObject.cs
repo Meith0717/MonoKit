@@ -59,8 +59,8 @@ namespace GameEngine.Gameplay
             GC.SuppressFinalize(this);
         }
 
-        public abstract void Update(double elapsedMs, Runtime.GameServiceContainer runtimeServices);
+        public abstract void Update(double elapsedMs, Runtime.RuntimeServiceContainer runtimeServices);
 
-        public abstract void Draw(SpriteBatch spriteBatch, Runtime.GameServiceContainer runtimeServices);
+        public abstract void Draw(SpriteBatch spriteBatch, Runtime.RuntimeServiceContainer runtimeServices);
     }
 }
