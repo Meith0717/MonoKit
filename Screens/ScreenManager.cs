@@ -66,7 +66,7 @@ public class ScreenManager(Game game)
 
     public void Draw(SpriteBatch spriteBatch)
     {
-        if (_screens.Count == 0) 
+        if (_screens.Count == 0)
             return;
 
         int i = 0;
@@ -77,7 +77,7 @@ public class ScreenManager(Game game)
         var lowerTargets = new RenderTarget2D[i];
 
         for (var j = i; j > 0; j--)
-            lowerTargets[j - 1] = _screens.ElementAt(j).RenderTarget(spriteBatch); 
+            lowerTargets[j - 1] = _screens.ElementAt(j).RenderTarget(spriteBatch);
 
         _game.GraphicsDevice.Clear(Color.Black);
         spriteBatch.Begin();

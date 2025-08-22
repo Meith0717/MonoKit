@@ -20,7 +20,7 @@ namespace GameEngine.Runtime
         private readonly SpatialHashing _spatialHashing;
         private HashSet<GameObject> _gameObjects;
 
-        public readonly GameRuntimeServiceContainer Services;
+        public readonly GameServiceContainer Services;
         public readonly Camera2d Camera;
         public readonly CameraMover CameraMover;
 

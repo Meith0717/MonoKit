@@ -3,7 +3,6 @@
 // All rights reserved.
 
 using GameEngine.Content;
-using GameEngine.Runtime;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
@@ -60,8 +59,8 @@ namespace GameEngine.Gameplay
             GC.SuppressFinalize(this);
         }
 
-        public abstract void Update(double elapsedMs, GameRuntimeServiceContainer runtimeServices);
+        public abstract void Update(double elapsedMs, Runtime.GameServiceContainer runtimeServices);
 
-        public abstract void Draw(SpriteBatch spriteBatch, GameRuntimeServiceContainer runtimeServices);
+        public abstract void Draw(SpriteBatch spriteBatch, Runtime.GameServiceContainer runtimeServices);
     }
 }

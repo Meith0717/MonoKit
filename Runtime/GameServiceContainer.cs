@@ -1,4 +1,4 @@
-﻿// GameRuntimeServiceContainer.cs 
+﻿// GameServiceContainer.cs 
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace GameEngine.Runtime
 {
-    public class GameRuntimeServiceContainer
+    public class GameServiceContainer
     {
         private readonly Dictionary<Type, object> _services = new();
 

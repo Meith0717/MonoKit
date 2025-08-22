@@ -8,8 +8,6 @@ using System;
 
 namespace GameEngine.Rendering
 {
-    public delegate RenderTarget2D PostProcessingDelegate(SpriteBatch spriteBatch, PostProcessing postProcessing, RenderTarget2D input);
-
     public class PostProcessing(GraphicsDevice graphicsDevice) : IDisposable
     {
         private readonly GraphicsDevice _graphicsDevice = graphicsDevice;
