@@ -75,6 +75,10 @@ namespace GameEngine.Input
             MousePosition = mousePosition;
         }
 
+        public readonly bool ContainsAction(ActionType action)
+            => Actions.Contains(action);
+
+
         public readonly bool HasAction(ActionType action)
             => Actions.Remove(action);
 

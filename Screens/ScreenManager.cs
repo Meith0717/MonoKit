@@ -39,6 +39,7 @@ public class ScreenManager(Game game)
             _screens.Push(screen);
             screen.Initialize();
             screen.ApplyResolution(gT, uI);
+            _topLayerAlpha = 0;
         });
     }
 
@@ -70,7 +71,6 @@ public class ScreenManager(Game game)
         while (_pendingActions.TryDequeue(out var action))
         {
             action(gameTime, uiScale);
-            _topLayerAlpha = 0;
         }
 
         foreach (Screen layer in _screens.ToList())
