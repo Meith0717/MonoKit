@@ -24,7 +24,6 @@ namespace GameEngine.Screens
         private readonly PostProcessing _postProcessing;
         private RenderTarget2D _renderTarget;
 
-
         protected Screen(GameServiceContainer applicationServices, bool updateBelow, bool drawBelow)
         {
             ApplicationServices = applicationServices;

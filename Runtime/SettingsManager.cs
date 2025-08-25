@@ -20,7 +20,7 @@ namespace GameEngine.Runtime
     }
 
     [Serializable]
-    public readonly struct SettingsState(float masterVol, float musicVol, float sfxVol, int refRate, bool showFPS, int msaa, bool vSync, WindowMode windowMode, float uiScale, float particleMult)
+    public readonly struct SettingsState(float masterVol, float musicVol, float sfxVol, int refRate, bool showFPS, int msaa, bool vSync, WindowMode windowMode, float uiScale, float bloomEffect)
     {
         [JsonProperty] public readonly float MasterVolume = masterVol;
         [JsonProperty] public readonly float MusicVolume = musicVol;
@@ -31,6 +31,6 @@ namespace GameEngine.Runtime
         [JsonProperty] public readonly bool VSync = vSync;
         [JsonProperty] public readonly WindowMode WindowMode = windowMode;
         [JsonProperty] public readonly float UiScale = uiScale;
-        [JsonProperty] public readonly float ParticlesMultiplier = particleMult;
+        [JsonProperty] public readonly float BloomIntensity = bloomEffect;
     }
 }
