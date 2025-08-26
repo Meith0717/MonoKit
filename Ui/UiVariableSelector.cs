@@ -17,16 +17,18 @@ namespace GameEngine.Ui
 
         public UiVariableSelector(string spriteFont)
         {
-            Add(_arrowL = new UiButton("arrowL")
+            Add(_arrowL = new UiButton("ui_arrow_l")
             {
                 OnClickAction = DecreaseIndex,
-                Anchor = Anchor.W
+                Anchor = Anchor.W,
+                TextureScale = .5f
             });
 
-            Add(_arrowR = new UiButton("arrowR")
+            Add(_arrowR = new UiButton("ui_arrow_r")
             {
                 OnClickAction = IncreaseIndex,
-                Anchor = Anchor.E
+                Anchor = Anchor.E,
+                TextureScale = .5f
             });
 
             Add(_text = new(spriteFont)

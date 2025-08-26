@@ -6,6 +6,7 @@ using GameEngine.Camera;
 using GameEngine.Content;
 using GameEngine.Gameplay;
 using GameEngine.Input;
+using GameEngine.Rendering;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
@@ -16,67 +17,70 @@ namespace GameEngine.Runtime
 {
     public class GameRuntime
     {
-        private readonly GraphicsDevice _graphicsDevice;
-        private readonly SpatialHashing _spatialHashing;
-        private HashSet<GameObject> _gameObjects;
-
         public readonly RuntimeServiceContainer Services;
-        public readonly Camera2d Camera;
+        public readonly SpatialHashing SpatialHashing;
         public readonly CameraMover CameraMover;
+        public readonly Camera2d Camera;
+
+        private readonly Renderer _renderer;
+        private HashSet<GameObject> _gameObjects;
 
         public Vector2 WorldMousePosition { get; private set; }
 
-        public IReadOnlyList<GameObject> GameObjects => _gameObjects.ToArray().AsReadOnly();
+        public IReadOnlyList<GameObject> GameObjects 
+            => _gameObjects.ToArray().AsReadOnly();
 
         public GameRuntime(GraphicsDevice graphicsDevice, int spatialHashingCellSize)
         {
-            _graphicsDevice = graphicsDevice;
-            _spatialHashing = new(spatialHashingCellSize);
-            Camera = new(_graphicsDevice);
+            _renderer = new();
+            Camera = new(graphicsDevice);
+            SpatialHashing = new(spatialHashingCellSize);
+
             Services = new();
-            Services.AddService(this);
-            Services.AddService(_spatialHashing);
-            Services.AddService(Camera);
             CameraMover = new(Camera);
+            Services.AddService(this);
+            Services.AddService(SpatialHashing);
+            Services.AddService(Camera);
         }
 
         public void Initialize(HashSet<GameObject> gameObjects)
         {
             _gameObjects = gameObjects;
             _gameObjects.AsParallel()
-                .ForAll(_spatialHashing.Add);
+                .ForAll(SpatialHashing.Add);
         }
 
         public void AddGameObject(GameObject gameObject)
         {
             _gameObjects.Add(gameObject);
-            _spatialHashing.Add(gameObject);
+            SpatialHashing.Add(gameObject);
         }
 
         public void Update(GameTime gameTime, InputState inputState)
         {
             UpdateGameObjects(gameTime.ElapsedGameTime.TotalMilliseconds);
             CameraMover.Update(gameTime.ElapsedGameTime.TotalMilliseconds);
-            _spatialHashing.Rearrange();
-            WorldMousePosition = Vector2.Transform(inputState.MousePosition, Matrix.Invert(Camera.TransformationMatrix));
+            SpatialHashing.Rearrange();
+            _renderer.CullingObjects(Camera.Bounds, SpatialHashing);
+
+            WorldMousePosition = Vector2.Transform(inputState.MousePosition, Matrix.Invert(Camera.WorldToCamera));
             if (float.IsNaN(WorldMousePosition.X) || float.IsNaN(WorldMousePosition.Y))
                 WorldMousePosition = Vector2.Zero;
         }
 
         public void BeginDraw(SpriteBatch spriteBatch)
         {
-            Camera.Update(_spatialHashing);
-
-            spriteBatch.Begin(transformMatrix: Camera.TransformationMatrix, sortMode: SpriteSortMode.BackToFront);
+            Camera.Update();
+            spriteBatch.Begin(transformMatrix: Camera.WorldToCamera, sortMode: SpriteSortMode.BackToFront);
         }
 
         public void DrawGameObjects(SpriteBatch spriteBatch)
         {
-            Camera.Draw(spriteBatch, this);
+            _renderer.Draw(spriteBatch, Camera, Services);
             if (Debugger.IsAttached)
             {
                 var font = ContentProvider.Fonts.Get("default_font");
-                _spatialHashing.Draw(spriteBatch, Camera.Position, Camera.Zoom);
+                SpatialHashing.Draw(spriteBatch, Camera.Position, Camera.Zoom);
                 var centerPosition = Vector2.Floor(Camera.Position);
                 spriteBatch.DrawString(font, $"{centerPosition.X}, {centerPosition.Y}", Camera.Position + new Vector2(10, -15) / Camera.Zoom, Color.White, 0, Vector2.Zero, 0.1f / Camera.Zoom, SpriteEffects.None, 1);
                 spriteBatch.DrawString(font, $"{Camera.Zoom}", Camera.Position + new Vector2(10, -35) / Camera.Zoom, Color.White, 0, Vector2.Zero, 0.1f / Camera.Zoom, SpriteEffects.None, 1);
@@ -92,8 +96,8 @@ namespace GameEngine.Runtime
 
             var spatialHashing = Services.Get<SpatialHashing>();
 
-            var objs = _gameObjects.ToArray();
-            foreach (var obj in objs)
+            var objects = _gameObjects.ToArray();
+            foreach (var obj in objects)
             {
                 if (obj == null) continue;
                 obj.Update(elapsedMs, Services);
