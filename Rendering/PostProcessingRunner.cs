@@ -8,7 +8,7 @@ using System;
 
 namespace GameEngine.Rendering
 {
-    public class PostProcessing(GraphicsDevice graphicsDevice) : IDisposable
+    public class PostProcessingRunner(GraphicsDevice graphicsDevice) : IDisposable
     {
         private readonly GraphicsDevice _graphicsDevice = graphicsDevice;
         private readonly RenderTarget2D[] _renderTargets = new RenderTarget2D[2];
@@ -36,7 +36,7 @@ namespace GameEngine.Rendering
             return _renderTargets[currentIndex];
         }
 
-        public RenderTarget2D Apply(SpriteBatch spriteBatch, RenderTarget2D input, Effect effect)
+        public RenderTarget2D Pass(Effect effect, SpriteBatch spriteBatch, RenderTarget2D input)
         {
             var destination = GetNextRenderTarget();
 

@@ -6,5 +6,8 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace GameEngine.Rendering
 {
-    public delegate RenderTarget2D PostProcessingDelegate(SpriteBatch spriteBatch, PostProcessing postProcessing, RenderTarget2D input);
+    public interface IPostProcessingEffect
+    {
+        public RenderTarget2D Apply(SpriteBatch spriteBatch, PostProcessingRunner pipeline, RenderTarget2D input);
+    }
 }

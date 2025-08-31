@@ -21,7 +21,8 @@ namespace GameEngine.Screens
         protected readonly GraphicsDevice GraphicsDevice;
         protected readonly UiFrame UiRoot;
 
-        private readonly PostProcessing _postProcessing;
+        private readonly PostProcessingRunner _postProcessingRunner;
+        public IPostProcessingEffect PostProcessingEffect;
         private RenderTarget2D _renderTarget;
 
         protected Screen(GameServiceContainer applicationServices, bool updateBelow, bool drawBelow)
@@ -31,7 +32,7 @@ namespace GameEngine.Screens
             ScreenManager = applicationServices.GetService<ScreenManager>();
             UpdateBelow = updateBelow;
             DrawBelow = drawBelow;
-            _postProcessing = new(GraphicsDevice);
+            _postProcessingRunner = new(GraphicsDevice);
 
             UiRoot = new()
             {
@@ -64,16 +65,15 @@ namespace GameEngine.Screens
                                   DepthFormat.Depth24Stencil8,
                                   4,
                                   RenderTargetUsage.PreserveContents);
-            _postProcessing.ApplyResolution(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
+            _postProcessingRunner.ApplyResolution(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
         }
 
         public virtual void Dispose()
         {
             _renderTarget.Dispose();
+            _postProcessingRunner.Dispose();
             GC.SuppressFinalize(this);
         }
-
-        public PostProcessingDelegate PostProcessing { get; set; }
 
         public RenderTarget2D RenderTarget(SpriteBatch spriteBatch)
         {
@@ -85,8 +85,8 @@ namespace GameEngine.Screens
             spriteBatch.End();
             GraphicsDevice.SetRenderTarget(null);
 
-            if (PostProcessing is not null)
-                return PostProcessing.Invoke(spriteBatch, _postProcessing, _renderTarget);
+            if (PostProcessingEffect is not null)
+                return PostProcessingEffect.Apply(spriteBatch, _postProcessingRunner, _renderTarget);
 
             return _renderTarget;
         }
