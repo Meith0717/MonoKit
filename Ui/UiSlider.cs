@@ -63,7 +63,6 @@ namespace GameEngine.Ui
             }
 
             spriteBatch.FillRectangle(rectangle, _hovered || _pressed ? HoverColor : IdeColor);
-            base.Drawer(spriteBatch);
         }
 
         public Color BgColor { private get; set; } = Color.DarkGray;
