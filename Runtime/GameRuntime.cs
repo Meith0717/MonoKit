@@ -27,7 +27,7 @@ namespace GameEngine.Runtime
 
         public Vector2 WorldMousePosition { get; private set; }
 
-        public IReadOnlyList<GameObject> GameObjects 
+        public IReadOnlyList<GameObject> GameObjects
             => _gameObjects.ToArray().AsReadOnly();
 
         public GameRuntime(GraphicsDevice graphicsDevice, int spatialHashingCellSize)
