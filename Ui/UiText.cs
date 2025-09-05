@@ -39,6 +39,7 @@ namespace GameEngine.Ui
         protected override void Drawer(SpriteBatch spriteBatch)
         {
             Vector2 position = Bounds.Location.ToVector2();
+            
             spriteBatch.DrawString(_font, Text, position, Color * Alpha, 0, Vector2.Zero, UiScale * Scale, SpriteEffects.None, 1);
         }
 
