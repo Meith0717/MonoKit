@@ -9,5 +9,8 @@ namespace GameEngine.Core
     public static class RNG
     {
         public static readonly Random Random = new();
+
+        public static bool NextBool(this Random random)
+            => random.NextDouble() < 0.5;
     }
 }
