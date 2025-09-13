@@ -29,12 +29,11 @@ namespace GameEngine.Gameplay
             Prefabs = [.. _objectPrefabs.Values];
         }
 
-        public T GetPrefab(byte id) 
+        public T GetPrefab(byte id)
         {
             if (_objectPrefabs.TryGetValue(id, out var value))
                 return value;
             throw new KeyNotFoundException();
         }
-
     }
 }
