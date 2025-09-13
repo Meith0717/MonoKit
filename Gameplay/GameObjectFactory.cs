@@ -12,7 +12,7 @@ namespace GameEngine.Gameplay
     {
         private readonly Dictionary<byte, T> _objectPrefabs = new();
         public readonly ImmutableArray<byte> IDs;
-        public readonly ImmutableArray<T> Prefabs;
+        public readonly ImmutableDictionary<byte, T> Prefabs;
 
         public GameObjectFactory(ContentContainer<object> objectPrefabs)
         {
@@ -26,7 +26,7 @@ namespace GameEngine.Gameplay
                 i++;
             }
             IDs = [.. ids];
-            Prefabs = [.. _objectPrefabs.Values];
+            Prefabs = _objectPrefabs.ToImmutableDictionary();
         }
 
         public T GetPrefab(byte id)
