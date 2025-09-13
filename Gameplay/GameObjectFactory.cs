@@ -3,27 +3,38 @@
 // All rights reserved.
 
 using GameEngine.Content;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 
 namespace GameEngine.Gameplay
 {
     public abstract class GameObjectFactory<T>
     {
-        protected readonly ContentContainer<T> ObjectPrefabs = new();
-        public readonly ImmutableArray<string> IDs;
+        private readonly Dictionary<byte, T> _objectPrefabs = new();
+        public readonly ImmutableArray<byte> IDs;
+        public readonly ImmutableArray<T> Prefabs;
 
         public GameObjectFactory(ContentContainer<object> objectPrefabs)
         {
-            var ids = new ConcurrentBag<string>();
+            byte i = 0;
+            var ids = new List<byte>();
             foreach (var kvp in objectPrefabs.Content)
             {
                 if (kvp.Value is not T TData) continue;
-                ObjectPrefabs.Add(kvp.Key, TData);
-                ids.Add(kvp.Key);
+                _objectPrefabs.Add(i, TData);
+                ids.Add(i);
+                i++;
             }
-            ;
-            IDs = ids.ToImmutableArray();
+            IDs = [.. ids];
+            Prefabs = [.. _objectPrefabs.Values];
         }
+
+        public T GetPrefab(byte id) 
+        {
+            if (_objectPrefabs.TryGetValue(id, out var value))
+                return value;
+            throw new KeyNotFoundException();
+        }
+
     }
 }
