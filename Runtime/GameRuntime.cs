@@ -52,6 +52,7 @@ namespace GameEngine.Runtime
 
         public void AddGameObject(GameObject gameObject)
         {
+            gameObject.Initialize(Services);
             _gameObjects.Add(gameObject);
             SpatialHashing.Add(gameObject);
         }

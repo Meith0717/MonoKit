@@ -36,7 +36,7 @@ namespace GameEngine.Screens
 
             UiRoot = new()
             {
-                Alpha = 0,
+                Color = Color.Transparent,
                 RelWidth = 1,
                 RelHeight = 1,
                 FillScale = FillScale.Fit,
