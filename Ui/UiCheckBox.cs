@@ -21,7 +21,7 @@ namespace GameEngine.Ui
         private bool _state;
 
         public UiCheckBox()
-            : base("")
+            : base(null, null, "")
         {
             Texture = State ? "ui_toggle_true" : "ui_toggle_false";
             OnClickAction = () =>

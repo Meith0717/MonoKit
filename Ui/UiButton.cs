@@ -40,20 +40,10 @@ namespace GameEngine.Ui
 
         public UiButton(string spriteFont, string text, string texture)
         {
-            Add(_uiText = new(spriteFont) { Text = text, HSpace = 25 });
-            TextAlign = Anchor.Center;
+            if (spriteFont != null)
+                Add(_uiText = new(spriteFont) { Text = text, HSpace = 25, Anchor = Anchor.Center });
             Texture = texture;
         }
-
-        public UiButton(string spriteFont, string text)
-        {
-            Add(_uiText = new(spriteFont) { Text = text, HSpace = 10 });
-            TextAlign = Anchor.Center;
-        }
-
-        public UiButton(string texture) => Texture = texture;
-
-        public UiButton() { }
 
         private bool _wasHovered;
         protected override void Updater(InputState inputState)
