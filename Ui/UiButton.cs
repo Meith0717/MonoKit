@@ -68,7 +68,7 @@ namespace GameEngine.Ui
             _IsDisabled = OnClickAction is null || Disable;
             if (_uiText is not null)
                 _uiText.Color = _IsDisabled ? _textDisableColor : _isHovered ? _textHoverColor : _textIdleColor;
-            Color = _IsDisabled ? _textDisableColor : _isHovered ? _textHoverColor : _textureIdleColor;
+            Color = _IsDisabled ? _textureDisableColor : _isHovered ? _textureHoverColor : _textureIdleColor;
             if (_IsDisabled)
                 return;
 
