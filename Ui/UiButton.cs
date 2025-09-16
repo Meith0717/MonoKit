@@ -10,24 +10,32 @@ using System;
 
 namespace GameEngine.Ui
 {
-    public enum TextAlign { W, E, Center }
+    public struct ButtonStyle
+    {
+        public Color TextIdleColor;
+        public Color TextHoverColor;
+        public Color TextDisableColor;
+        public Color TextureIdleColor;
+        public Color TextureHoverColor;
+        public Color TextureDisableColor;
+    }
 
     public class UiButton : UiFrame
     {
+        private readonly static Color _textIdleColor = Color.White;
+        private readonly static Color _textHoverColor = Color.Gray;
+        private readonly static Color _textDisableColor = Color.DarkGray;
+        private readonly static Color _textureIdleColor = Color.White;
+        private readonly static Color _textureHoverColor = Color.MonoGameOrange;
+        private readonly static Color _textureDisableColor = Color.DarkGray;
+
         private readonly UiText _uiText;
         public Action OnClickAction { get; set; }
 
         public Anchor TextAlign { set { _uiText.Anchor = value; } }
         public string Text { set { _uiText.Text = value; } }
         public float TextScale { set { _uiText.Scale = value; } }
-        public float TextAlpha { set { _uiText.Alpha = value; } }
 
-        public Color TextIdleColor { get; set; } = Color.White;
-        public Color TextHoverColor { get; set; } = Color.Cyan;
-        public Color TextDisableColor { get; set; } = Color.DarkRed;
-        public Color TextureIdleColor { get; set; } = Color.White;
-        public Color TextureHoverColor { get; set; } = Color.Cyan;
-        public Color TextureDisableColor { get; set; } = Color.DarkGray;
         public bool Disable { get; set; } = false;
         public string Tooltip { private get; set; }
 
@@ -59,8 +67,8 @@ namespace GameEngine.Ui
             _isClicked = _isHovered && inputState.HasAction(ActionType.LeftWasClicked);
             _IsDisabled = OnClickAction is null || Disable;
             if (_uiText is not null)
-                _uiText.Color = _IsDisabled ? TextDisableColor : _isHovered ? TextHoverColor : TextIdleColor;
-            Color = _IsDisabled ? TextureDisableColor : _isHovered ? TextureHoverColor : TextureIdleColor;
+                _uiText.Color = _IsDisabled ? _textDisableColor : _isHovered ? _textHoverColor : _textIdleColor;
+            Color = _IsDisabled ? _textDisableColor : _isHovered ? _textHoverColor : _textureIdleColor;
             if (_IsDisabled)
                 return;
 

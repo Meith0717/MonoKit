@@ -60,14 +60,7 @@ namespace GameEngine.Ui
         public float ButtonScale { set { _text.Scale = value; } }
         public Color TextColor { set { _text.Color = value; } }
         public float TextAlpha { set { _text.Alpha = value; } }
-        public bool Disable
-        {
-            set
-            {
-                _arrowL.Disable = _arrowR.Disable = value;
-                _text.Color = value ? _arrowL.TextureDisableColor : Color.White;
-            }
-        }
+        public bool Disable { set  { _arrowL.Disable = _arrowR.Disable = value; } }
         public List<T> Values
         {
             set

@@ -25,15 +25,15 @@ namespace GameEngine.Ui
             foreach (var tab in _tabs)
             {
                 var tabFrame = tab.Value;
-                tabFrame.RelWidth = 1;
-                tabFrame.RelHeight = .95f;
+                tabFrame.RelWidth = .85f;
+                tabFrame.RelHeight = 1f;
 
                 var tabButton = tab.Key;
                 tabButton.OnClickAction = () => _activeFrame = tabFrame;
-                tabButton.RelY = 0;
-                tabButton.RelWidth = 1f / tabCount;
-                tabButton.RelHeight = .05f;
-                tabButton.RelX = i * (1f / tabCount);
+                tabButton.RelY = i * (1f / tabCount);
+                tabButton.RelWidth = .15f;
+                tabButton.RelHeight = 1f / tabCount;
+                tabButton.RelX = 0;
                 tabButton.Color = Color.Transparent;
                 tabButton.TextScale = .2f;
                 tabButton.Alpha = 0;
@@ -48,16 +48,11 @@ namespace GameEngine.Ui
             foreach (var tab in _tabs)
             {
                 var button = tab.Key;
-                var frame = tab.Value;
                 button.Update(inputState, Bounds, UiScale);
-
-                button.TextIdleColor = Color.White;
-                if (ReferenceEquals(_activeFrame, frame))
-                    button.TextIdleColor = Color.Blue;
             }
 
             if (_activeFrame is null) return;
-            _activeFrame.Anchor = Anchor.S;
+            _activeFrame.Anchor = Anchor.E;
             _activeFrame.Update(inputState, Bounds, UiScale);
         }
 
