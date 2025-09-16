@@ -37,7 +37,6 @@ namespace GameEngine.Ui
         public float TextScale { set { _uiText.Scale = value; } }
 
         public bool Disable { get; set; } = false;
-        public string Tooltip { private get; set; }
 
         public UiButton(string spriteFont, string text, string texture)
         {
@@ -56,39 +55,34 @@ namespace GameEngine.Ui
 
         public UiButton() { }
 
-        private bool _isHovered;
-        private bool _isClicked;
-        private bool _IsDisabled;
-
+        private bool _wasHovered;
         protected override void Updater(InputState inputState)
         {
             base.Updater(inputState);
-            _isHovered = Bounds.Contains(inputState.MousePosition);
-            _isClicked = _isHovered && inputState.HasAction(ActionType.LeftWasClicked);
-            _IsDisabled = OnClickAction is null || Disable;
-            if (_uiText is not null)
-                _uiText.Color = _IsDisabled ? _textDisableColor : _isHovered ? _textHoverColor : _textIdleColor;
-            Color = _IsDisabled ? _textureDisableColor : _isHovered ? _textureHoverColor : _textureIdleColor;
-            if (_IsDisabled)
-                return;
 
-            if (Bounds.Contains(inputState.MousePosition) && !_isHovered)
+            var isDisabled = OnClickAction is null || Disable;
+            var isHovered = !isDisabled && Bounds.Contains(inputState.MousePosition);
+            var isClicked = isHovered && inputState.HasAction(ActionType.LeftWasClicked);
+
+            Color = isDisabled ? _textureDisableColor : isHovered ? _textureHoverColor : _textureIdleColor;
+            if (_uiText is not null)
+                _uiText.Color = isDisabled ? _textDisableColor : isHovered ? _textHoverColor : _textIdleColor;
+
+            if (isHovered && !_wasHovered)
                 AudioService.SFX.PlaySound("hoverButton");
 
-            if (!_isClicked) return;
-            AudioService.SFX.PlaySound("clickButton");
-            OnClickAction?.Invoke();
-            _isHovered = false;
+            if (isClicked)
+            {
+                AudioService.SFX.PlaySound("clickButton");
+                OnClickAction?.Invoke();
+            }
+
+            _wasHovered = isHovered;
         }
 
         protected override void Drawer(SpriteBatch spriteBatch)
         {
             base.Drawer(spriteBatch);
-            if (Tooltip is null) return;
-            if (!_isHovered) return;
-            var font = ContentProvider.Fonts.Get("default_font");
-            var pos = new Vector2(Bounds.Left, Bounds.Bottom);
-            spriteBatch.DrawString(font, Tooltip, pos, Color.White, 0, Vector2.Zero, .1f, SpriteEffects.None, 1);
         }
     }
 }
