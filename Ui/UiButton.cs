@@ -10,17 +10,7 @@ using System;
 
 namespace GameEngine.Ui
 {
-    public struct ButtonStyle
-    {
-        public Color TextIdleColor;
-        public Color TextHoverColor;
-        public Color TextDisableColor;
-        public Color TextureIdleColor;
-        public Color TextureHoverColor;
-        public Color TextureDisableColor;
-    }
-
-    public class UiButton : UiFrame
+    public class UiButton(string texture) : UiSprite(texture)
     {
         private readonly static Color _textIdleColor = Color.White;
         private readonly static Color _textHoverColor = Color.Gray;
@@ -28,32 +18,22 @@ namespace GameEngine.Ui
         private readonly static Color _textureIdleColor = Color.White;
         private readonly static Color _textureHoverColor = Color.MonoGameOrange;
         private readonly static Color _textureDisableColor = Color.DarkGray;
-
-        private readonly UiText _uiText;
-        public Action OnClickAction { get; set; }
-
-        public Anchor TextAlign { set { _uiText.Anchor = value; } }
-        public string Text { set { _uiText.Text = value; } }
-        public float TextScale { set { _uiText.Scale = value; } }
-
-        public bool Disable { get; set; } = false;
-
-        public UiButton(string spriteFont, string text, string texture)
-        {
-            if (spriteFont != null)
-                Add(_uiText = new(spriteFont) { Text = text, HSpace = 25, Anchor = Anchor.Center });
-            if (texture != null)
-                base.AttachTexture(texture, 1);
-        }
-
+        private UiText _uiText;
         private bool _wasHovered;
+
+        public UiText Text { set => _uiText = value; }
+        public Action OnClickAction;
+        public bool Disable;
+
         protected override void Updater(InputState inputState)
         {
             base.Updater(inputState);
+            _uiText?.Update(inputState, Bounds, UiScale);
 
             var isDisabled = OnClickAction is null || Disable;
             var isHovered = !isDisabled && Bounds.Contains(inputState.MousePosition);
             var isClicked = isHovered && inputState.HasAction(ActionType.LeftWasClicked);
+            _wasHovered = isHovered;
 
             Color = isDisabled ? _textureDisableColor : isHovered ? _textureHoverColor : _textureIdleColor;
             if (_uiText is not null)
@@ -62,18 +42,27 @@ namespace GameEngine.Ui
             if (isHovered && !_wasHovered)
                 AudioService.SFX.PlaySound("hoverButton");
 
-            if (isClicked)
-            {
-                AudioService.SFX.PlaySound("clickButton");
-                OnClickAction?.Invoke();
-            }
-
-            _wasHovered = isHovered;
+            if (!isClicked) return;
+            AudioService.SFX.PlaySound("clickButton");
+            OnClickAction?.Invoke();
         }
 
         protected override void Drawer(SpriteBatch spriteBatch)
         {
             base.Drawer(spriteBatch);
+            _uiText?.Draw(spriteBatch);
+        }
+
+        public override void ApplyScale(Rectangle root, float uiScale)
+        {
+            base.ApplyScale(root, uiScale);
+            _uiText?.ApplyScale(Bounds, uiScale);
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            _uiText?.Dispose();
         }
     }
 }

@@ -9,24 +9,14 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace GameEngine.Ui
 {
-    public class UiText(string spriteFont) : UiElement
+    public class UiText(string spriteFont, string text = default) : UiElement
     {
         private readonly SpriteFont _font = ContentProvider.Fonts.Get(spriteFont);
+        private string _text = text;
+        private float _scale = 1;
 
-        private string _text;
-        private bool _dirty;
-
-        public string Text
-        {
-            get => _text;
-            set
-            {
-                _text = value;
-                _dirty = true;
-            }
-        }
-
-        public float Scale { private get; set; } = 1;
+        public string Text { set { _text = value; UpdateSize(); } }
+        public float Scale { set { _scale = value; UpdateSize(); } }
         public Color Color { private get; set; } = Color.Black;
         public float Alpha { private get; set; } = 1;
 
@@ -40,24 +30,16 @@ namespace GameEngine.Ui
         {
             Vector2 position = Bounds.Location.ToVector2();
 
-            spriteBatch.DrawString(_font, Text, position, Color * Alpha, 0, Vector2.Zero, UiScale * Scale, SpriteEffects.None, 1);
+            spriteBatch.DrawString(_font, _text, position, Color * Alpha, 0, Vector2.Zero, UiScale * _scale, SpriteEffects.None, 1);
         }
 
-        protected override void Updater(InputState inputState)
-        {
-            if (_dirty)
-            {
-                UpdateSize();
-                _dirty = false;
-            }
-        }
+        protected override void Updater(InputState inputState) {; }
 
         private void UpdateSize()
         {
-            Vector2 textSize = _text == null ? Vector2.Zero : _font.MeasureString(_text) * Scale;
-            var textDimension = textSize.ToPoint();
-            Width = textDimension.X;
-            Height = (int)(textDimension.Y * .85f);
+            Vector2 textDimension = _text == null ? Vector2.Zero : _font.MeasureString(_text);
+            Width = (int)(textDimension.X * _scale);
+            Height = (int)float.Ceiling(textDimension.Y * _scale * .85f);
         }
     }
 }

@@ -15,7 +15,10 @@ namespace GameEngine.Ui
         private UiFrame _activeFrame;
 
         public void Add(string tabDescription, UiFrame tabFrame)
-            => _tabs.Add(new UiButton("default_font", tabDescription, null), tabFrame);
+            => _tabs.Add(new UiButton("button")
+            {
+                Text = new("default_font", tabDescription) { Scale = .2f }
+            }, tabFrame);
 
         public void Initialize()
         {
@@ -34,8 +37,6 @@ namespace GameEngine.Ui
                 tabButton.RelWidth = .15f;
                 tabButton.RelHeight = 1f / tabCount;
                 tabButton.RelX = 0;
-                tabButton.Color = Color.Transparent;
-                tabButton.TextScale = .2f;
                 i++;
 
                 _activeFrame ??= tabFrame;
