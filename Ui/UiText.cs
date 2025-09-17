@@ -18,7 +18,6 @@ namespace GameEngine.Ui
         public string Text { set { _text = value; UpdateSize(); } }
         public float Scale { set { _scale = value; UpdateSize(); } }
         public Color Color { private get; set; } = Color.Black;
-        public float Alpha { private get; set; } = 1;
 
         public override void ApplyScale(Rectangle root, float uiScale = 1)
         {
@@ -30,7 +29,7 @@ namespace GameEngine.Ui
         {
             Vector2 position = Bounds.Location.ToVector2();
 
-            spriteBatch.DrawString(_font, _text, position, Color * Alpha, 0, Vector2.Zero, UiScale * _scale, SpriteEffects.None, 1);
+            spriteBatch.DrawString(_font, _text, position, Color, 0, Vector2.Zero, UiScale * _scale, SpriteEffects.None, 1);
         }
 
         protected override void Updater(InputState inputState) {; }

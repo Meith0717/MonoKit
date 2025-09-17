@@ -18,6 +18,7 @@ namespace GameEngine.Ui
         private readonly static Color _textureIdleColor = Color.White;
         private readonly static Color _textureHoverColor = Color.MonoGameOrange;
         private readonly static Color _textureDisableColor = Color.DarkGray;
+
         private UiText _uiText;
         private bool _wasHovered;
 

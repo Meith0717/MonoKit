@@ -9,7 +9,7 @@ using MonoGame.Extended;
 
 namespace GameEngine.Ui
 {
-    public class UiSlider(bool interactive) : UiFrame
+    public class UiSlider(bool interactive) : UiElement
     {
         private float _sliderValue;
         private bool _hovered;
@@ -40,13 +40,10 @@ namespace GameEngine.Ui
                 _sliderValue = float.Round(float.Clamp(_sliderValue, 0, 1), 2);
                 _pressed = !inputState.HasAction(ActionType.LeftReleased);
             }
-            Color = Color.Transparent;
-            base.Updater(inputState);
         }
 
         protected override void Drawer(SpriteBatch spriteBatch)
         {
-
             var rectangle = Bounds;
             spriteBatch.FillRectangle(rectangle, BgColor);
 
@@ -58,9 +55,7 @@ namespace GameEngine.Ui
                 rectangle.Y = bottom - rectangle.Height;
             }
             else
-            {
                 rectangle.Width = (int)(rectangle.Width * _sliderValue);
-            }
 
             spriteBatch.FillRectangle(rectangle, _hovered || _pressed ? HoverColor : IdeColor);
         }

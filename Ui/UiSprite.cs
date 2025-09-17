@@ -17,13 +17,13 @@ namespace GameEngine.Ui
         protected float Scale = scale;
         protected Color Color = color;
 
-        protected override void Updater(InputState inputState) 
+        protected override void Updater(InputState inputState)
         {
             Width = (int)float.Ceiling(_texture.Width * Scale);
             Height = (int)float.Ceiling(_texture.Height * Scale);
         }
 
-        protected override void Drawer(SpriteBatch spriteBatch) 
+        protected override void Drawer(SpriteBatch spriteBatch)
             => spriteBatch.Draw(_texture, Bounds, Color);
     }
 }
