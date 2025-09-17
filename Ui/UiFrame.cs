@@ -14,40 +14,27 @@ namespace GameEngine.Ui
     public class UiFrame() : UiElement
     {
         private readonly List<UiElement> _elementChilds = new();
-        private readonly List<UiElement> _disposedChilds = new();
+        private Texture2D _texture;
+        private float _textureScale = 1;
+        private Color _color = Color.White;
 
-        public Color Color { private get; set; } = Color.White;
-        public float Alpha { private get; set; } = 1;
-        public string Texture { private get; set; }
-        public float TextureScale { private get; set; } = 1;
-
-        public void Clear()
-            => _elementChilds.Clear();
-
-        public void Add(UiElement child)
-        {
-            _elementChilds.Add(child);
-        }
+        public Color Color { set => _color = value; }
 
         protected override void Updater(InputState inputState)
         {
-            foreach (var child in _disposedChilds)
-                _elementChilds.Remove(child);
-            _disposedChilds.Clear();
-
             UpdateSizeIfTextureNotNull();
-
+            _elementChilds.RemoveAll(c => c.IsDisposed);
             foreach (var child in _elementChilds)
-            {
                 child.Update(inputState, Bounds, UiScale);
-                if (child.IsDisposed)
-                    _disposedChilds.Add(child);
-            }
         }
 
         protected override void Drawer(SpriteBatch spriteBatch)
         {
-            DrawTextureOrRectangle(spriteBatch);
+            if (_texture is not null)
+                spriteBatch.Draw(_texture, Bounds, _color);
+            else if (_color != Color.Transparent)
+                spriteBatch.FillRectangle(Bounds, _color);
+
             foreach (var child in _elementChilds)
                 child.Draw(spriteBatch);
         }
@@ -55,7 +42,6 @@ namespace GameEngine.Ui
         public override void ApplyScale(Rectangle root, float uiScale)
         {
             base.ApplyScale(root, uiScale);
-
             foreach (var child in _elementChilds)
                 child.ApplyScale(Bounds, uiScale);
         }
@@ -67,20 +53,28 @@ namespace GameEngine.Ui
                 child.Dispose();
         }
 
-        private void DrawTextureOrRectangle(SpriteBatch spriteBatch)
+        public void Clear()
         {
-            if (Texture is not null)
-                spriteBatch.Draw(ContentProvider.Textures.Get(Texture), Bounds, Color * Alpha);
-            else if (Alpha != 0 && Color != Color.Transparent)
-                spriteBatch.FillRectangle(Bounds, Color * Alpha);
+            _elementChilds.Clear();
+        }
+
+        public void Add(UiElement child)
+        {
+            _elementChilds.Add(child);
+        }
+
+        public UiFrame AttachTexture(string texture, float scale = 1)
+        {
+            _texture = ContentProvider.Textures.Get(texture);
+            _textureScale = scale;
+            return this;
         }
 
         private void UpdateSizeIfTextureNotNull()
         {
-            if (Texture is null) return;
-            var texture = ContentProvider.Textures.Get(Texture);
-            Width = (int)(texture.Width * TextureScale);
-            Height = (int)(texture.Height * TextureScale);
+            if (_texture is null) return;
+            Width = (int)(_texture.Width * _textureScale);
+            Height = (int)(_texture.Height * _textureScale);
         }
     }
 }

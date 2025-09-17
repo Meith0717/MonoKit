@@ -15,7 +15,7 @@ namespace GameEngine.Ui
             set
             {
                 _state = value;
-                Texture = value ? "ui_toggle_true" : "ui_toggle_false";
+                AttachTexture(State ? "ui_toggle_true" : "ui_toggle_false", 1);
             }
         }
         private bool _state;
@@ -23,12 +23,8 @@ namespace GameEngine.Ui
         public UiCheckBox()
             : base(null, null, "")
         {
-            Texture = State ? "ui_toggle_true" : "ui_toggle_false";
-            OnClickAction = () =>
-            {
-                State = !State;
-                Texture = State ? "ui_toggle_true" : "ui_toggle_false";
-            };
+            AttachTexture(State ? "ui_toggle_true" : "ui_toggle_false", 1);
+            OnClickAction = () => State = !State;
         }
     }
 }

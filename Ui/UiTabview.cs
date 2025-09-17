@@ -36,7 +36,6 @@ namespace GameEngine.Ui
                 tabButton.RelX = 0;
                 tabButton.Color = Color.Transparent;
                 tabButton.TextScale = .2f;
-                tabButton.Alpha = 0;
                 i++;
 
                 _activeFrame ??= tabFrame;

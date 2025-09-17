@@ -42,7 +42,8 @@ namespace GameEngine.Ui
         {
             if (spriteFont != null)
                 Add(_uiText = new(spriteFont) { Text = text, HSpace = 25, Anchor = Anchor.Center });
-            Texture = texture;
+            if (texture != null)
+                AttachTexture(texture, 1);
         }
 
         private bool _wasHovered;

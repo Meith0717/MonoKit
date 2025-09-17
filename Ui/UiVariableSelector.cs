@@ -20,15 +20,13 @@ namespace GameEngine.Ui
             Add(_arrowL = new UiButton(null, null, "ui_arrow_l")
             {
                 OnClickAction = DecreaseIndex,
-                Anchor = Anchor.W,
-                TextureScale = .5f
+                Anchor = Anchor.W
             });
 
             Add(_arrowR = new UiButton(null, null, "ui_arrow_r")
             {
                 OnClickAction = IncreaseIndex,
-                Anchor = Anchor.E,
-                TextureScale = .5f
+                Anchor = Anchor.E
             });
 
             Add(_text = new(spriteFont)
