@@ -17,7 +17,7 @@ namespace GameEngine.Ui
         private UiFrame _activeFrame;
 
         public void Add(string tabDescription, UiFrame tabFrame)
-            => _tabs.Add((new UiTextButton() { Text = new("default_font", tabDescription) { Scale = .3f, Anchor = Anchor.Center, HSpace = 10 }  }, tabFrame));
+            => _tabs.Add((new UiTextButton() { Text = new("default_font", tabDescription) { Scale = .3f, Allign = Allign.Center, HSpace = 10 } }, tabFrame));
 
         public void Initialize()
         {
@@ -49,7 +49,7 @@ namespace GameEngine.Ui
             }
 
             if (_activeFrame is null) return;
-            _activeFrame.Anchor = Anchor.S;
+            _activeFrame.Allign = Allign.S;
             _activeFrame.Update(inputState, Bounds, UiScale);
         }
 

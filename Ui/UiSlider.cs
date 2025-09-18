@@ -60,7 +60,7 @@ namespace GameEngine.Ui
 
             spriteBatch.FillRectangle(rectangle, _hovered || _pressed ? HoverColor : IdeColor);
         }
-       
+
         public Color BgColor { private get; set; } = new(20, 20, 20);
         public Color IdeColor { private get; set; } = Color.MonoGameOrange;
         public Color HoverColor { private get; set; } = Color.Orange;

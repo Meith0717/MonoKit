@@ -11,7 +11,7 @@ using System.Diagnostics;
 
 namespace GameEngine.Ui
 {
-    public enum Anchor { N, NE, E, SE, S, SW, W, NW, Center, None, Left, Right, Top, Bottom, CenterH, CenterV }
+    public enum Allign { N, NE, E, SE, S, SW, W, NW, Center, None, Left, Right, Top, Bottom, CenterH, CenterV }
 
     public enum FillScale { X, Y, Both, FillIn, Fit, None }
 
@@ -21,8 +21,6 @@ namespace GameEngine.Ui
         public bool IsDisposed { get; private set; }
         protected float UiScale { get; private set; }
 
-        public int? X = null;
-        public int? Y = null;
         public float RelX = 0;
         public float RelY = 0;
 
@@ -34,7 +32,7 @@ namespace GameEngine.Ui
         public int? HSpace = null;
         public int? VSpace = null;
 
-        public Anchor Anchor = Anchor.None;
+        public Allign Allign = Allign.None;
         public FillScale FillScale = FillScale.None;
 
         protected abstract void Updater(InputState inputState);
@@ -71,14 +69,14 @@ namespace GameEngine.Ui
 
         private void UpdateBounds(Rectangle root)
         {
-            int x = X ?? (int)float.Floor(root.Width * RelX);
-            int y = Y ?? (int)float.Floor(root.Height * RelY);
+            int x = (int)float.Floor(root.Width * RelX);
+            int y = (int)float.Floor(root.Height * RelY);
 
             int width = (int)float.Floor(Width * UiScale ?? root.Width * RelWidth);
             int height = (int)float.Floor(Height * UiScale ?? root.Height * RelHeight);
 
             ManageFillScale(root, FillScale, ref x, ref y, ref width, ref height);
-            ManageAnchor(root, Anchor, ref x, ref y, ref width, ref height);
+            ManageAllign(root, Allign, ref x, ref y, ref width, ref height);
             ManageSpacing(root, ref x, ref y, ref width, ref height, HSpace.HasValue ? HSpace * UiScale : null, VSpace.HasValue ? VSpace * UiScale : null);
 
             Bounds = new(root.X + x, root.Y + y, width, height);
@@ -146,46 +144,46 @@ namespace GameEngine.Ui
             }
         }
 
-        private static void ManageAnchor(Rectangle root, Anchor anchor, ref int x, ref int y, ref int width, ref int height)
+        private static void ManageAllign(Rectangle root, Allign allign, ref int x, ref int y, ref int width, ref int height)
         {
-            x = anchor switch
+            x = allign switch
             {
-                Anchor.NW => 0,
-                Anchor.SW => 0,
-                Anchor.W => 0,
-                Anchor.Left => 0,
-                Anchor.N => (root.Width - width) / 2,
-                Anchor.Center => (root.Width - width) / 2,
-                Anchor.CenterV => (root.Width - width) / 2,
-                Anchor.S => (root.Width - width) / 2,
-                Anchor.NE => root.Width - width,
-                Anchor.E => root.Width - width,
-                Anchor.Right => root.Width - width,
-                Anchor.SE => root.Width - width,
-                Anchor.CenterH => x,
-                Anchor.None => x,
-                Anchor.Bottom => x,
-                Anchor.Top => x,
+                Allign.NW => 0,
+                Allign.SW => 0,
+                Allign.W => 0,
+                Allign.Left => 0,
+                Allign.N => (root.Width - width) / 2,
+                Allign.Center => (root.Width - width) / 2,
+                Allign.CenterV => (root.Width - width) / 2,
+                Allign.S => (root.Width - width) / 2,
+                Allign.NE => root.Width - width,
+                Allign.E => root.Width - width,
+                Allign.Right => root.Width - width,
+                Allign.SE => root.Width - width,
+                Allign.CenterH => x,
+                Allign.None => x,
+                Allign.Bottom => x,
+                Allign.Top => x,
                 _ => throw new System.NotImplementedException()
             };
-            y = anchor switch
+            y = allign switch
             {
-                Anchor.NW => 0,
-                Anchor.N => 0,
-                Anchor.NE => 0,
-                Anchor.Top => 0,
-                Anchor.E => (root.Height - height) / 2,
-                Anchor.W => (root.Height - height) / 2,
-                Anchor.Center => (root.Height - height) / 2,
-                Anchor.CenterH => (root.Height - height) / 2,
-                Anchor.SE => root.Height - height,
-                Anchor.S => root.Height - height,
-                Anchor.Bottom => root.Height - height,
-                Anchor.SW => root.Height - height,
-                Anchor.CenterV => y,
-                Anchor.None => y,
-                Anchor.Left => y,
-                Anchor.Right => y,
+                Allign.NW => 0,
+                Allign.N => 0,
+                Allign.NE => 0,
+                Allign.Top => 0,
+                Allign.E => (root.Height - height) / 2,
+                Allign.W => (root.Height - height) / 2,
+                Allign.Center => (root.Height - height) / 2,
+                Allign.CenterH => (root.Height - height) / 2,
+                Allign.SE => root.Height - height,
+                Allign.S => root.Height - height,
+                Allign.Bottom => root.Height - height,
+                Allign.SW => root.Height - height,
+                Allign.CenterV => y,
+                Allign.None => y,
+                Allign.Left => y,
+                Allign.Right => y,
                 _ => throw new System.NotImplementedException()
             };
         }

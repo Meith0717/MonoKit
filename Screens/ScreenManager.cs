@@ -15,8 +15,11 @@ namespace GameEngine.Screens;
 public class ScreenManager(Game game)
 {
     private readonly Game _game = game;
+    private readonly GraphicsDevice _graphicsDevice = game.GraphicsDevice;
     private readonly Stack<Screen> _screens = new();
     private readonly ConcurrentQueue<Action<GameTime, float>> _pendingActions = new();
+    private RenderTarget2D _renderTarget;
+
 
     public void AddScreen(Screen screen)
     {
@@ -79,10 +82,17 @@ public class ScreenManager(Game game)
         for (var j = i; j > 0; j--)
             lowerTargets[j - 1] = _screens.ElementAt(j).RenderTarget(spriteBatch);
 
+        _graphicsDevice.SetRenderTarget(_renderTarget);
         _game.GraphicsDevice.Clear(Color.Black);
         spriteBatch.Begin();
         foreach (var lowerTarget in lowerTargets)
             spriteBatch.Draw(lowerTarget, Vector2.Zero, Color.White);
+        spriteBatch.End();
+        _graphicsDevice.SetRenderTarget(null);
+
+        _game.GraphicsDevice.Clear(Color.Black);
+        spriteBatch.Begin();
+        //spriteBatch.Draw(_renderTarget, Vector2.Zero, Color.White);
         spriteBatch.Draw(topScreenTarget, Vector2.Zero, Color.White);
         spriteBatch.End();
     }
@@ -92,6 +102,7 @@ public class ScreenManager(Game game)
         for (int i = 0; i < _screens.Count; i++)
             _screens.ElementAt(i).Dispose();
 
+        _renderTarget.Dispose();
         _game.Exit();
     }
 
@@ -99,5 +110,14 @@ public class ScreenManager(Game game)
     {
         foreach (Screen layer in _screens)
             layer.ApplyResolution(gameTime, uiScale);
+        _renderTarget?.Dispose();
+        _renderTarget = new(_graphicsDevice,
+                              _graphicsDevice.Viewport.Width,
+                              _graphicsDevice.Viewport.Height,
+                              false,
+                              SurfaceFormat.Color,
+                              DepthFormat.Depth24Stencil8,
+                              4,
+                              RenderTargetUsage.PreserveContents);
     }
 }

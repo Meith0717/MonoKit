@@ -40,7 +40,7 @@ namespace GameEngine.Screens
                 RelWidth = 1,
                 RelHeight = 1,
                 FillScale = FillScale.Fit,
-                Anchor = Anchor.Center,
+                Allign = Allign.Center,
             };
         }
 

@@ -14,28 +14,6 @@ namespace GameEngine.Rendering
         private readonly RenderTarget2D[] _renderTargets = new RenderTarget2D[2];
         private int currentIndex = 0;
 
-        public void ApplyResolution(int width, int height)
-        {
-            for (var i = 0; i < _renderTargets.Length; i++)
-            {
-                _renderTargets[i]?.Dispose();
-                _renderTargets[i] = new RenderTarget2D(
-                _graphicsDevice,
-                width,
-                height,
-                false,
-                SurfaceFormat.Color,
-                DepthFormat.None
-                );
-            }
-        }
-
-        private RenderTarget2D GetNextRenderTarget()
-        {
-            currentIndex = (currentIndex + 1) % _renderTargets.Length;
-            return _renderTargets[currentIndex];
-        }
-
         public RenderTarget2D Pass(Effect effect, SpriteBatch spriteBatch, RenderTarget2D input)
         {
             var destination = GetNextRenderTarget();
@@ -52,12 +30,33 @@ namespace GameEngine.Rendering
             return destination;
         }
 
+        public void ApplyResolution(int width, int height)
+        {
+            for (var i = 0; i < _renderTargets.Length; i++)
+            {
+                _renderTargets[i]?.Dispose();
+                _renderTargets[i] = new RenderTarget2D(
+                _graphicsDevice,
+                width,
+                height,
+                false,
+                SurfaceFormat.Color,
+                DepthFormat.None
+                );
+            }
+        }
+
         public void Dispose()
         {
             foreach (var renderTarget in _renderTargets)
                 renderTarget?.Dispose();
-
             GC.SuppressFinalize(this);
+        }
+
+        private RenderTarget2D GetNextRenderTarget()
+        {
+            currentIndex = (currentIndex + 1) % _renderTargets.Length;
+            return _renderTargets[currentIndex];
         }
     }
 }
