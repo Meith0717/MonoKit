@@ -3,6 +3,7 @@
 // All rights reserved.
 
 using GameEngine.Input;
+using GameEngine.Rendering;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -18,8 +19,12 @@ public class ScreenManager(Game game)
     private readonly GraphicsDevice _graphicsDevice = game.GraphicsDevice;
     private readonly Stack<Screen> _screens = new();
     private readonly ConcurrentQueue<Action<GameTime, float>> _pendingActions = new();
-    private RenderTarget2D _renderTarget;
 
+    private readonly LinkedList<RenderTarget2D> _lowerRenderTargets = new();
+    private readonly PostProcessingRunner _postProcessingRunner = new(game.GraphicsDevice);
+    private RenderTarget2D _lowerRenderTarget;
+    private bool _runnEffect;
+    public IPostProcessingEffect PostProcessingEffect;
 
     public void AddScreen(Screen screen)
     {
@@ -67,32 +72,37 @@ public class ScreenManager(Game game)
         }
     }
 
+    public void EffectOn() => _runnEffect = true;
+    public void EffectOff() => _runnEffect = false;
+
     public void Draw(SpriteBatch spriteBatch)
     {
-        if (_screens.Count == 0)
-            return;
-
-        int i = 0;
-        while (_screens.ElementAt(i).DrawBelow)
-            i++;
+        if (_screens.Count == 0) return;
+        _lowerRenderTargets.Clear();
 
         var topScreenTarget = _screens.First().RenderTarget(spriteBatch);
-        var lowerTargets = new RenderTarget2D[i];
+
+        int i = 0;
+        while (_screens.ElementAt(i).DrawBelow) 
+            i++;
 
         for (var j = i; j > 0; j--)
-            lowerTargets[j - 1] = _screens.ElementAt(j).RenderTarget(spriteBatch);
+            _lowerRenderTargets.AddFirst(_screens.ElementAt(j).RenderTarget(spriteBatch));
 
-        _graphicsDevice.SetRenderTarget(_renderTarget);
+        _graphicsDevice.SetRenderTarget(_lowerRenderTarget);
         _game.GraphicsDevice.Clear(Color.Black);
         spriteBatch.Begin();
-        foreach (var lowerTarget in lowerTargets)
+        foreach (var lowerTarget in _lowerRenderTargets)
             spriteBatch.Draw(lowerTarget, Vector2.Zero, Color.White);
         spriteBatch.End();
-        _graphicsDevice.SetRenderTarget(null);
 
+        if (_runnEffect)
+            _lowerRenderTarget = PostProcessingEffect?.Apply(spriteBatch, _postProcessingRunner, _lowerRenderTarget);
+
+        _graphicsDevice.SetRenderTarget(null);
         _game.GraphicsDevice.Clear(Color.Black);
         spriteBatch.Begin();
-        //spriteBatch.Draw(_renderTarget, Vector2.Zero, Color.White);
+        spriteBatch.Draw(_lowerRenderTarget, Vector2.Zero, Color.White);
         spriteBatch.Draw(topScreenTarget, Vector2.Zero, Color.White);
         spriteBatch.End();
     }
@@ -102,7 +112,8 @@ public class ScreenManager(Game game)
         for (int i = 0; i < _screens.Count; i++)
             _screens.ElementAt(i).Dispose();
 
-        _renderTarget.Dispose();
+        _postProcessingRunner.Dispose();
+        _lowerRenderTarget.Dispose();
         _game.Exit();
     }
 
@@ -110,8 +121,9 @@ public class ScreenManager(Game game)
     {
         foreach (Screen layer in _screens)
             layer.ApplyResolution(gameTime, uiScale);
-        _renderTarget?.Dispose();
-        _renderTarget = new(_graphicsDevice,
+        _postProcessingRunner.ApplyResolution(_graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height);
+        _lowerRenderTarget?.Dispose();
+        _lowerRenderTarget = new(_graphicsDevice,
                               _graphicsDevice.Viewport.Width,
                               _graphicsDevice.Viewport.Height,
                               false,
