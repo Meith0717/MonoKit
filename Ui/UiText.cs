@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace GameEngine.Ui
 {
-    public class UiText(string spriteFont, string text = default) : UiElement
+    public sealed class UiText(string spriteFont, string text = default) : UiElement
     {
         private readonly SpriteFont _font = ContentProvider.Fonts.Get(spriteFont);
         private string _text = text;
@@ -38,7 +38,7 @@ namespace GameEngine.Ui
         {
             Vector2 textDimension = _text == null ? Vector2.Zero : _font.MeasureString(_text);
             Width = (int)(textDimension.X * _scale);
-            Height = (int)float.Ceiling(textDimension.Y * _scale * .85f);
+            Height = (int)float.Floor(textDimension.Y * _scale * .85f);
         }
     }
 }

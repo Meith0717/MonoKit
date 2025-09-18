@@ -9,8 +9,9 @@ using MonoGame.Extended;
 
 namespace GameEngine.Ui
 {
-    public class UiSlider(bool interactive) : UiElement
+    public sealed class UiSlider(bool interactive) : UiElement
     {
+        private readonly ButtonStyle style = new();
         private float _sliderValue;
         private bool _hovered;
         private bool _pressed;
@@ -59,9 +60,9 @@ namespace GameEngine.Ui
 
             spriteBatch.FillRectangle(rectangle, _hovered || _pressed ? HoverColor : IdeColor);
         }
-
-        public Color BgColor { private get; set; } = Color.DarkGray;
-        public Color IdeColor { private get; set; } = Color.DarkOrange;
-        public Color HoverColor { private get; set; } = Color.MonoGameOrange;
+       
+        public Color BgColor { private get; set; } = new(20, 20, 20);
+        public Color IdeColor { private get; set; } = Color.MonoGameOrange;
+        public Color HoverColor { private get; set; } = Color.Orange;
     }
 }

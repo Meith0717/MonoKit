@@ -71,11 +71,11 @@ namespace GameEngine.Ui
 
         private void UpdateBounds(Rectangle root)
         {
-            int x = X ?? (int)(root.Width * RelX);
-            int y = Y ?? (int)(root.Height * RelY);
+            int x = X ?? (int)float.Floor(root.Width * RelX);
+            int y = Y ?? (int)float.Floor(root.Height * RelY);
 
-            int width = (int)(Width * UiScale ?? root.Width * RelWidth);
-            int height = (int)(Height * UiScale ?? root.Height * RelHeight);
+            int width = (int)float.Floor(Width * UiScale ?? root.Width * RelWidth);
+            int height = (int)float.Floor(Height * UiScale ?? root.Height * RelHeight);
 
             ManageFillScale(root, FillScale, ref x, ref y, ref width, ref height);
             ManageAnchor(root, Anchor, ref x, ref y, ref width, ref height);

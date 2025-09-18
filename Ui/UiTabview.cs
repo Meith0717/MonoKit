@@ -5,74 +5,73 @@
 using GameEngine.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Extended;
 using System.Collections.Generic;
 
 namespace GameEngine.Ui
 {
-    public class UiTabView : UiElement
+    public sealed class UiTabView(Color color) : UiElement
     {
-        private readonly Dictionary<UiButton, UiFrame> _tabs = new();
+        private readonly List<(UiTextButton, UiFrame)> _tabs = new();
+        private readonly Color _color = color;
         private UiFrame _activeFrame;
 
         public void Add(string tabDescription, UiFrame tabFrame)
-            => _tabs.Add(new UiButton("button")
-            {
-                Text = new("default_font", tabDescription) { Scale = .2f }
-            }, tabFrame);
+            => _tabs.Add((new UiTextButton() { Text = new("default_font", tabDescription) { Scale = .3f, Anchor = Anchor.Center, HSpace = 10 }  }, tabFrame));
 
         public void Initialize()
         {
             var tabCount = _tabs.Count;
-            var i = 0;
 
-            foreach (var tab in _tabs)
+            for (var i = 0; i < _tabs.Count; i++)
             {
-                var tabFrame = tab.Value;
-                tabFrame.RelWidth = .85f;
-                tabFrame.RelHeight = 1f;
+                var (button, frame) = _tabs[i];
+                _activeFrame ??= frame;
 
-                var tabButton = tab.Key;
-                tabButton.OnClickAction = () => _activeFrame = tabFrame;
-                tabButton.RelY = i * (1f / tabCount);
-                tabButton.RelWidth = .15f;
-                tabButton.RelHeight = 1f / tabCount;
-                tabButton.RelX = 0;
-                i++;
+                frame.RelWidth = 1f;
+                frame.RelHeight = .9f;
 
-                _activeFrame ??= tabFrame;
+                button.OnClickAction = () => _activeFrame = frame;
+                button.RelX = i * (1f / tabCount);
+                button.RelY = 0;
+                button.RelWidth = 1f / tabCount;
+                button.RelHeight = .1f;
             }
         }
 
         protected override void Updater(InputState inputState)
         {
-            foreach (var tab in _tabs)
+            foreach (var (button, frame) in _tabs)
             {
-                var button = tab.Key;
                 button.Update(inputState, Bounds, UiScale);
+                if (_activeFrame == frame)
+                    button.OveideColor(Color.MonoGameOrange);
             }
 
             if (_activeFrame is null) return;
-            _activeFrame.Anchor = Anchor.E;
+            _activeFrame.Anchor = Anchor.S;
             _activeFrame.Update(inputState, Bounds, UiScale);
         }
 
         protected override void Drawer(SpriteBatch spriteBatch)
         {
+            spriteBatch.FillRectangle(Bounds, _color);
             _activeFrame?.Draw(spriteBatch);
 
-            foreach (var button in _tabs.Keys)
+            foreach (var (button, _) in _tabs)
                 button.Draw(spriteBatch);
+
         }
 
         public override void ApplyScale(Rectangle root, float uiScale)
         {
             base.ApplyScale(root, uiScale);
 
-            foreach (var button in _tabs.Keys)
+            foreach (var (button, frame) in _tabs)
+            {
                 button.ApplyScale(Bounds, uiScale);
-
-            foreach (var tab in _tabs.Values)
-                tab.ApplyScale(Bounds, uiScale);
+                frame.ApplyScale(Bounds, uiScale);
+            }
         }
     }
 }

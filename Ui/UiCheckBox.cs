@@ -4,7 +4,7 @@
 
 namespace GameEngine.Ui
 {
-    public class UiCheckBox : UiButton
+    public sealed class UiCheckBox : UiButton
     {
         private bool _state;
 

@@ -9,7 +9,7 @@ using System.Collections.Generic;
 
 namespace GameEngine.Ui
 {
-    public class UiVariableSelector<T> : UiElement
+    public sealed class UiVariableSelector<T> : UiElement
     {
         private readonly UiButton _arrowL;
         private readonly UiButton _arrowR;
@@ -18,9 +18,10 @@ namespace GameEngine.Ui
         private int _selectedIndex;
 
         public float TextScale { set { _text.Scale = value; } }
-        public float ButtonScale { set { _text.Scale = value; } }
+        public float ButtonScale { set { _arrowL.Scale = _arrowR.Scale = value; } }
         public Color TextColor { set { _text.Color = value; } }
         public bool Disable { set { _arrowL.Disable = _arrowR.Disable = value; } }
+
         public T Value
         {
             set => _selectedIndex = GetIndex(value);
@@ -34,7 +35,7 @@ namespace GameEngine.Ui
             _arrowL = new UiButton("ui_arrow_l")
             {
                 OnClickAction = DecreaseIndex,
-                Anchor = Anchor.W
+                Anchor = Anchor.W,
             };
 
             _arrowR = new UiButton("ui_arrow_r")
@@ -56,7 +57,7 @@ namespace GameEngine.Ui
             _arrowR.Update(inputState, Bounds, UiScale);
             _text.Update(inputState, Bounds, UiScale);
             _text.Text = _items[_selectedIndex].ToString();
-            Height = int.Max(_text.Bounds.Height, int.Max(_arrowL.Bounds.Height, _arrowR.Bounds.Height));
+            Height = (int)float.Floor(int.Max(_text.Bounds.Height, int.Max(_arrowL.Bounds.Height, _arrowR.Bounds.Height)) / UiScale);
         }
 
         protected override void Drawer(SpriteBatch spriteBatch)

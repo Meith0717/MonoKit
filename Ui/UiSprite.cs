@@ -14,13 +14,13 @@ namespace GameEngine.Ui
         private Texture2D _texture = ContentProvider.Textures.Get(texture);
 
         protected string Texture { set => _texture = ContentProvider.Textures.Get(value); }
-        protected float Scale = scale;
-        protected Color Color = color;
+        public float Scale = scale;
+        public Color Color = color;
 
         protected override void Updater(InputState inputState)
         {
-            Width = (int)float.Ceiling(_texture.Width * Scale);
-            Height = (int)float.Ceiling(_texture.Height * Scale);
+            Width = (int)float.Floor(_texture.Width * Scale);
+            Height = (int)float.Floor(_texture.Height * Scale);
         }
 
         protected override void Drawer(SpriteBatch spriteBatch)
