@@ -13,7 +13,7 @@ namespace GameEngine.Ui
     public struct ButtonStyle()
     {
         public Color TextIdleColor = Color.White;
-        public Color TextHoverColor = Color.Gray;
+        public Color TextHoverColor = Color.MonoGameOrange;
         public Color TextDisableColor = Color.DarkGray;
         public Color TextureIdleColor = Color.White;
         public Color TextureHoverColor = Color.MonoGameOrange;

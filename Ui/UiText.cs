@@ -38,7 +38,7 @@ namespace GameEngine.Ui
         {
             Vector2 textDimension = _text == null ? Vector2.Zero : _font.MeasureString(_text);
             Width = (int)(textDimension.X * _scale);
-            Height = (int)float.Floor(textDimension.Y * _scale * .85f);
+            Height = (int)float.Floor(textDimension.Y * _scale);
         }
     }
 }

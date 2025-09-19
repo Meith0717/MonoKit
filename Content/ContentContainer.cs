@@ -5,6 +5,7 @@
 using GameEngine.Core;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -23,6 +24,7 @@ namespace GameEngine.Content
         {
             if (_content.ContainsKey(key))
                 return _content[key];
+            MessageBox.Show("Missing content", $"'{key}' of type {typeof(T)}\ncold not be found.", ["ok"]);
             if (typeof(T) == typeof(Texture2D))
                 return _content["missingContent"];
             return default;

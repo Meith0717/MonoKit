@@ -34,7 +34,10 @@ namespace GameEngine.Input
         RightWasClicked,
         MidWasClicked,
         MouseWheelForward,
-        MouseWheelBackward
+        MouseWheelBackward,
+
+        // DEBUG
+        ReloadUi
     }
 
     public enum GamePadActionType
