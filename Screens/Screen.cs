@@ -39,7 +39,7 @@ namespace GameEngine.Screens
                 Color = Color.Transparent,
                 RelWidth = 1,
                 RelHeight = 1,
-                FillScale = FillScale.Fit,
+                FillScale = FillScale.FillIn,
                 Allign = Allign.Center,
             };
         }
