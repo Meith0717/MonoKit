@@ -50,6 +50,7 @@ namespace GameEngine.Ui
             if (!isClicked) return;
             AudioService.SFX.PlaySound("clickButton");
             OnClickAction?.Invoke();
+            Color = _style.TextureIdleColor;
         }
 
         protected override void Drawer(SpriteBatch spriteBatch)
