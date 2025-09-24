@@ -67,10 +67,10 @@ namespace GameEngine.Camera
             _zoomTarget = MathHelper.Clamp(_zoomTarget, minZoom, maxZoom);
         }
 
-        public void MoveByMouse(InputState inputState)
+        public void MoveByMouse(InputState inputState, float applicationScale)
         {
             if (inputState.HasAction(ActionType.RightClickHold))
-                _positionTarget += (_lastMousePosition - inputState.MousePosition) / _camera.Zoom;
+                _positionTarget += (_lastMousePosition - inputState.MousePosition) / (_camera.Zoom * applicationScale);
             _lastMousePosition = inputState.MousePosition;
         }
 

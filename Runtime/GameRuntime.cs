@@ -69,9 +69,9 @@ namespace GameEngine.Runtime
                 WorldMousePosition = Vector2.Zero;
         }
 
-        public void BeginDraw(SpriteBatch spriteBatch)
+        public void BeginDraw(SpriteBatch spriteBatch, float viewportScale)
         {
-            Camera.Update();
+            Camera.Update(viewportScale);
             spriteBatch.Begin(transformMatrix: Camera.WorldToCamera, sortMode: SpriteSortMode.BackToFront);
         }
 

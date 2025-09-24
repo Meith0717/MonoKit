@@ -51,7 +51,7 @@ namespace GameEngine.Ui
             Drawer(spriteBatch);
             if (Debugger.IsAttached)
             {
-                spriteBatch.DrawRectangle(Bounds, Color.Red, 1);
+                // spriteBatch.DrawRectangle(Bounds, Color.Red, 1);
             }
         }
 

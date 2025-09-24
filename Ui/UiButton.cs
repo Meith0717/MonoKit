@@ -20,9 +20,9 @@ namespace GameEngine.Ui
         public Color TextureDisableColor = Color.DarkGray;
     }
 
-    public class UiButton(string texture) : UiSprite(texture)
+    public class UiButton(string texture, ButtonStyle? style = null) : UiSprite(texture)
     {
-        private readonly ButtonStyle _style = new();
+        private readonly ButtonStyle _style = style == null ? new() : style.Value;
         private UiText _uiText;
         private bool _wasHovered;
 

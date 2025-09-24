@@ -18,7 +18,7 @@ namespace GameEngine.Camera
         public Camera2d(GraphicsDevice graphicsDevice)
         {
             _graphicsDevice = graphicsDevice;
-            Update();
+            Update(1);
         }
 
         public RectangleF Bounds { get; private set; }
@@ -27,10 +27,10 @@ namespace GameEngine.Camera
 
         public Matrix CameraToWorld { get; private set; }
 
-        public void Update()
+        public void Update(float viewportScale)
         {
             var viewport = _graphicsDevice.Viewport.Bounds;
-            WorldToCamera = CreateViewTransformationMatrix(Position, Zoom, viewport.Width, viewport.Height);
+            WorldToCamera = CreateViewTransformationMatrix(Position, Zoom * viewportScale, viewport.Width, viewport.Height);
             CameraToWorld = Matrix.Invert(WorldToCamera);
             Bounds = TransformRectangle(viewport, CameraToWorld);
         }

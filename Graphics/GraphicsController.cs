@@ -13,8 +13,12 @@ namespace GameEngine.Graphics
 
     public class GraphicsController
     {
+        private const float VirtualHeight = 1080;
+        private const float VirtualWidth = 1920;
+
         private int _oldWidth;
         private int _oldHeight;
+        private float _viewportScale;
 
         private readonly Game _game;
         private readonly GraphicsDeviceManager _graphicsDeviceManager;
@@ -32,12 +36,20 @@ namespace GameEngine.Graphics
             {
                 _oldWidth = _window.ClientBounds.Width;
                 _oldHeight = _window.ClientBounds.Height;
+
+                var virtualViewportSize = new SizeF(VirtualWidth, VirtualHeight);
+                var currentViewportSize = _graphicsDeviceManager.GraphicsDevice.Viewport.Bounds.Size;
+                _viewportScale = float.Min(currentViewportSize.X / virtualViewportSize.Width, currentViewportSize.Y / virtualViewportSize.Height);
+
                 _resolutionWasResized = true;
             };
 
             _oldWidth = 800;
             _oldHeight = 400;
+            _viewportScale = 1;
         }
+
+        public float ViewportScale => _viewportScale;
 
         public void ApplyRefreshRate(int value, bool vSync)
         {
@@ -74,8 +86,6 @@ namespace GameEngine.Graphics
         public bool ResolutionWasResized => (_resolutionWasResized, _resolutionWasResized = false).Item1;
 
         private static Size MonitorSize => new(GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width, GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height);
-
-        private static int QualityLevels => 0;
 
         private void DoFullScreen()
         {
