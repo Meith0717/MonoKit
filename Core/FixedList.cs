@@ -15,6 +15,8 @@ namespace GameEngine.Core
 
         public int Capacity => _items.Length;
 
+        public bool Full => Capacity == Count;
+
         public T this[int index]
         {
             get

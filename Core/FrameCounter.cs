@@ -2,14 +2,18 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
+using GameEngine.Content;
 using GameEngine.Extensions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace GameEngine.Core
 {
     public class FrameCounter()
     {
+        private static readonly SpriteFont spriteFont = ContentProvider.Fonts.Get("default_font");
+
         private int _samples;
         private double _summedFps;
 
@@ -49,9 +53,14 @@ namespace GameEngine.Core
             _timeSinceLastSample = 0;
         }
 
-        public void Draw(SpriteBatch spriteBatch)
+        public void Draw(SpriteBatch spriteBatch, Viewport viewport, float viewpointScale)
         {
-            spriteBatch.DrawString("default_font", $"{double.Round(CurrentFramesPerSecond)} fps", new Vector2(1, 1), Color.White, .12f);
+            var scale = .12f;
+            var str = double.Round(CurrentFramesPerSecond).ToString();
+            var strSize = spriteFont.MeasureString(str) * scale * viewpointScale;
+            var ofset = new Vector2(10, -10) * scale * viewpointScale;
+            var position = new Vector2(viewport.Width - strSize.X, 0) - ofset;
+            spriteBatch.DrawString(spriteFont, str, position, Color.White, 0, Vector2.Zero, scale * viewpointScale, SpriteEffects.None, 1);
         }
     }
 }
