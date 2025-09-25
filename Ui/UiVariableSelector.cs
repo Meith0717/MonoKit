@@ -34,15 +34,15 @@ namespace GameEngine.Ui
 
             _arrowL = new UiButton("ui_arrow_l")
             {
-                OnClickAction = DecreaseIndex,
                 Allign = Allign.W,
             };
+            _arrowL.OnClickAction += DecreaseIndex;
 
             _arrowR = new UiButton("ui_arrow_r")
             {
-                OnClickAction = IncreaseIndex,
                 Allign = Allign.E
             };
+            _arrowR.OnClickAction += IncreaseIndex;
 
             _text = new(spriteFont)
             {

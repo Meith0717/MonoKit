@@ -72,9 +72,9 @@ namespace GameEngine.Ui
         }
     }
 
-    public class UiTextButton() : UiElement
+    public class UiTextButton(ButtonStyle? style = null) : UiElement
     {
-        private readonly ButtonStyle _style = new();
+        private readonly ButtonStyle _style = style == null ? new() : style.Value;
         private UiText _uiText;
         private bool _wasHovered;
 

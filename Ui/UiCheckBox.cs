@@ -10,7 +10,7 @@ namespace GameEngine.Ui
 
         public UiCheckBox() : base("ui_toggle_true")
         {
-            OnClickAction = () => State = !State;
+            OnClickAction += () => State = !State;
         }
 
         public bool State

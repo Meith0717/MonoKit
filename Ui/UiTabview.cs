@@ -32,7 +32,7 @@ namespace GameEngine.Ui
                 frame.RelHeight = .9f;
                 frame.Allign = Allign.S;
 
-                button.OnClickAction = () => _activeFrame = frame;
+                button.OnClickAction += () => _activeFrame = frame;
                 button.RelX = i * (1f / tabCount);
                 button.RelY = 0;
                 button.RelWidth = 1f / tabCount;
@@ -46,7 +46,7 @@ namespace GameEngine.Ui
             {
                 button.Update(inputState, Bounds, UiScale);
                 if (_activeFrame == frame)
-                    button.OveideColor(Color.MonoGameOrange);
+                    button.OveideColor(Color.Red);
             }
 
             if (_activeFrame is null) return;
