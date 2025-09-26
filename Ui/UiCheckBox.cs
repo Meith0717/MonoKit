@@ -4,7 +4,7 @@
 
 namespace GameEngine.Ui
 {
-    public sealed class UiCheckBox : UiButton
+    public sealed class UiCheckBox : UiButton.Sprite
     {
         private bool _state;
 

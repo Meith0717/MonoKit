@@ -46,7 +46,9 @@ namespace GameEngine.Graphics
 
             _oldWidth = 800;
             _oldHeight = 400;
-            _viewportScale = 1;
+
+            var virtualViewportSize = new SizeF(VirtualWidth, VirtualHeight);
+            _viewportScale = float.Min(_oldWidth / virtualViewportSize.Width, _oldHeight / virtualViewportSize.Height);
         }
 
         public float ViewportScale => _viewportScale;

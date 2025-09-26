@@ -10,43 +10,70 @@ using System.Collections.Generic;
 
 namespace GameEngine.Ui
 {
-    public sealed class UiTabView(Color color) : UiElement
+    public enum TabAxix : byte { X, Y }
+
+    public sealed class UiTabView<ButtonType>(Color color) : UiElement where ButtonType : UiElement, IButton
     {
-        private readonly List<(UiTextButton, UiFrame)> _tabs = new();
+        private readonly List<(UiFrame, ButtonType, UiFrame)> _tabs = new();
         private readonly Color _color = color;
         private UiFrame _activeFrame;
 
-        public void Add(string tabDescription, UiFrame tabFrame)
-            => _tabs.Add((new UiTextButton() { Text = new("default_font", tabDescription) { Scale = .25f, Allign = Allign.Center, HSpace = 10 } }, tabFrame));
+        public void Add(ButtonType button, UiFrame tabFrame)
+        {
+            var buttonFrame = new UiFrame() { Color = Color.Transparent };
+            buttonFrame.Add(button);
+            button.OnClickAction += () => _activeFrame = tabFrame;
 
-        public void Initialize()
+            _tabs.Add((buttonFrame, button, tabFrame));
+        }
+
+        public void Initialize(TabAxix axix, float tabButtonRatio)
         {
             var tabCount = _tabs.Count;
 
-            for (var i = 0; i < _tabs.Count; i++)
+            if (axix == TabAxix.Y)
             {
-                var (button, frame) = _tabs[i];
-                _activeFrame ??= frame;
+                for (var i = 0; i < _tabs.Count; i++)
+                {
+                    var (buttonFrame, _, frame) = _tabs[i];
+                    _activeFrame ??= frame;
 
-                frame.RelWidth = 1f;
-                frame.RelHeight = .9f;
-                frame.Allign = Allign.S;
+                    frame.RelWidth = 1f - tabButtonRatio;
+                    frame.RelHeight = 1f;
+                    frame.Allign = Allign.E;
 
-                button.OnClickAction += () => _activeFrame = frame;
-                button.RelX = i * (1f / tabCount);
-                button.RelY = 0;
-                button.RelWidth = 1f / tabCount;
-                button.RelHeight = .1f;
+                    buttonFrame.RelX = 0;
+                    buttonFrame.RelY = i * (1f / 10);
+                    buttonFrame.RelWidth = tabButtonRatio;
+                    buttonFrame.RelHeight = 1f / 10;
+                }
+            }
+            else if (axix == TabAxix.X)
+            {
+                for (var i = 0; i < _tabs.Count; i++)
+                {
+                    var (buttonFrame, _, frame) = _tabs[i];
+                    _activeFrame ??= frame;
+
+                    frame.RelWidth = 1f;
+                    frame.RelHeight = 1f - tabButtonRatio;
+                    frame.Allign = Allign.S;
+
+                    buttonFrame.RelX = i * (1f / tabCount);
+                    buttonFrame.RelY = 0;
+                    buttonFrame.RelWidth = 1f / tabCount;
+                    buttonFrame.RelHeight = tabButtonRatio;
+                }
             }
         }
 
         protected override void Updater(InputState inputState)
         {
-            foreach (var (button, frame) in _tabs)
+            foreach (var (buttonFrame, button, frame) in _tabs)
             {
-                button.Update(inputState, Bounds, UiScale);
+                buttonFrame.Update(inputState, Bounds, UiScale);
                 if (_activeFrame == frame)
-                    button.OveideColor(Color.Red);
+                    button.OveideColor(Color.Red, Color.Red);
             }
 
             if (_activeFrame is null) return;
@@ -58,8 +85,8 @@ namespace GameEngine.Ui
             spriteBatch.FillRectangle(Bounds, _color);
             _activeFrame?.Draw(spriteBatch);
 
-            foreach (var (button, _) in _tabs)
-                button.Draw(spriteBatch);
+            foreach (var (buttonFrame, _, _) in _tabs)
+                buttonFrame.Draw(spriteBatch);
 
         }
 
@@ -67,9 +94,9 @@ namespace GameEngine.Ui
         {
             base.ApplyScale(root, uiScale);
 
-            foreach (var (button, frame) in _tabs)
+            foreach (var (buttonFrame, _, frame) in _tabs)
             {
-                button.ApplyScale(Bounds, uiScale);
+                buttonFrame.ApplyScale(Bounds, uiScale);
                 frame.ApplyScale(Bounds, uiScale);
             }
         }

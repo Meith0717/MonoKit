@@ -11,8 +11,8 @@ namespace GameEngine.Ui
 {
     public sealed class UiVariableSelector<T> : UiElement
     {
-        private readonly UiButton _arrowL;
-        private readonly UiButton _arrowR;
+        private readonly UiButton.Sprite _arrowL;
+        private readonly UiButton.Sprite _arrowR;
         private readonly UiText _text;
         private readonly List<T> _items;
         private int _selectedIndex;
@@ -32,13 +32,13 @@ namespace GameEngine.Ui
         {
             _items = [.. items];
 
-            _arrowL = new UiButton("ui_arrow_l")
+            _arrowL = new UiButton.Sprite("ui_arrow_l")
             {
                 Allign = Allign.W,
             };
             _arrowL.OnClickAction += DecreaseIndex;
 
-            _arrowR = new UiButton("ui_arrow_r")
+            _arrowR = new UiButton.Sprite("ui_arrow_r")
             {
                 Allign = Allign.E
             };
