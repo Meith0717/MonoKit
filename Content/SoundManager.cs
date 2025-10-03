@@ -48,7 +48,7 @@ namespace GameEngine.Content
         public void PlaySound(string soundId, float volume = 1f, float pan = 0f, bool loop = false, bool interpup = true)
         {
             if (!_soundEffectInstances.TryGetValue(soundId, out var soundInstances))
-                throw new KeyNotFoundException();
+                return;
 
             volume *= _volume;
             pan = float.Clamp(pan, -1, 1);

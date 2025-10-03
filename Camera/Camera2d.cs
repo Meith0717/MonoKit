@@ -2,9 +2,11 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
+using GameEngine.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
+using System.Collections.Generic;
 
 namespace GameEngine.Camera
 {
@@ -18,7 +20,7 @@ namespace GameEngine.Camera
         public Camera2d(GraphicsDevice graphicsDevice)
         {
             _graphicsDevice = graphicsDevice;
-            Update(1);
+            UpdateTransformation(1);
         }
 
         public RectangleF Bounds { get; private set; }
@@ -27,7 +29,7 @@ namespace GameEngine.Camera
 
         public Matrix CameraToWorld { get; private set; }
 
-        public void Update(float viewportScale)
+        public void UpdateTransformation(float viewportScale)
         {
             var viewport = _graphicsDevice.Viewport.Bounds;
             WorldToCamera = CreateViewTransformationMatrix(Position, Zoom * viewportScale, viewport.Width, viewport.Height);
