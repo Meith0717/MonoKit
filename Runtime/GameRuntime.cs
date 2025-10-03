@@ -17,13 +17,13 @@ namespace GameEngine.Runtime
 {
     public class GameRuntime
     {
-        public readonly RuntimeServiceContainer Services = new();
-        public readonly CameraMover CameraMover;
         public readonly Camera2d Camera;
+        public readonly CameraMover CameraMover;
+        public readonly RuntimeServiceContainer Services = new();
 
         private readonly SpatialHashing _spatialHashing;
         private readonly Renderer _renderer = new();
-        private HashSet<GameObject> _gameObjects = new();
+        private List<GameObject> _gameObjects = new();
 
         public Vector2 WorldMousePosition { get; private set; }
 
@@ -33,32 +33,33 @@ namespace GameEngine.Runtime
         public GameRuntime(GraphicsDevice graphicsDevice, int spatialHashingCellSize)
         {
             Camera = new(graphicsDevice);
+            CameraMover = new(Camera);
+
             _spatialHashing = new(spatialHashingCellSize);
 
-            CameraMover = new(Camera);
             Services.AddService(this);
             Services.AddService(_spatialHashing);
             Services.AddService(Camera);
         }
 
-        public void Initialize(HashSet<GameObject> gameObjects)
+        public void Initialize(List<GameObject> gameObjects)
         {
             _gameObjects = gameObjects;
             _gameObjects.AsParallel()
                 .ForAll(_spatialHashing.Add);
         }
 
-        public void AddGameObject(GameObject gameObject)
+        public void Add(GameObject gameObject)
         {
             gameObject.Initialize(Services);
             _gameObjects.Add(gameObject);
             _spatialHashing.Add(gameObject);
         }
 
-        public void Update(GameTime gameTime, InputState inputState)
+        public void Update(double elapsedMilliseconds, InputState inputState)
         {
-            UpdateGameObjects(gameTime.ElapsedGameTime.TotalMilliseconds);
-            CameraMover.Update(gameTime.ElapsedGameTime.TotalMilliseconds);
+            UpdateGameObjects(elapsedMilliseconds);
+            CameraMover.Update(elapsedMilliseconds);
             _spatialHashing.Rearrange();
             _renderer.CullingObjects(Camera.Bounds, _spatialHashing);
 
@@ -90,22 +91,20 @@ namespace GameEngine.Runtime
 
         private void UpdateGameObjects(double elapsedMs)
         {
-            if (_gameObjects is null) return;
-            if (_gameObjects.Count == 0) return;
+            if (_gameObjects is null || _gameObjects.Count == 0) return;
 
-            var spatialHashing = Services.Get<SpatialHashing>();
-
-            var objects = _gameObjects.ToArray();
-            foreach (var obj in objects)
+            for (var i = 0; i < _gameObjects.Count; i++)
             {
-                if (obj == null) continue;
+                var obj = _gameObjects[i];
+
                 obj.Update(elapsedMs, Services);
                 obj.Position += obj.MovingDirection * obj.Velocity * (float)elapsedMs;
 
-                if (!obj.IsDisposed) continue;
-                _gameObjects.Remove(obj);
-                spatialHashing.RemoveObject(obj);
+                if (obj.IsDisposed)
+                    _spatialHashing.RemoveObject(obj);
             }
+
+            _gameObjects.RemoveAll(obj => obj.IsDisposed);
         }
     }
 }

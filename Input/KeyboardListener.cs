@@ -44,7 +44,7 @@ namespace GameEngine.Input
             mKeysKeyEventTypes = new();
         }
 
-        private int Hash(params Keys[] keys)
+        private static int Hash(params Keys[] keys)
         {
             int tmp = 0;
             Array.Sort(keys);
@@ -77,23 +77,13 @@ namespace GameEngine.Input
             }
         }
 
-        public void Listener(ref List<ActionType> actions, out string typedOutput)
+        public void Listener(ref List<ActionType> actions)
         {
-            typedOutput = "";
-
             mPreviousKeysPressed = mCurrentKeysPressed;
             mKeysKeyEventTypes.Clear();
 
             mCurrentKeysPressed = Keyboard.GetState().GetPressedKeys();
             UpdateKeysKeyEventTypes();
-
-            foreach (Keys pressedKey in mCurrentKeysPressed)
-            {
-                typedOutput += GetPressedAlphabet(pressedKey);
-                typedOutput += GetPressedDigs(pressedKey);
-                if (pressedKey == Keys.LeftShift || pressedKey == Keys.RightShift || Keyboard.GetState().CapsLock)
-                    typedOutput = typedOutput.ToUpper();
-            }
 
             if (mActionOnMultiplePressed.TryGetValue(Hash(mCurrentKeysPressed), out ActionType action))
                 foreach (Keys key in mCurrentKeysPressed)
@@ -106,23 +96,6 @@ namespace GameEngine.Input
                 if (!mActionOnHold.TryGetValue(key, out ActionType actionHold)) continue;
                 if (mKeysKeyEventTypes[key] == KeyEventType.OnButtonPressed) actions.Add(actionHold);
             }
-        }
-
-        private string GetPressedAlphabet(Keys pressedKey)
-        {
-            if (mPreviousKeysPressed.Contains(pressedKey)) return "";
-            if (pressedKey == Keys.Space) return " ";
-            if (pressedKey >= Keys.A && pressedKey <= Keys.Z)
-                return ((char)('a' + (pressedKey - Keys.A))).ToString();
-            return "";
-        }
-
-        private string GetPressedDigs(Keys pressedKey)
-        {
-            if (mPreviousKeysPressed.Contains(pressedKey)) return "";
-            if (pressedKey >= Keys.D0 && pressedKey <= Keys.D9)
-                return ((char)('0' + (pressedKey - Keys.D0))).ToString();
-            return "";
         }
     }
 }

@@ -2,6 +2,8 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
+using GameEngine.Core;
+using GameEngine.Graphics;
 using GameEngine.Input;
 using GameEngine.Rendering;
 using Microsoft.Xna.Framework;
@@ -18,7 +20,7 @@ public class ScreenManager(Game game)
     private readonly Game _game = game;
     private readonly GraphicsDevice _graphicsDevice = game.GraphicsDevice;
     private readonly Stack<Screen> _screens = new();
-    private readonly ConcurrentQueue<Action<GameTime, float>> _pendingActions = new();
+    private readonly ConcurrentQueue<Action<double, float>> _pendingActions = new();
 
     private readonly LinkedList<RenderTarget2D> _lowerRenderTargets = new();
     private readonly PostProcessingRunner _postProcessingRunner = new(game.GraphicsDevice);
@@ -58,15 +60,15 @@ public class ScreenManager(Game game)
         }
     }
 
-    public void Update(GameTime gameTime, InputState inputState, float uiScale)
+    public void Update(double elapsedMilliseconds, InputState inputState, float uiScale)
     {
         while (_pendingActions.TryDequeue(out var action))
-            action(gameTime, uiScale);
+            action(elapsedMilliseconds, uiScale);
 
         for (int i = 0; i < _screens.Count; i++)
         {
             var screen = _screens.ElementAt(i);
-            screen.Update(gameTime, inputState, uiScale);
+            screen.Update(elapsedMilliseconds, inputState, uiScale);
             if (!screen.UpdateBelow)
                 break;
         }
@@ -117,10 +119,10 @@ public class ScreenManager(Game game)
         _game.Exit();
     }
 
-    public void OnResolutionChanged(GameTime gameTime, float uiScale)
+    public void OnResolutionChanged(double elapsedMilliseconds, float uiScale)
     {
         foreach (Screen layer in _screens)
-            layer.ApplyResolution(gameTime, uiScale);
+            layer.ApplyResolution(elapsedMilliseconds, uiScale);
         _postProcessingRunner.ApplyResolution(_graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height);
         _lowerRenderTarget?.Dispose();
         _lowerRenderTarget = new(_graphicsDevice,

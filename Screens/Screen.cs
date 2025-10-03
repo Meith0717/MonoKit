@@ -46,14 +46,14 @@ namespace GameEngine.Screens
 
         public virtual void Initialize() {; }
 
-        public virtual void Update(GameTime gameTime, InputState inputState, float uiScale)
+        public virtual void Update(double elapsedMilliseconds, InputState inputState, float uiScale)
         {
             UiRoot.Update(inputState, GraphicsDevice.Viewport.Bounds, uiScale);
         }
 
         public virtual void Draw(SpriteBatch spriteBatch) {; }
 
-        public virtual void ApplyResolution(GameTime gameTime, float uiScale)
+        public virtual void ApplyResolution(double elapsedMilliseconds, float uiScale)
         {
             UiRoot.ApplyScale(GraphicsDevice.Viewport.Bounds, uiScale);
             _renderTarget?.Dispose();

@@ -54,37 +54,24 @@ namespace GameEngine.Input
         OnButtonPressed
     }
 
-    public struct ThumbSticksState
+    public class InputState()
     {
-        public Vector2 LeftThumbSticks = Vector2.Zero;
-        public Vector2 RightThumbSticks = Vector2.Zero;
-        public float LeftTrigger = new();
-        public float RightTrigger = new();
+        public Vector2 MousePosition { get; private set; }
+        private HashSet<ActionType> _actions = new();
 
-        public ThumbSticksState() {; }
-    }
-
-    public struct InputState
-    {
-        public List<ActionType> Actions = new();
-        public Vector2 MousePosition = Vector2.Zero;
-        public string TypedString = "";
-
-        public InputState(List<ActionType> actions, string typedString, Vector2 mousePosition)
+        public void UpdateData(List<ActionType> actionTypes, Vector2 mousePosition)
         {
-            Actions = actions;
-            TypedString = typedString;
+            _actions.Clear();
+            for (int i = 0; i < actionTypes.Count; i++)
+                _actions.Add(actionTypes[i]);
             MousePosition = mousePosition;
         }
 
-        public readonly bool ContainsAction(ActionType action)
-            => Actions.Contains(action);
+        public bool ContainsAction(ActionType action) => _actions.Contains(action);
 
+        public bool HasAction(ActionType action) => _actions.Remove(action);
 
-        public readonly bool HasAction(ActionType action)
-            => Actions.Remove(action);
-
-        public readonly void DoAction(ActionType action, Action function)
+        public void DoAction(ActionType action, Action function)
         {
             if (function is null) return;
             if (HasAction(action)) function();

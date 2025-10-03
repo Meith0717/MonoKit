@@ -9,17 +9,20 @@ namespace GameEngine.Input
 {
     public class InputManager
     {
-        private KeyboardListener _KeyboardListener = new();
-        private MouseListener _MouseListener = new();
+        private readonly KeyboardListener _keyboardListener = new();
+        private readonly MouseListener _mouseListener = new();
+        private readonly InputState _inputState = new();
+        private List<ActionType> _actions = new();
 
         public InputState Update(GameTime gameTime)
         {
-            List<ActionType> actions = new List<ActionType>();
+            _mouseListener.Listen(gameTime, ref _actions, out Vector2 mousePosition);
+            _keyboardListener.Listener(ref _actions);
 
-            _MouseListener.Listen(gameTime, ref actions, out Vector2 mousePosition);
-            _KeyboardListener.Listener(ref actions, out string typedString);
+            _inputState.UpdateData(_actions, mousePosition);
+            _actions.Clear();
 
-            return new(actions, typedString, mousePosition);
+            return _inputState;
         }
     }
 }
