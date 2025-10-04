@@ -140,18 +140,18 @@ namespace GameEngine.Gameplay
             var gameObjects = new List<GameObject>();
             GetObjectsInBucket(lookUpPosition, ref gameObjects);
             foreach (GameObject obj in gameObjects)
-                spriteBatch.DrawLine(lookUpPosition, obj.Position, Color.White, 2f / cameraZoom, 0.9f);
+                spriteBatch.DrawLine(lookUpPosition, obj.Position, Color.White, 1f / cameraZoom, 0.9f);
             gameObjects.Clear();
             spriteBatch.DrawRectangleF(rectangle, Color.Red, cameraZoom);
             GetObjectsInRectangle(rectangle, ref gameObjects);
             foreach (GameObject obj in gameObjects)
-                spriteBatch.DrawLine(lookUpPosition, obj.Position, Color.Red, 2f / cameraZoom, 0.99f);
+                spriteBatch.DrawLine(lookUpPosition, obj.Position, Color.Red, 1f / cameraZoom, 0.99f);
 
             gameObjects.Clear();
             spriteBatch.DrawCircleF(lookUpPosition, radius, Color.Orange, cameraZoom);
             GetObjectsInRadius(lookUpPosition, radius, ref gameObjects);
             foreach (GameObject obj in gameObjects)
-                spriteBatch.DrawLine(lookUpPosition, obj.Position, Color.Orange, 2f / cameraZoom, 0.999f);
+                spriteBatch.DrawLine(lookUpPosition, obj.Position, Color.Orange, 1f / cameraZoom, 0.999f);
         }
     }
 }

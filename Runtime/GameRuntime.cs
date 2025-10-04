@@ -3,7 +3,6 @@
 // All rights reserved.
 
 using GameEngine.Camera;
-using GameEngine.Content;
 using GameEngine.Gameplay;
 using GameEngine.Input;
 using GameEngine.Rendering;
@@ -77,16 +76,11 @@ namespace GameEngine.Runtime
         public void DrawGameObjects(SpriteBatch spriteBatch)
         {
             _renderer.Draw(spriteBatch, Camera, Services);
-            if (Debugger.IsAttached)
-            {
-                var font = ContentProvider.Fonts.Get("default_font");
-                _spatialHashing.Draw(spriteBatch, Camera.Position, Camera.Zoom);
-                var centerPosition = Vector2.Floor(Camera.Position);
-                spriteBatch.DrawString(font, $"{centerPosition.X}, {centerPosition.Y}", Camera.Position + new Vector2(10, -15) / Camera.Zoom, Color.White, 0, Vector2.Zero, 0.1f / Camera.Zoom, SpriteEffects.None, 1);
-                spriteBatch.DrawString(font, $"{Camera.Zoom}", Camera.Position + new Vector2(10, -35) / Camera.Zoom, Color.White, 0, Vector2.Zero, 0.1f / Camera.Zoom, SpriteEffects.None, 1);
-
-                spriteBatch.Draw(ContentProvider.Textures.Get("crosshair"), Camera.Position, null, Color.White, 0, new Vector2(512 / 2), .05f / Camera.Zoom, SpriteEffects.None, 1);
-            }
+# if DEBUG
+            var cameraPos = Vector2.Floor(Camera.Position);
+            Debug.WriteLine($"Camera Pos: {cameraPos}\nCamera Zom: {Camera.Zoom}");
+            _spatialHashing.Draw(spriteBatch, cameraPos, Camera.Zoom);
+#endif
         }
 
         private void UpdateGameObjects(double elapsedMs)

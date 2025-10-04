@@ -3,10 +3,8 @@
 // All rights reserved.
 
 using GameEngine.Content;
-using GameEngine.Extensions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace GameEngine.Core
 {

@@ -2,8 +2,6 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
-using GameEngine.Core;
-using GameEngine.Graphics;
 using GameEngine.Input;
 using GameEngine.Rendering;
 using Microsoft.Xna.Framework;
@@ -85,7 +83,7 @@ public class ScreenManager(Game game)
         var topScreenTarget = _screens.First().RenderTarget(spriteBatch);
 
         int i = 0;
-        while (_screens.ElementAt(i).DrawBelow) 
+        while (_screens.ElementAt(i).DrawBelow)
             i++;
 
         for (var j = i; j > 0; j--)

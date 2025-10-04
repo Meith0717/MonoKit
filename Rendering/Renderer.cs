@@ -11,7 +11,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace GameEngine.Rendering
 {
@@ -27,19 +26,19 @@ namespace GameEngine.Rendering
 
         public void Draw(SpriteBatch spriteBatch, Camera2d camera, RuntimeServiceContainer serviceContainer)
         {
-            var font = ContentProvider.Fonts.Get("default_font");
 
             foreach (GameObject obj in _objects)
-            {
-                if (Debugger.IsAttached)
-                {
-                    spriteBatch.DrawCircleF(obj.BoundBox.Position, obj.BoundBox.Radius, Color.Purple, .5f * camera.Zoom);
-                    spriteBatch.DrawLine(obj.Position, obj.Position.InDirection(obj.MovingDirection, obj.Velocity * 500), Color.Blue, 2f / camera.Zoom, 1);
-                    spriteBatch.DrawString(font, $"{obj.GetType().Name}", obj.BoundBox.ToRectangleF().TopLeft, Color.Purple, 0, Vector2.Zero, 0.2f, SpriteEffects.None, 1);
-                }
-
                 obj.Draw(spriteBatch, serviceContainer);
+
+#if DEBUG
+            var font = ContentProvider.Fonts.Get("default_font");
+            foreach (GameObject obj in _objects)
+            {
+                spriteBatch.DrawCircleF(obj.BoundBox.Position, obj.BoundBox.Radius, Color.Purple, .5f * camera.Zoom);
+                spriteBatch.DrawLine(obj.Position, obj.Position.InDirection(obj.MovingDirection, obj.Velocity * 500), Color.Blue, 2f / camera.Zoom, 1);
+                spriteBatch.DrawString(font, $"{obj.GetType().Name}", obj.BoundBox.ToRectangleF().TopLeft, Color.Purple, 0, Vector2.Zero, 0.2f, SpriteEffects.None, 1);
             }
+#endif
         }
     }
 }

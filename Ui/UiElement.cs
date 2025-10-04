@@ -7,7 +7,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
 using System;
-using System.Diagnostics;
 
 namespace GameEngine.Ui
 {
@@ -49,10 +48,9 @@ namespace GameEngine.Ui
         public void Draw(SpriteBatch spriteBatch)
         {
             Drawer(spriteBatch);
-            if (Debugger.IsAttached)
-            {
-                // spriteBatch.DrawRectangle(Bounds, Color.Red, 1);
-            }
+# if DEBUG
+            spriteBatch.DrawRectangle(Bounds, Color.DeepSkyBlue, 1);
+#endif
         }
 
         public virtual void ApplyScale(Rectangle root, float uiScale)
