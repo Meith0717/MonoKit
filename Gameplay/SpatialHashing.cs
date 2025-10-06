@@ -35,7 +35,7 @@ namespace GameEngine.Gameplay
             }
         }
 
-        public void RemoveObject(GameObject obj)
+        public void Remove(GameObject obj)
         {
             var hashes = _hashes[obj];
             foreach (var hash in hashes)
@@ -57,7 +57,7 @@ namespace GameEngine.Gameplay
 
             foreach (var obj in movingObjects)
             {
-                RemoveObject(obj);
+                Remove(obj);
                 Add(obj);
             }
         }

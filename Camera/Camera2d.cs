@@ -32,7 +32,7 @@ namespace GameEngine.Camera
             var viewport = _graphicsDevice.Viewport.Bounds;
             WorldToCamera = CreateViewTransformationMatrix(Position, Zoom * viewportScale, viewport.Width, viewport.Height);
             CameraToWorld = Matrix.Invert(WorldToCamera);
-            Bounds = TransformRectangle(viewport, CameraToWorld);
+            Bounds = TransformViewport(viewport, CameraToWorld);
         }
 
         private static Matrix CreateViewTransformationMatrix(Vector2 cameraPosition, float cameraZoom, int screenWidth, int screenHeight)
@@ -44,7 +44,7 @@ namespace GameEngine.Camera
             return translationMatrix * scaleMatrix * screenCenterMatrix;
         }
 
-        private static RectangleF TransformRectangle(Rectangle screenRect, Matrix cameraToWorld)
+        private static RectangleF TransformViewport(Rectangle screenRect, Matrix cameraToWorld)
         {
             Vector2 topLeft = Vector2.Transform(screenRect.Location.ToVector2(), cameraToWorld);
             Vector2 bottomRight = Vector2.Transform(new Vector2(screenRect.Right, screenRect.Bottom), cameraToWorld);

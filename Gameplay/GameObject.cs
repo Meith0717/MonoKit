@@ -15,8 +15,8 @@ namespace GameEngine.Gameplay
     [Serializable]
     public abstract class GameObject : IDisposable
     {
-        [JsonProperty] private float _maxTextureSize;
         [JsonProperty] private CircleF _boundBox = new();
+        [JsonProperty] private readonly float _maxTextureSize;
 
         // Physic Stuff
         [JsonIgnore] public CircleF BoundBox => _boundBox;
