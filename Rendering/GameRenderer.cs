@@ -12,7 +12,6 @@ using GameEngine.Gameplay;
 using GameEngine.Runtime;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
-using System.Data.SqlTypes;
 
 namespace GameEngine.Rendering
 {
@@ -37,10 +36,10 @@ namespace GameEngine.Rendering
         }
 
         public void DrawTextures(SpriteBatch spriteBatch)
-        {   
+        {
             _gameObjRenderer?.DrawTextures(spriteBatch, _services, _culledObjects);
 
-            #if DEBUG
+#if DEBUG
             _spatialHashing?.Draw(spriteBatch, _camera.Position, _camera.Zoom);
             for (int i = 0; i < _culledObjects.Count; i++)
             {
@@ -48,7 +47,7 @@ namespace GameEngine.Rendering
                 spriteBatch.DrawRectangle(obj.BoundBox.ToRectangleF(), Color.Purple, 2 / _camera.Zoom);
                 spriteBatch.DrawLine(obj.Position, obj.Position.InDirection(obj.MovingDirection, obj.Velocity * 500), Color.Blue, 1 / _camera.Zoom, 1);
             }
-            #endif
+#endif
         }
 
         public void DrawShaders(SpriteBatch spriteBatch)

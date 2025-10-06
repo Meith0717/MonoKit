@@ -2,12 +2,14 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
+# if DEBUG
+using System.Diagnostics;
+#endif
 using GameEngine.Camera;
 using GameEngine.Gameplay;
 using GameEngine.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System.Diagnostics;
 
 namespace GameEngine.Runtime
 {
