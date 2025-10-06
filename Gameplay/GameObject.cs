@@ -62,7 +62,5 @@ namespace GameEngine.Gameplay
         public abstract void Initialize(Runtime.RuntimeContainer runtimeServices);
 
         public abstract void Update(double elapsedMs, Runtime.RuntimeContainer runtimeServices);
-
-        public abstract void Draw(SpriteBatch spriteBatch, Runtime.RuntimeContainer runtimeServices);
     }
 }

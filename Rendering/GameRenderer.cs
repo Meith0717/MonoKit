@@ -12,11 +12,13 @@ using GameEngine.Gameplay;
 using GameEngine.Runtime;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 
 namespace GameEngine.Rendering
 {
-    public class GameRenderer(RuntimeContainer services)
+    public class GameRenderer(RuntimeContainer services, IGameObjRenderer renderer)
     {
+        private readonly IGameObjRenderer _gameObjRenderer = renderer;
         private readonly RuntimeContainer _services = services;
         private readonly Camera2d _camera = services.Get<Camera2d>();
         private readonly SpatialHashing _spatialHashing = services.Get<SpatialHashing>();
@@ -34,13 +36,12 @@ namespace GameEngine.Rendering
             spriteBatch.Begin(transformMatrix: _camera.WorldToCamera, sortMode: SpriteSortMode.BackToFront);
         }
 
-        public void DrawTextures(SpriteBatch spriteBatch, float viewportScale = 1)
-        {
-            for (int i = 0; i < _culledObjects.Count; i++)
-                _culledObjects[i].Draw(spriteBatch, _services);
+        public void DrawTextures(SpriteBatch spriteBatch)
+        {   
+            _gameObjRenderer?.DrawTextures(spriteBatch, _services, _culledObjects);
 
             #if DEBUG
-            _spatialHashing.Draw(spriteBatch, _camera.Position, _camera.Zoom);
+            _spatialHashing?.Draw(spriteBatch, _camera.Position, _camera.Zoom);
             for (int i = 0; i < _culledObjects.Count; i++)
             {
                 var obj = _culledObjects[i];
@@ -49,5 +50,17 @@ namespace GameEngine.Rendering
             }
             #endif
         }
+
+        public void DrawShaders(SpriteBatch spriteBatch)
+        {
+            _gameObjRenderer?.DrawShaders(spriteBatch, _services, _culledObjects);
+        }
+    }
+
+    public interface IGameObjRenderer
+    {
+        public void DrawTextures(SpriteBatch spriteBatch, RuntimeContainer services, IReadOnlyList<GameObject> gameObjects);
+
+        public void DrawShaders(SpriteBatch spriteBatch, RuntimeContainer services, IReadOnlyList<GameObject> gameObjects);
     }
 }
