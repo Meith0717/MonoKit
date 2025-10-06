@@ -68,7 +68,7 @@ namespace GameEngine.Gameplay
         public (int, int) Hash(Vector2 vector)
             => ((int)float.Floor(vector.X / CellSize), (int)float.Floor(vector.Y / CellSize));
 
-        public void GetObjectsInRadius<T>(Vector2 position, float radius, ref List<T> objectsInRadius, bool sortedByDistance = true) where T : GameObject
+        public void GetObjectsInRadius<T>(Vector2 position, float radius, List<T> objectsInRadius, bool sortedByDistance = true) where T : GameObject
         {
             var startX = (int)MathF.Floor((position.X - radius) / CellSize);
             var endX = (int)MathF.Ceiling((position.X + radius) / CellSize);
@@ -90,7 +90,7 @@ namespace GameEngine.Gameplay
             objectsInRadius.AsParallel().OrderBy(obj => Vector2.Distance(position, obj.Position) - obj.BoundBox.Radius);
         }
 
-        public void GetObjectsInRectangle<T>(RectangleF searchRectangle, ref List<T> objectsInRectangle) where T : GameObject
+        public void GetObjectsInRectangle<T>(RectangleF searchRectangle, List<T> objectsInRectangle) where T : GameObject
         {
             int startX = (int)Math.Floor(searchRectangle.Left / CellSize);
             int endX = (int)Math.Ceiling(searchRectangle.Right / CellSize);
@@ -108,7 +108,7 @@ namespace GameEngine.Gameplay
             }
         }
 
-        public void GetObjectsInBucket<T>(Vector2 position, ref List<T> objectsInBucket) where T : GameObject
+        public void GetObjectsInBucket<T>(Vector2 position, List<T> objectsInBucket) where T : GameObject
         {
             var hash = Hash(position);
             if (!_grids.TryGetValue(hash, out var bucket)) return;
@@ -118,14 +118,14 @@ namespace GameEngine.Gameplay
         public List<T> GetObjectsInRadius<T>(Vector2 position, float radius, bool sortedByDistance = true) where T : GameObject
         {
             List<T> objectsInRadius = new List<T>();
-            GetObjectsInRadius(position, radius, ref objectsInRadius, sortedByDistance);
+            GetObjectsInRadius(position, radius, objectsInRadius, sortedByDistance);
             return objectsInRadius;
         }
 
         public List<T> GetObjectsInRectangle<T>(RectangleF searchRectangle) where T : GameObject
         {
             List<T> objectsInRadius = new();
-            GetObjectsInRectangle(searchRectangle, ref objectsInRadius);
+            GetObjectsInRectangle(searchRectangle, objectsInRadius);
             return objectsInRadius;
         }
 
@@ -138,18 +138,18 @@ namespace GameEngine.Gameplay
             int radius2 = radius * 2;
             RectangleF rectangle = new(lookUpPosition - new Vector2(radius), new(radius2, radius2));
             var gameObjects = new List<GameObject>();
-            GetObjectsInBucket(lookUpPosition, ref gameObjects);
+            GetObjectsInBucket(lookUpPosition, gameObjects);
             foreach (GameObject obj in gameObjects)
                 spriteBatch.DrawLine(lookUpPosition, obj.Position, Color.White, 1f / cameraZoom, 0.9f);
             gameObjects.Clear();
             spriteBatch.DrawRectangleF(rectangle, Color.Red, cameraZoom);
-            GetObjectsInRectangle(rectangle, ref gameObjects);
+            GetObjectsInRectangle(rectangle, gameObjects);
             foreach (GameObject obj in gameObjects)
                 spriteBatch.DrawLine(lookUpPosition, obj.Position, Color.Red, 1f / cameraZoom, 0.99f);
 
             gameObjects.Clear();
             spriteBatch.DrawCircleF(lookUpPosition, radius, Color.Orange, cameraZoom);
-            GetObjectsInRadius(lookUpPosition, radius, ref gameObjects);
+            GetObjectsInRadius(lookUpPosition, radius, gameObjects);
             foreach (GameObject obj in gameObjects)
                 spriteBatch.DrawLine(lookUpPosition, obj.Position, Color.Orange, 1f / cameraZoom, 0.999f);
         }

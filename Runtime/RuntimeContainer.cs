@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace GameEngine.Runtime
 {
-    public class RuntimeServiceContainer
+    public class RuntimeContainer
     {
         private readonly Dictionary<Type, object> _services = new();
 

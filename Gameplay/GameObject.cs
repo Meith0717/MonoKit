@@ -59,10 +59,10 @@ namespace GameEngine.Gameplay
             GC.SuppressFinalize(this);
         }
 
-        public abstract void Initialize(Runtime.RuntimeServiceContainer runtimeServices);
+        public abstract void Initialize(Runtime.RuntimeContainer runtimeServices);
 
-        public abstract void Update(double elapsedMs, Runtime.RuntimeServiceContainer runtimeServices);
+        public abstract void Update(double elapsedMs, Runtime.RuntimeContainer runtimeServices);
 
-        public abstract void Draw(SpriteBatch spriteBatch, Runtime.RuntimeServiceContainer runtimeServices);
+        public abstract void Draw(SpriteBatch spriteBatch, Runtime.RuntimeContainer runtimeServices);
     }
 }

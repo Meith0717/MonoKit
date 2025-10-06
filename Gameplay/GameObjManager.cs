@@ -7,10 +7,10 @@ using System.Collections.Generic;
 
 namespace GameEngine.Gameplay
 {
-    public class GameObjManager(SpatialHashing spatialHashing, RuntimeServiceContainer services)
+    public class GameObjManager(SpatialHashing spatialHashing, RuntimeContainer services)
     {
         private readonly SpatialHashing _spatialHashing = spatialHashing;
-        private readonly RuntimeServiceContainer _services = services;
+        private readonly RuntimeContainer _services = services;
         private readonly List<GameObject> _gameObjects = new();
 
         public IReadOnlyList<GameObject> GameObjects => _gameObjects.AsReadOnly();

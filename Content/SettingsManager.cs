@@ -6,7 +6,7 @@ using GameEngine.Graphics;
 using Newtonsoft.Json;
 using System;
 
-namespace GameEngine.Runtime
+namespace GameEngine.Content
 {
     [Serializable]
     public class SettingsManager

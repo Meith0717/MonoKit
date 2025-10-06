@@ -85,7 +85,7 @@ namespace GameEngine.Graphics
             _resolutionWasResized = true;
         }
 
-        public bool ResolutionWasResized => (_resolutionWasResized, _resolutionWasResized = false).Item1;
+        public bool ResolutionWasResized => (_resolutionWasResized, _resolutionWasResized = false)._resolutionWasResized;
 
         private static Size MonitorSize => new(GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width, GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height);
 
