@@ -28,17 +28,17 @@ namespace GameEngine.Ui
             get => _items[_selectedIndex];
         }
 
-        public UiVariableSelector(string spriteFont, T[] items)
+        public UiVariableSelector(string leftButton, string rightButton, string spriteFont, T[] items)
         {
             _items = [.. items];
 
-            _arrowL = new UiButton.Sprite("ui_arrow_l")
+            _arrowL = new UiButton.Sprite(leftButton)
             {
                 Allign = Allign.W,
             };
             _arrowL.OnClickAction += DecreaseIndex;
 
-            _arrowR = new UiButton.Sprite("ui_arrow_r")
+            _arrowR = new UiButton.Sprite(rightButton)
             {
                 Allign = Allign.E
             };

@@ -52,7 +52,7 @@ namespace GameEngine.Rendering
 
         public void DrawShaders(SpriteBatch spriteBatch)
         {
-            _gameObjRenderer?.DrawShaders(spriteBatch, _services, _culledObjects);
+            _gameObjRenderer?.DrawShaders(spriteBatch, _camera.WorldToCamera, _services, _culledObjects);
         }
     }
 
@@ -60,6 +60,6 @@ namespace GameEngine.Rendering
     {
         public void DrawTextures(SpriteBatch spriteBatch, RuntimeContainer services, IReadOnlyList<GameObject> gameObjects);
 
-        public void DrawShaders(SpriteBatch spriteBatch, RuntimeContainer services, IReadOnlyList<GameObject> gameObjects);
+        public void DrawShaders(SpriteBatch spriteBatch, Matrix Transformation, RuntimeContainer services, IReadOnlyList<GameObject> gameObjects);
     }
 }
