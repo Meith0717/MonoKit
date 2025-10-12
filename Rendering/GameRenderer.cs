@@ -50,7 +50,7 @@ namespace GameEngine.Rendering
 #endif
         }
 
-        public void DrawShaders(SpriteBatch spriteBatch)
+        public void DrawEffects(SpriteBatch spriteBatch)
         {
             _gameObjRenderer?.DrawShaders(spriteBatch, _camera.WorldToCamera, _services, _culledObjects);
         }
