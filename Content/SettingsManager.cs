@@ -12,7 +12,7 @@ namespace GameEngine.Content
     public class SettingsManager
     {
         [JsonProperty]
-        private SettingsState _settings = new(1, .9f, 1, 60, true, false, WindowMode.Windowed, .9f, 1);
+        private SettingsState _settings = new(1, .9f, 1, 60, true, false, WindowMode.Windowed, .9f, 1, .5f);
 
         public SettingsState GetSettings() => _settings;
 
@@ -20,7 +20,7 @@ namespace GameEngine.Content
     }
 
     [Serializable]
-    public readonly struct SettingsState(float masterVol, float musicVol, float sfxVol, int refRate, bool showFPS, bool vSync, WindowMode windowMode, float uiScale, float bloomEffect)
+    public readonly struct SettingsState(float masterVol, float musicVol, float sfxVol, int refRate, bool showFPS, bool vSync, WindowMode windowMode, float uiScale, float bloomEffect, float bloomThreshold)
     {
         [JsonProperty] public readonly float MasterVolume = masterVol;
         [JsonProperty] public readonly float MusicVolume = musicVol;
@@ -30,6 +30,7 @@ namespace GameEngine.Content
         [JsonProperty] public readonly bool VSync = vSync;
         [JsonProperty] public readonly WindowMode WindowMode = windowMode;
         [JsonProperty] public readonly float UiScale = uiScale;
-        [JsonProperty] public readonly float BloomIntensity = bloomEffect;
+        [JsonProperty] public readonly float BloomIntensity = bloomEffect; 
+        [JsonProperty] public readonly float BloomThreshold = bloomThreshold;
     }
 }

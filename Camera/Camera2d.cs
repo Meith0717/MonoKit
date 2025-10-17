@@ -2,40 +2,60 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
+using GameEngine.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
+using System.Collections.Generic;
 
 namespace GameEngine.Camera
 {
-    public class Camera2d
+    public interface ICamera2dBehaviour
+    {
+        public void Initialize(Camera2D owner);
+        public void Update(Camera2D owner, InputState inputState, double elapsedGameTime);
+    }
+
+    public class Camera2D
     {
         private readonly GraphicsDevice _graphicsDevice;
+        private readonly List<ICamera2dBehaviour> _behaviours = new();
 
         public Vector2 Position = Vector2.Zero;
+        public float ViewportZoom = 1;
         public float Zoom = 1;
 
-        public Camera2d(GraphicsDevice graphicsDevice)
+        public RectangleF Bounds { get; private set; }
+        public Matrix View { get; private set; }
+        public Matrix ViewInvert { get; private set; }
+
+        public Camera2D(GraphicsDevice graphicsDevice)
         {
             _graphicsDevice = graphicsDevice;
-            UpdateTransformation(1);
+            UpdateView(1);
         }
 
-        public RectangleF Bounds { get; private set; }
+        public void Update(double elapsedGameTime, InputState inputState)
+        {
+            _behaviours.ForEach(behaviour => behaviour.Update(this, inputState, elapsedGameTime));
+        }
 
-        public Matrix WorldToCamera { get; private set; }
-
-        public Matrix CameraToWorld { get; private set; }
-
-        public void UpdateTransformation(float viewportScale)
+        public void UpdateView(float viewportScale)
         {
             var viewport = _graphicsDevice.Viewport.Bounds;
-            WorldToCamera = CreateViewTransformationMatrix(Position, Zoom * viewportScale, viewport.Width, viewport.Height);
-            CameraToWorld = Matrix.Invert(WorldToCamera);
-            Bounds = TransformViewport(viewport, CameraToWorld);
+            ViewportZoom = viewportScale;
+            View = CreateView(Position, Zoom * ViewportZoom, viewport.Width, viewport.Height);
+            ViewInvert = Matrix.Invert(View);
+            Bounds = TransformViewport(viewport, ViewInvert);
         }
 
-        private static Matrix CreateViewTransformationMatrix(Vector2 cameraPosition, float cameraZoom, int screenWidth, int screenHeight)
+        public void AddBehaviour(ICamera2dBehaviour behaviour)
+        {
+            behaviour.Initialize(this);
+            _behaviours.Add(behaviour);
+        }
+
+        private static Matrix CreateView(Vector2 cameraPosition, float cameraZoom, int screenWidth, int screenHeight)
         {
             Matrix translationMatrix = Matrix.CreateTranslation(new Vector3(-cameraPosition.X, -cameraPosition.Y, 0));
             Matrix scaleMatrix = Matrix.CreateScale(cameraZoom, cameraZoom, 1);
