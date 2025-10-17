@@ -26,15 +26,15 @@ namespace GameEngine.Input
         private bool RightMouseButtonJustReleased => _currentState.RightButton == ButtonState.Released && _previousState.RightButton == ButtonState.Pressed;
         private bool MidMouseButtonJustReleased => _currentState.MiddleButton == ButtonState.Released && _previousState.MiddleButton == ButtonState.Pressed;
 
-        public void Listen(GameTime gameTime, ref List<ActionType> actions, out Vector2 mousePosition)
+        public void Listen(double elapsedMilliseconds, ref List<ActionType> actions, out Vector2 mousePosition)
         {
             _previousState = _currentState;
             _currentState = Mouse.GetState();
             mousePosition = _currentState.Position.ToVector2();
 
             // Track the time the Keys are Pressed
-            _leftCounter += LeftMouseButtonPressed ? gameTime.ElapsedGameTime.TotalMilliseconds : 0;
-            _rightCounter += RightMouseButtonPressed ? gameTime.ElapsedGameTime.TotalMilliseconds : 0;
+            _leftCounter += LeftMouseButtonPressed ? elapsedMilliseconds : 0;
+            _rightCounter += RightMouseButtonPressed ? elapsedMilliseconds : 0;
 
             // Check if Mouse Key was Hold or Clicked
             if (_leftCounter > _clickHoldTeshholld && !LeftMouseButtonJustReleased)

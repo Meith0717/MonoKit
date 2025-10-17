@@ -25,21 +25,16 @@ namespace GameEngine.Core
 
         private double _timeSinceLastSample;
 
-        private GameTime _gameTime;
-
-        public void SetGameTime(GameTime gameTime)
-            => _gameTime = gameTime;
-
-        public void Update()
+        public void Update(double elapsedSeconds, double elapsedMilliseconds)
         {
             TotalFrames++;
-            _timeSinceLastSample += _gameTime.ElapsedGameTime.TotalSeconds;
-            TotalSeconds += _gameTime.ElapsedGameTime.TotalSeconds;
+            _timeSinceLastSample += elapsedSeconds;
+            TotalSeconds += elapsedSeconds;
 
             if (_timeSinceLastSample < 1.0)
                 return;
 
-            FrameTime = _gameTime.ElapsedGameTime.TotalMilliseconds;
+            FrameTime = elapsedMilliseconds;
             CurrentFramesPerSecond = 1d / FrameTime * 1e3d;
 
             _samples++;

@@ -42,7 +42,7 @@ namespace GameEngine.Camera
             }
         }
 
-        internal class In3D(GraphicsDevice graphicsDevice) : ICamera3dBehaviour
+        public class In3D(GraphicsDevice graphicsDevice) : ICamera3dBehaviour
         {
             private readonly GraphicsDevice _graphicsDevice = graphicsDevice;
             private MouseState _prevMouseState;
@@ -51,10 +51,11 @@ namespace GameEngine.Camera
 
             public void Initialize(Camera3D owner) {; }
 
-            public void Update(Camera3D owner, double elapsedGameTime)
+
+            public void Update(Camera3D owner, InputState inputState, double elapsedGameTime)
             {
                 KeyboardState ks = Keyboard.GetState();
-                MouseState mouseState = Mouse.GetState();
+                var mouseState = Mouse.GetState();
 
                 float sensitivity = 0.002f;
                 int deltaX = mouseState.X - _prevMouseState.X;
@@ -88,12 +89,6 @@ namespace GameEngine.Camera
                 Mouse.SetPosition(_graphicsDevice.Viewport.Width / 2, _graphicsDevice.Viewport.Height / 2);
                 _prevMouseState = Mouse.GetState();
             }
-
-            public void Update(Camera3D owner, InputState inputState, double elapsedGameTime)
-            {
-                throw new System.NotImplementedException();
-            }
         }
-
     }
 }

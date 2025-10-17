@@ -14,9 +14,9 @@ namespace GameEngine.Input
         private readonly InputState _inputState = new();
         private List<ActionType> _actions = new();
 
-        public InputState Update(GameTime gameTime)
+        public InputState Update(double elapsedMilliseconds)
         {
-            _mouseListener.Listen(gameTime, ref _actions, out Vector2 mousePosition);
+            _mouseListener.Listen(elapsedMilliseconds, ref _actions, out Vector2 mousePosition);
             _keyboardListener.Listener(ref _actions);
 
             _inputState.UpdateData(_actions, mousePosition);
