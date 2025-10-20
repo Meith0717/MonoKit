@@ -49,7 +49,7 @@ namespace GameEngine.Camera
             private float _yaw;
             private float _pitch;
 
-            public void Initiialize(Camera3D owner) {; }
+            public void Initialize(Camera3D owner) {; }
 
             public void Update(Camera3D owner, double elapsedGameTime)
             {

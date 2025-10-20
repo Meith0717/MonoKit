@@ -11,7 +11,7 @@ namespace GameEngine.Camera
 {
     public interface ICamera3dBehaviour
     {
-        void Initiialize(Camera3D owner);
+        void Initialize(Camera3D owner);
         public void Update(Camera3D owner, InputState inputState, double elapsedGameTime);
     }
 
@@ -35,7 +35,7 @@ namespace GameEngine.Camera
 
         public void AddBehaviour(ICamera3dBehaviour behaviour)
         {
-            behaviour.Initiialize(this);
+            behaviour.Initialize(this);
             _behaviours.Add(behaviour);
         }
 
