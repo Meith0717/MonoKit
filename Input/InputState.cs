@@ -39,15 +39,6 @@ namespace GameEngine.Input
         ReloadUi
     }
 
-    public enum GamePadActionType
-    {
-        None,
-        LeftThumbStickUp,
-        LeftThumbStickDown,
-        RightThumbStickUp,
-        RightThumbStickDown,
-    }
-
     public enum KeyEventType
     {
         OnButtonDown,

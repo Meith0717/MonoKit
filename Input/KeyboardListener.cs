@@ -11,18 +11,18 @@ namespace GameEngine.Input
 {
     public class KeyboardListener
     {
-        private readonly Dictionary<int, ActionType> mActionOnMultiplePressed;
-        private readonly Dictionary<Keys, ActionType> mActionOnPressed, mActionOnHold;
-        private readonly Dictionary<Keys, KeyEventType> mKeysKeyEventTypes;
-        private Keys[] mCurrentKeysPressed, mPreviousKeysPressed;
+        private readonly Dictionary<int, ActionType> _actionOnMultiplePressed;
+        private readonly Dictionary<Keys, ActionType> _actionOnPressed, _actionOnHold;
+        private readonly Dictionary<Keys, KeyEventType> _keysKeyEventTypes;
+        private Keys[] _currentKeysPressed, _previousKeysPressed;
 
         public KeyboardListener()
         {
-            mActionOnMultiplePressed = new()
+            _actionOnMultiplePressed = new()
             {
             };
 
-            mActionOnPressed = new()
+            _actionOnPressed = new()
             {
                 { Keys.Escape, ActionType.ESC },
                 { Keys.Space, ActionType.Space },
@@ -36,12 +36,12 @@ namespace GameEngine.Input
                 { Keys.R, ActionType.ReloadUi }
             };
 
-            mActionOnHold = new()
+            _actionOnHold = new()
             {
                 { Keys.W, ActionType.Accelerate },
                 { Keys.S, ActionType.Break },
             };
-            mKeysKeyEventTypes = new();
+            _keysKeyEventTypes = new();
         }
 
         private static int Hash(params Keys[] keys)
@@ -59,42 +59,42 @@ namespace GameEngine.Input
         private void UpdateKeysKeyEventTypes()
         {
             KeyboardState keyboardState = Keyboard.GetState();
-            mCurrentKeysPressed = keyboardState.GetPressedKeys();
+            _currentKeysPressed = keyboardState.GetPressedKeys();
 
             // Get KeyEventTypes (down or pressed) for keys.
-            foreach (Keys key in mCurrentKeysPressed)
+            foreach (Keys key in _currentKeysPressed)
             {
-                if (mPreviousKeysPressed == null)
+                if (_previousKeysPressed == null)
                 {
                     continue;
                 }
-                if (mPreviousKeysPressed.Contains(key))
+                if (_previousKeysPressed.Contains(key))
                 {
-                    mKeysKeyEventTypes.Add(key, KeyEventType.OnButtonPressed);
+                    _keysKeyEventTypes.Add(key, KeyEventType.OnButtonPressed);
                     continue;
                 }
-                mKeysKeyEventTypes.Add(key, KeyEventType.OnButtonDown);
+                _keysKeyEventTypes.Add(key, KeyEventType.OnButtonDown);
             }
         }
 
         public void Listener(ref List<ActionType> actions)
         {
-            mPreviousKeysPressed = mCurrentKeysPressed;
-            mKeysKeyEventTypes.Clear();
+            _previousKeysPressed = _currentKeysPressed;
+            _keysKeyEventTypes.Clear();
 
-            mCurrentKeysPressed = Keyboard.GetState().GetPressedKeys();
+            _currentKeysPressed = Keyboard.GetState().GetPressedKeys();
             UpdateKeysKeyEventTypes();
 
-            if (mActionOnMultiplePressed.TryGetValue(Hash(mCurrentKeysPressed), out ActionType action))
-                foreach (Keys key in mCurrentKeysPressed)
-                    if (mKeysKeyEventTypes[key] == KeyEventType.OnButtonDown) actions.Add(action);
+            if (_actionOnMultiplePressed.TryGetValue(Hash(_currentKeysPressed), out ActionType action))
+                foreach (Keys key in _currentKeysPressed)
+                    if (_keysKeyEventTypes[key] == KeyEventType.OnButtonDown) actions.Add(action);
 
-            foreach (Keys key in mCurrentKeysPressed)
+            foreach (Keys key in _currentKeysPressed)
             {
-                if (mActionOnPressed.TryGetValue(key, out ActionType actionPressed))
-                    if (mKeysKeyEventTypes[key] == KeyEventType.OnButtonDown) actions.Add(actionPressed);
-                if (!mActionOnHold.TryGetValue(key, out ActionType actionHold)) continue;
-                if (mKeysKeyEventTypes[key] == KeyEventType.OnButtonPressed) actions.Add(actionHold);
+                if (_actionOnPressed.TryGetValue(key, out ActionType actionPressed))
+                    if (_keysKeyEventTypes[key] == KeyEventType.OnButtonDown) actions.Add(actionPressed);
+                if (!_actionOnHold.TryGetValue(key, out ActionType actionHold)) continue;
+                if (_keysKeyEventTypes[key] == KeyEventType.OnButtonPressed) actions.Add(actionHold);
             }
         }
     }
