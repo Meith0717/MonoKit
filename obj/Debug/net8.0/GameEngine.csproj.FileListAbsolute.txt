@@ -1,0 +1,13 @@
+C:\Users\Thierry\Documents\git\MonoKit\bin\Debug\net8.0\GameEngine.deps.json
+C:\Users\Thierry\Documents\git\MonoKit\bin\Debug\net8.0\GameEngine.dll
+C:\Users\Thierry\Documents\git\MonoKit\bin\Debug\net8.0\GameEngine.pdb
+C:\Users\Thierry\Documents\git\MonoKit\obj\Debug\net8.0\GameEngine.csproj.AssemblyReference.cache
+C:\Users\Thierry\Documents\git\MonoKit\obj\Debug\net8.0\GameEngine.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Thierry\Documents\git\MonoKit\obj\Debug\net8.0\GameEngine.AssemblyInfoInputs.cache
+C:\Users\Thierry\Documents\git\MonoKit\obj\Debug\net8.0\GameEngine.AssemblyInfo.cs
+C:\Users\Thierry\Documents\git\MonoKit\obj\Debug\net8.0\GameEngine.csproj.CoreCompileInputs.cache
+C:\Users\Thierry\Documents\git\MonoKit\obj\Debug\net8.0\GameEngine.sourcelink.json
+C:\Users\Thierry\Documents\git\MonoKit\obj\Debug\net8.0\GameEngine.dll
+C:\Users\Thierry\Documents\git\MonoKit\obj\Debug\net8.0\refint\GameEngine.dll
+C:\Users\Thierry\Documents\git\MonoKit\obj\Debug\net8.0\GameEngine.pdb
+C:\Users\Thierry\Documents\git\MonoKit\obj\Debug\net8.0\ref\GameEngine.dll

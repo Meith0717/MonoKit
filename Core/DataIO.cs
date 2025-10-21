@@ -5,7 +5,7 @@
 using System;
 using System.Threading;
 
-namespace GameEngine.Core
+namespace MonoKit.Core
 {
     public static class DataIO
     {

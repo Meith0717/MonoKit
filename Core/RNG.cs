@@ -4,7 +4,7 @@
 
 using System;
 
-namespace GameEngine.Core
+namespace MonoKit.Core
 {
     public static class RNG
     {

@@ -2,7 +2,7 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
-namespace GameEngine.Ui
+namespace MonoKit.Ui
 {
     public sealed class UiCheckBox : UiButton.Sprite
     {

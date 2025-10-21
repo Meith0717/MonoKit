@@ -4,7 +4,7 @@
 
 using System;
 
-namespace GameEngine.Content
+namespace MonoKit.Content
 {
     public sealed class AudioService
     {

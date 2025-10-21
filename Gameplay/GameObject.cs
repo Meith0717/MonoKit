@@ -2,14 +2,14 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
-using GameEngine.Content;
+using MonoKit.Content;
 using Microsoft.Xna.Framework;
 using MonoGame.Extended;
 using Newtonsoft.Json;
 using System;
 using System.Text.Json;
 
-namespace GameEngine.Gameplay
+namespace MonoKit.Gameplay
 {
     [Serializable]
     public abstract class GameObject : IDisposable

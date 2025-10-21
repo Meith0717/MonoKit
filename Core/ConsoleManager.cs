@@ -5,7 +5,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace GameEngine.Core
+namespace MonoKit.Core
 {
     public static class ConsoleManager
     {

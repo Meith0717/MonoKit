@@ -5,7 +5,7 @@
 
 using System;
 
-namespace GameEngine.Extensions
+namespace MonoKit.Extensions
 {
     public static class IntExtension
     {

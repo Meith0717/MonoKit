@@ -5,7 +5,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using System;
 
-namespace GameEngine.Content
+namespace MonoKit.Content
 {
     public sealed class ContentProvider
     {

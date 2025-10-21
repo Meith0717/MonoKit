@@ -2,12 +2,12 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
-using GameEngine.Core;
+using MonoKit.Core;
 using Microsoft.Xna.Framework.Content;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace GameEngine.Content
+namespace MonoKit.Content
 {
     public class ContentLoadingState
     {

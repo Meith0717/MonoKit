@@ -5,7 +5,7 @@
 using System;
 using System.IO;
 
-namespace GameEngine.Core
+namespace MonoKit.Core
 {
     public class FileHandler
     {

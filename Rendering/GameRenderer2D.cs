@@ -4,16 +4,16 @@
 
 #if DEBUG
 using MonoGame.Extended;
-using GameEngine.Extensions;
+using MonoKit.Extensions;
 # endif
 using Microsoft.Xna.Framework;
-using GameEngine.Camera;
-using GameEngine.Gameplay;
-using GameEngine.Runtime;
+using MonoKit.Camera;
+using MonoKit.Gameplay;
+using MonoKit.Runtime;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 
-namespace GameEngine.Rendering
+namespace MonoKit.Rendering
 {
     public class GameRenderer2D(RuntimeContainer services, IGameObjRenderer2D renderer)
     {

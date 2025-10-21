@@ -5,7 +5,7 @@
 using Microsoft.Xna.Framework;
 using MonoGame.Extended;
 
-namespace GameEngine.Extensions
+namespace MonoKit.Extensions
 {
     public static class EllipseFFExtension
     {

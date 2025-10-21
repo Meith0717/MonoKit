@@ -2,13 +2,13 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
-using GameEngine.Input;
+using MonoKit.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
 using System.Collections.Generic;
 
-namespace GameEngine.Camera
+namespace MonoKit.Camera
 {
     public interface ICamera2dBehaviour
     {

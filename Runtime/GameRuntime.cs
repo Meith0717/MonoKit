@@ -5,14 +5,14 @@
 # if DEBUG
 using System.Diagnostics;
 #endif
-using GameEngine.Camera;
-using GameEngine.Gameplay;
-using GameEngine.Input;
+using MonoKit.Camera;
+using MonoKit.Gameplay;
+using MonoKit.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-namespace GameEngine.Runtime
+namespace MonoKit.Runtime
 {
     public class GameRuntime
     {

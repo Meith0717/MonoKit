@@ -2,12 +2,12 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
-using GameEngine.Content;
-using GameEngine.Input;
+using MonoKit.Content;
+using MonoKit.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace GameEngine.Ui
+namespace MonoKit.Ui
 {
     public sealed class UiText(string spriteFont, string text = default) : UiElement
     {

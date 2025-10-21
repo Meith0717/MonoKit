@@ -5,12 +5,12 @@
 # if DEBUG
 using MonoGame.Extended;
 # endif
-using GameEngine.Input;
+using MonoKit.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 
-namespace GameEngine.Ui
+namespace MonoKit.Ui
 {
     public enum Allign { N, NE, E, SE, S, SW, W, NW, Center, None, Left, Right, Top, Bottom, CenterH, CenterV }
 

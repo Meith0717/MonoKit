@@ -2,10 +2,10 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
-using GameEngine.Runtime;
+using MonoKit.Runtime;
 using System.Collections.Generic;
 
-namespace GameEngine.Gameplay
+namespace MonoKit.Gameplay
 {
     public class GameObjManager(SpatialHashing spatialHashing, RuntimeContainer services)
     {

@@ -7,7 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace GameEngine.Input
+namespace MonoKit.Input
 {
     public class KeyboardListener(Dictionary<(Keys, InputEventType), byte> bindings)
         : IInputDevice

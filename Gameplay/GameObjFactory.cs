@@ -2,11 +2,11 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
-using GameEngine.Content;
+using MonoKit.Content;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
-namespace GameEngine.Gameplay
+namespace MonoKit.Gameplay
 {
     public abstract class GameObjFactory<T>
     {

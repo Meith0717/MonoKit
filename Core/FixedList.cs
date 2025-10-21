@@ -5,7 +5,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace GameEngine.Core
+namespace MonoKit.Core
 {
     public class FixedList<T>(int capacity)
     {

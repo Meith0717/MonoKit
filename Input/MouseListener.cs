@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework.Input;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace GameEngine.Input
+namespace MonoKit.Input
 {
     public enum MouseButton { Left, Mid, Right, Forward, Back, WheelForward, WheelBack }
 

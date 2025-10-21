@@ -2,7 +2,7 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
-using GameEngine.Core;
+using MonoKit.Core;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -11,7 +11,7 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 
-namespace GameEngine.Content
+namespace MonoKit.Content
 {
     public class ContentContainer<T>
     {

@@ -4,7 +4,7 @@
 
 using System.Collections;
 
-namespace GameEngine.Input
+namespace MonoKit.Input
 {
     public enum InputEventType { Pressed, Released, Held }
 

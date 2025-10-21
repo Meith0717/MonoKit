@@ -2,14 +2,14 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
-using GameEngine.Input;
-using GameEngine.Rendering;
-using GameEngine.Ui;
+using MonoKit.Input;
+using MonoKit.Rendering;
+using MonoKit.Ui;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 
-namespace GameEngine.Screens
+namespace MonoKit.Screens
 {
     public abstract class Screen : IDisposable
     {

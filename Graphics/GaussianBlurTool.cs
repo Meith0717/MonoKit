@@ -4,7 +4,7 @@
 
 using System;
 
-namespace GameEngine.Graphics
+namespace MonoKit.Graphics
 {
     public class GaussianBlurTool
     {
