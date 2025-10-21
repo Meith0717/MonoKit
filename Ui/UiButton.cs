@@ -6,6 +6,7 @@ using GameEngine.Content;
 using GameEngine.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using System;
 using System.Linq;
 
@@ -47,11 +48,11 @@ namespace GameEngine.Ui
                     Color = color[1];
             }
 
-            protected override void Updater(InputState inputState)
+            protected override void Updater(InputHandler inputHandler)
             {
-                base.Updater(inputState);
-                _uiText?.Update(inputState, Bounds, UiScale);
-                _buttonBehaviour.Update(inputState, Bounds, OnClickAction, Disable);
+                base.Updater(inputHandler);
+                _uiText?.Update(inputHandler, Bounds, UiScale);
+                _buttonBehaviour.Update(inputHandler, Bounds, OnClickAction, Disable);
                 Color = Disable ? _style.TextureDisableColor : _buttonBehaviour.IsHovered ? _style.TextureHoverColor : _style.TextureIdleColor;
                 if (_uiText is not null)
                     _uiText.Color = Disable ? _style.TextDisableColor : _buttonBehaviour.IsHovered ? _style.TextHoverColor : _style.TextIdleColor;
@@ -87,10 +88,10 @@ namespace GameEngine.Ui
             public Action OnClickAction { get; set; }
             public bool Disable;
 
-            protected override void Updater(InputState inputState)
+            protected override void Updater(InputHandler inputHandler)
             {
-                _uiText.Update(inputState, Bounds, UiScale);
-                _buttonBehaviour.Update(inputState, Bounds, OnClickAction, Disable);
+                _uiText.Update(inputHandler, Bounds, UiScale);
+                _buttonBehaviour.Update(inputHandler, Bounds, OnClickAction, Disable);
                 _uiText.Color = Disable ? _style.TextDisableColor : _buttonBehaviour.IsHovered ? _style.TextHoverColor : _style.TextIdleColor;
             }
 
@@ -125,10 +126,10 @@ namespace GameEngine.Ui
         private bool _isPressed;
         public bool IsHovered;
 
-        public void Update(InputState inputState, Rectangle bounds, Action onClickAction, bool isDisabled)
+        public void Update(InputHandler inputHandler, Rectangle bounds, Action onClickAction, bool isDisabled)
         {
-            IsHovered = !isDisabled && bounds.Contains(inputState.MousePosition);
-            _isPressed = IsHovered && inputState.HasAction(ActionType.LeftWasClicked);
+            IsHovered = !isDisabled && bounds.Contains(Mouse.GetState().Position);
+            _isPressed = IsHovered && inputHandler.HasAction(EngineInputActions.ButtonPressed);
             _wasHovered = IsHovered;
 
             if (IsHovered && !_wasHovered)

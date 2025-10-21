@@ -36,14 +36,14 @@ namespace GameEngine.Ui
         public Allign Allign = Allign.None;
         public FillScale FillScale = FillScale.None;
 
-        protected abstract void Updater(InputState inputState);
+        protected abstract void Updater(InputHandler inputHandler);
 
         protected abstract void Drawer(SpriteBatch spriteBatch);
 
-        public void Update(InputState inputState, Rectangle root, float uiScale)
+        public void Update(InputHandler inputHandler, Rectangle root, float uiScale)
         {
             ApplyScale(root, uiScale);
-            Updater(inputState);
+            Updater(inputHandler);
             ApplyScale(root, uiScale);
         }
 

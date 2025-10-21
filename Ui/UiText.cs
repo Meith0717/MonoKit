@@ -32,7 +32,7 @@ namespace GameEngine.Ui
             spriteBatch.DrawString(_font, _text, position, Color, 0, Vector2.Zero, UiScale * _scale, SpriteEffects.None, 1);
         }
 
-        protected override void Updater(InputState inputState) {; }
+        protected override void Updater(InputHandler inputHandler) {; }
 
         private void UpdateSize()
         {

@@ -51,11 +51,11 @@ namespace GameEngine.Ui
             };
         }
 
-        protected override void Updater(InputState inputState)
+        protected override void Updater(InputHandler inputHandler)
         {
-            _arrowL.Update(inputState, Bounds, UiScale);
-            _arrowR.Update(inputState, Bounds, UiScale);
-            _text.Update(inputState, Bounds, UiScale);
+            _arrowL.Update(inputHandler, Bounds, UiScale);
+            _arrowR.Update(inputHandler, Bounds, UiScale);
+            _text.Update(inputHandler, Bounds, UiScale);
             _text.Text = _items[_selectedIndex].ToString();
             Height = (int)float.Floor(int.Max(_text.Bounds.Height, int.Max(_arrowL.Bounds.Height, _arrowR.Bounds.Height)) / UiScale);
         }

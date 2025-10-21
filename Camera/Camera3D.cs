@@ -12,7 +12,7 @@ namespace GameEngine.Camera
     public interface ICamera3dBehaviour
     {
         void Initialize(Camera3D owner);
-        public void Update(Camera3D owner, InputState inputState, double elapsedGameTime);
+        public void Update(Camera3D owner, InputHandler inputHandler, double elapsedGameTime);
     }
 
     public class Camera3D(GraphicsDevice graphicsDevice)
@@ -39,11 +39,11 @@ namespace GameEngine.Camera
             _behaviours.Add(behaviour);
         }
 
-        public void Update(double elapsedGameTime, InputState inputState)
+        public void Update(double elapsedGameTime, InputHandler inputHandler)
         {
             View = Matrix.CreateLookAt(Position, Target, Up);
             Projection = Matrix.CreatePerspectiveFieldOfView(Fov, AspectRatio, NearPlane, FarPlane);
-            _behaviours.ForEach(behaviour => behaviour.Update(this, inputState, elapsedGameTime));
+            _behaviours.ForEach(behaviour => behaviour.Update(this, inputHandler, elapsedGameTime));
         }
     }
 }

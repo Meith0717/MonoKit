@@ -13,7 +13,7 @@ namespace GameEngine.Camera
     public interface ICamera2dBehaviour
     {
         public void Initialize(Camera2D owner);
-        public void Update(Camera2D owner, InputState inputState, double elapsedGameTime);
+        public void Update(Camera2D owner, InputHandler inputHandler, double elapsedGameTime);
     }
 
     public class Camera2D
@@ -35,9 +35,9 @@ namespace GameEngine.Camera
             UpdateView(1);
         }
 
-        public void Update(double elapsedGameTime, InputState inputState)
+        public void Update(double elapsedGameTime, InputHandler inputHandler)
         {
-            _behaviours.ForEach(behaviour => behaviour.Update(this, inputState, elapsedGameTime));
+            _behaviours.ForEach(behaviour => behaviour.Update(this, inputHandler, elapsedGameTime));
         }
 
         public void UpdateView(float viewportScale)

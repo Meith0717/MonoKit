@@ -20,12 +20,12 @@ namespace GameEngine.Ui
 
         public Color Color { set => _color = value; }
 
-        protected override void Updater(InputState inputState)
+        protected override void Updater(InputHandler inputHandler)
         {
             UpdateSizeIfTextureNotNull();
             _elementChilds.RemoveAll(c => c.IsDisposed);
             foreach (var child in _elementChilds)
-                child.Update(inputState, Bounds, UiScale);
+                child.Update(inputHandler, Bounds, UiScale);
         }
 
         protected override void Drawer(SpriteBatch spriteBatch)

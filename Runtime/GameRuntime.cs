@@ -10,6 +10,7 @@ using GameEngine.Gameplay;
 using GameEngine.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
 namespace GameEngine.Runtime
 {
@@ -33,12 +34,12 @@ namespace GameEngine.Runtime
             Services.AddService(_gameObjManager);
         }
 
-        public void Update(double elapsedMilliseconds, InputState inputState)
+        public void Update(double elapsedMilliseconds, InputHandler inputHandler)
         {
             _gameObjManager.Update(elapsedMilliseconds);
             _spatialHashing.Rearrange();
-            _camera.Update(elapsedMilliseconds, inputState);
-            WorldMousePosition = Vector2.Transform(inputState.MousePosition, _camera.ViewInvert);
+            _camera.Update(elapsedMilliseconds, inputHandler);
+            WorldMousePosition = Vector2.Transform(Mouse.GetState().Position.ToVector2(), _camera.ViewInvert);
 #if DEBUG
             var cameraPos = Vector2.Floor(_camera.Position);
             Debug.WriteLine($"Camera Pos: {cameraPos}\nCamera Zom: {_camera.Zoom}");

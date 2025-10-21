@@ -5,6 +5,7 @@
 using GameEngine.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using MonoGame.Extended;
 
 namespace GameEngine.Ui
@@ -19,27 +20,28 @@ namespace GameEngine.Ui
 
         public float Value { get => _sliderValue; set => _sliderValue = float.Round(float.Clamp(value, 0, 1), 2); }
 
-        protected override void Updater(InputState inputState)
+        protected override void Updater(InputHandler inputHandler)
         {
             if (!_interactive) return;
-            _hovered = Bounds.Contains(inputState.MousePosition);
-            _pressed = _pressed || (_hovered && inputState.HasAction(ActionType.LeftClickHold));
+            var mousePos = Mouse.GetState().Position;
+            _hovered = Bounds.Contains(mousePos);
+            _pressed = _pressed || (_hovered && inputHandler.HasAction(EngineInputActions.SliderHold));
             if (_pressed)
             {
                 var rectangle = Bounds;
                 var ratio = rectangle.Width / rectangle.Height;
                 if (ratio < 1) // Vertical
                 {
-                    float relativeMousePosition = Bounds.Bottom - inputState.MousePosition.Y;
+                    float relativeMousePosition = Bounds.Bottom - mousePos.Y;
                     _sliderValue = relativeMousePosition / Bounds.Height;
                 }
                 else // Horizontal
                 {
-                    float relativeMousePosition = inputState.MousePosition.X - Bounds.X;
+                    float relativeMousePosition = mousePos.X - Bounds.X;
                     _sliderValue = relativeMousePosition / Bounds.Width;
                 }
                 _sliderValue = float.Round(float.Clamp(_sliderValue, 0, 1), 2);
-                _pressed = !inputState.HasAction(ActionType.LeftReleased);
+                _pressed = !inputHandler.HasAction(EngineInputActions.ButtonPressed);
             }
         }
 

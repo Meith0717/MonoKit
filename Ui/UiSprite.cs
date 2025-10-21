@@ -17,7 +17,7 @@ namespace GameEngine.Ui
         public float Scale = scale;
         public Color Color = color;
 
-        protected override void Updater(InputState inputState)
+        protected override void Updater(InputHandler inputHandler)
         {
             Width = (int)float.Floor(_texture.Width * Scale);
             Height = (int)float.Floor(_texture.Height * Scale);

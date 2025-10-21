@@ -46,9 +46,9 @@ namespace GameEngine.Screens
 
         public virtual void Initialize() {; }
 
-        public virtual void Update(double elapsedMilliseconds, InputState inputState, float uiScale)
+        public virtual void Update(double elapsedMilliseconds, InputHandler inputHandler, float uiScale)
         {
-            UiRoot.Update(inputState, GraphicsDevice.Viewport.Bounds, uiScale);
+            UiRoot.Update(inputHandler, GraphicsDevice.Viewport.Bounds, uiScale);
         }
 
         public virtual void Draw(SpriteBatch spriteBatch) {; }

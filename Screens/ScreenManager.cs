@@ -58,7 +58,7 @@ public class ScreenManager(Game game)
         }
     }
 
-    public void Update(double elapsedMilliseconds, InputState inputState, float uiScale)
+    public void Update(double elapsedMilliseconds, InputHandler inputHandler, float uiScale)
     {
         while (_pendingActions.TryDequeue(out var action))
             action(elapsedMilliseconds, uiScale);
@@ -66,7 +66,7 @@ public class ScreenManager(Game game)
         for (int i = 0; i < _screens.Count; i++)
         {
             var screen = _screens.ElementAt(i);
-            screen.Update(elapsedMilliseconds, inputState, uiScale);
+            screen.Update(elapsedMilliseconds, inputHandler, uiScale);
             if (!screen.UpdateBelow)
                 break;
         }

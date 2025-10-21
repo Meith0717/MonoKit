@@ -67,17 +67,17 @@ namespace GameEngine.Ui
             }
         }
 
-        protected override void Updater(InputState inputState)
+        protected override void Updater(InputHandler inputHandler)
         {
             foreach (var (buttonFrame, button, frame) in _tabs)
             {
-                buttonFrame.Update(inputState, Bounds, UiScale);
+                buttonFrame.Update(inputHandler, Bounds, UiScale);
                 if (_activeFrame == frame)
                     button.OveideColor(Color.Red, Color.Red);
             }
 
             if (_activeFrame is null) return;
-            _activeFrame.Update(inputState, Bounds, UiScale);
+            _activeFrame.Update(inputHandler, Bounds, UiScale);
         }
 
         protected override void Drawer(SpriteBatch spriteBatch)
