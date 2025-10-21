@@ -2,31 +2,36 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
+using System.Collections;
 using System.Collections.Generic;
 
 namespace GameEngine.Input
 {
-    public enum InputEventType { Pressed, Released, Held }
-
-    public record InputEvent<TActionType>(TActionType Action, InputEventType Type);
-
-    public interface IInputDevice<TActionType>
+    internal static class EngineInputActions
     {
-        void Update(double elapsedMilliseconds, List<TActionType> actions);
+        public readonly static byte ButtonPressed = byte.MaxValue;
+        public readonly static byte SliderHold = byte.MaxValue - 1;
     }
 
-    public class InputHandler<TActionType>
-    {
-        private readonly List<IInputDevice<TActionType>> _devices = new();
-        private readonly List<TActionType> _actions = new();
+    public enum InputEventType { Pressed, Released, Held }
 
-        public void RegisterDevice(IInputDevice<TActionType> device) => _devices.Add(device);
+    public interface IInputDevice
+    {
+        void Update(double elapsedMilliseconds, BitArray actionFlags);
+    }
+
+    public class InputHandler
+    {
+        private readonly List<IInputDevice> _devices = new();
+        private readonly BitArray _actionsFlags = new(byte.MaxValue + 1);
+
+        public void RegisterDevice(IInputDevice device) => _devices.Add(device);
 
         public void Update(double elapsedMilliseconds)
         {
-            _actions.Clear();
+            _actionsFlags.SetAll(false);
             foreach (var device in _devices)
-                device.Update(elapsedMilliseconds, _actions);
+                device.Update(elapsedMilliseconds, _actionsFlags);
         }
     }
 }

@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace GameEngine.Input
 {
-    public enum ActionType
+    public enum ActionType : byte
     {
         ESC,
         Accelerate,
@@ -57,8 +57,6 @@ namespace GameEngine.Input
                 _actions.Add(actionTypes[i]);
             MousePosition = mousePosition;
         }
-
-        public bool ContainsAction(ActionType action) => _actions.Contains(action);
 
         public bool HasAction(ActionType action) => _actions.Remove(action);
 

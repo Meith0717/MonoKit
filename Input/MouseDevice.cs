@@ -3,20 +3,25 @@
 // All rights reserved.
 
 using Microsoft.Xna.Framework.Input;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace GameEngine.Input
 {
     public enum MouseButtons { Left, Mid, Right, Forward, Back }
 
-    public class MouseDevice<TActionType>(Dictionary<(MouseButtons, InputEventType), TActionType> bindings) : IInputDevice<TActionType>
+    public class MouseDevice : IInputDevice
     {
-        private readonly Dictionary<(MouseButtons, InputEventType), TActionType> _bindings = bindings;
+        private readonly Dictionary<(MouseButtons, InputEventType), byte> _bindings;
         private readonly Dictionary<MouseButtons, (ButtonState, ButtonState)> _buttonsStates = new();
-        private readonly Dictionary<MouseButtons, (ButtonState, ButtonState)> _previousButtonState = new();
         private MouseState _currentState, _previousState;
 
-        public void Update(double elapsedMilliseconds, List<TActionType> actions)
+        public MouseDevice(Dictionary<(MouseButtons, InputEventType), byte> bindings)
+        {
+            _bindings = bindings;
+        }
+
+        public void Update(double elapsedMilliseconds, BitArray actionFlags)
         {
             _currentState = Mouse.GetState();
             _buttonsStates[MouseButtons.Left] = (_currentState.LeftButton, _previousState.LeftButton);
@@ -35,8 +40,14 @@ namespace GameEngine.Input
                 if (previous == ButtonState.Pressed && current == ButtonState.Pressed) inputEventType = InputEventType.Held;
 
                 var inputEvent = (button, inputEventType);
-                if (_bindings.TryGetValue(inputEvent, out var action))
-                    actions.Add(action);
+                if (_bindings.TryGetValue(inputEvent, out var actionID))
+                    actionFlags[actionID] = true;
+
+                if (button == MouseButtons.Left && inputEventType == InputEventType.Released)
+                    actionFlags[EngineInputActions.ButtonPressed] = true;
+
+                if (button == MouseButtons.Left && inputEventType == InputEventType.Held)
+                    actionFlags[EngineInputActions.SliderHold] = true;
             }
         }
     }

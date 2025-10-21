@@ -3,19 +3,20 @@
 // All rights reserved.
 
 using Microsoft.Xna.Framework.Input;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace GameEngine.Input
 {
-    public class KeyboardDevice<TActionType>(Dictionary<(Keys, InputEventType), TActionType> bindings)
-        : IInputDevice<TActionType>
+    public class KeyboardDevice(Dictionary<(Keys, InputEventType), byte> bindings)
+        : IInputDevice
     {
-        private readonly Dictionary<(Keys, InputEventType), TActionType> _bindings = bindings;
+        private readonly Dictionary<(Keys, InputEventType), byte> _bindings = bindings;
         private Keys[] _currentPressedKeys, _previousPressedKeys = [];
         private readonly List<(Keys, InputEventType)> _pressedKeyStates = new();
 
-        public void Update(double elapsedMilliseconds, List<TActionType> actions)
+        public void Update(double elapsedMilliseconds, BitArray actionFlags)
         {
             _pressedKeyStates.Clear();
 
@@ -41,8 +42,8 @@ namespace GameEngine.Input
 
             foreach (var item in _pressedKeyStates)
             {
-                if (_bindings.TryGetValue(item, out var action))
-                    actions.Add(action);
+                if (_bindings.TryGetValue(item, out var actionID))
+                    actionFlags[actionID] = true;
             }
         }
     }
