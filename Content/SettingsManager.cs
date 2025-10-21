@@ -30,7 +30,7 @@ namespace GameEngine.Content
         [JsonProperty] public readonly bool VSync = vSync;
         [JsonProperty] public readonly WindowMode WindowMode = windowMode;
         [JsonProperty] public readonly float UiScale = uiScale;
-        [JsonProperty] public readonly float BloomIntensity = bloomEffect; 
+        [JsonProperty] public readonly float BloomIntensity = bloomEffect;
         [JsonProperty] public readonly float BloomThreshold = bloomThreshold;
     }
 }

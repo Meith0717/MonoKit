@@ -3,7 +3,6 @@
 // All rights reserved.
 
 using Microsoft.Xna.Framework.Input;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -11,7 +10,7 @@ namespace GameEngine.Input
 {
     public enum MouseButton { Left, Mid, Right, Forward, Back, WheelForward, WheelBack }
 
-    public class MouseDevice(Dictionary<(MouseButton, InputEventType), byte> bindings) : IInputDevice
+    public class MouseListener(Dictionary<(MouseButton, InputEventType), byte> bindings) : IInputDevice
     {
         private const int HeldMaxCoolDown = 100; // Milliseconds
         private readonly Dictionary<(MouseButton, InputEventType), byte> _bindings = bindings;
@@ -22,7 +21,7 @@ namespace GameEngine.Input
             { MouseButton.Mid, HeldMaxCoolDown },
             { MouseButton.Right, HeldMaxCoolDown },
             { MouseButton.Forward, HeldMaxCoolDown },
-            { MouseButton.Back, HeldMaxCoolDown } 
+            { MouseButton.Back, HeldMaxCoolDown }
         };
 
         public void Update(double elapsedMilliseconds, BitArray actionFlags)

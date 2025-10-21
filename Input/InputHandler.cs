@@ -1,4 +1,4 @@
-﻿// NewInputManager.cs 
+﻿// InputHandler.cs 
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
@@ -14,19 +14,12 @@ namespace GameEngine.Input
         public readonly static byte SliderHold = byte.MaxValue - 1;
     }
 
-    public enum InputEventType { Pressed, Released, Held }
-
-    public interface IInputDevice
-    {
-        void Update(double elapsedMilliseconds, BitArray actionFlags);
-    }
-
     public class InputHandler
     {
         private readonly List<IInputDevice> _devices = new();
         private readonly BitArray _actionsFlags = new(byte.MaxValue + 1);
 
-        public void RegisterDevice(IInputDevice device) 
+        public void RegisterDevice(IInputDevice device)
             => _devices.Add(device);
 
         public void Update(double elapsedMilliseconds)
@@ -45,7 +38,7 @@ namespace GameEngine.Input
 
         public void DoAction(byte actionID, Action function)
         {
-            if (HasAction(actionID)) 
+            if (HasAction(actionID))
                 function?.Invoke();
         }
     }

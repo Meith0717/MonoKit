@@ -1,4 +1,4 @@
-﻿// Keyboard.cs 
+﻿// KeyboardDevice.cs 
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace GameEngine.Input
 {
-    public class KeyboardDevice(Dictionary<(Keys, InputEventType), byte> bindings)
+    public class KeyboardListener(Dictionary<(Keys, InputEventType), byte> bindings)
         : IInputDevice
     {
         private readonly Dictionary<(Keys, InputEventType), byte> _bindings = bindings;
