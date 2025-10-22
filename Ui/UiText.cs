@@ -11,7 +11,7 @@ namespace MonoKit.Ui
 {
     public sealed class UiText(string spriteFont, string text = default) : UiElement
     {
-        private readonly SpriteFont _font = ContentProvider.Fonts.Get(spriteFont);
+        private readonly SpriteFont _font = ContentProvider.Container<SpriteFont>().Get(spriteFont);
         private string _text = text;
         private float _scale = 1;
 

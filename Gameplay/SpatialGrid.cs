@@ -93,7 +93,7 @@ namespace MonoKit.Gameplay
 
         public void Draw(SpriteBatch spriteBatch, Color color, float cameraZoom)
         {
-            var font = ContentProvider.Fonts.Get("default_font");
+            var font = ContentProvider.Container<SpriteFont>().Get("default_font");
             var pos = Bounds.TopRight - new Vector2(10, -10);
             var str = $"({_hash.Item1},{_hash.Item2})";
             var size = font.MeasureString(str) * .2f;

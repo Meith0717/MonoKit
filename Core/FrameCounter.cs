@@ -8,10 +8,8 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace MonoKit.Core
 {
-    public class FrameCounter()
+    public class FrameCounter(SpriteFont spriteFont)
     {
-        private static readonly SpriteFont spriteFont = ContentProvider.Fonts.Get("default_font");
-
         private int _samples;
         private double _summedFps;
 

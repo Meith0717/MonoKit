@@ -25,7 +25,7 @@ namespace MonoKit.Extensions
 
         public static void DrawGameObject(this SpriteBatch spriteBatch, GameObject gameObject)
         {
-            Texture2D texture = ContentProvider.Textures.Get(gameObject.TextureId);
+            Texture2D texture = ContentProvider.Container<Texture2D>().Get(gameObject.TextureId);
             Vector2 position = gameObject.Position;
             float rotation = gameObject.MovingDirection.InclinationAngle();
             float scale = gameObject.Scale;
@@ -43,26 +43,26 @@ namespace MonoKit.Extensions
 
         public static void DrawString(this SpriteBatch spriteBatch, string font, string text, Vector2 position, Color color, float scale)
         {
-            SpriteFont spriteFont = ContentProvider.Fonts.Get(font);
+            SpriteFont spriteFont = ContentProvider.Container<SpriteFont>().Get(font);
             spriteBatch.DrawString(spriteFont, text, position, color, 0, Vector2.Zero, scale, SpriteEffects.None, 1);
         }
 
         public static void Draw(this SpriteBatch spriteBatch, string id, Vector2 position, float scale, float rotation, int depth, Color color)
         {
-            Texture2D texture = ContentProvider.Textures.Get(id);
+            Texture2D texture = ContentProvider.Container<Texture2D>().Get(id);
             Vector2 offset = new(texture.Width / 2, texture.Height / 2);
             spriteBatch.Draw(texture, position, null, color, rotation, offset, scale, SpriteEffects.None, GetDepth(depth));
         }
 
         public static void Draw(this SpriteBatch spriteBatch, string id, Vector2 position, float width, float height, Color color)
         {
-            Texture2D texture = ContentProvider.Textures.Get(id);
+            Texture2D texture = ContentProvider.Container<Texture2D>().Get(id);
             spriteBatch.Draw(texture, new RectangleF(position.X, position.Y, width, height).ToRectangle(), null, color, 0, Vector2.Zero, SpriteEffects.None, 0);
         }
 
         public static void Draw(this SpriteBatch spriteBatch, string id, Vector2 position, float width, float height, Vector2 offset, float rotation)
         {
-            Texture2D texture = ContentProvider.Textures.Get(id);
+            Texture2D texture = ContentProvider.Container<Texture2D>().Get(id);
             spriteBatch.Draw(texture, new RectangleF(position.X + offset.X, position.Y + offset.Y, width, height).ToRectangle(), null, Color.White, rotation, new(texture.Width / 2, texture.Height / 2), SpriteEffects.None, 1);
         }
     }

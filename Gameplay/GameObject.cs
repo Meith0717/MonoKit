@@ -8,6 +8,7 @@ using MonoGame.Extended;
 using Newtonsoft.Json;
 using System;
 using System.Text.Json;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace MonoKit.Gameplay
 {
@@ -46,7 +47,7 @@ namespace MonoKit.Gameplay
         {
             Position = position;
             TextureId = textureId;
-            var texture = ContentProvider.Textures.Get(TextureId);
+            var texture = ContentProvider.Container<Texture2D>().Get(TextureId);
             _maxTextureSize = float.Max(texture.Width, texture.Height);
             Scale = scale;
         }

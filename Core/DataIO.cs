@@ -9,29 +9,32 @@ namespace MonoKit.Core
 {
     public static class DataIO
     {
-        public static Obj Load<Obj>(string path, Obj obj)
+        public static TObj Load<TObj>(string path, TObj obj)
         {
             string jsonStr = FileHandler.ReadFile(path);
-            obj = (Obj)JsonHandler.PopulateObject(obj, jsonStr);
+            obj = (TObj)JsonHandler.PopulateObject(obj, jsonStr);
             return obj;
         }
 
-        public static void Save<Obj>(Obj obj, string path, Action onComplete)
+        public static void Save<TObj>(string path, TObj obj)
         {
             if (obj is null) throw new Exception();
             string jsonStr = JsonHandler.SerializeToJson(obj);
             FileHandler.CreateFile(path, jsonStr);
-            onComplete?.Invoke();
         }
 
-        public static void LoadAsync<Obj>(string path, Obj newObj, Action<Obj> onComplete)
+        public static void LoadAsync<TObj>(string path, TObj newObj, Action<TObj> onComplete)
             => new Thread(_ =>
             {
                 var obj = Load(path, newObj);
-                onComplete.Invoke(obj);
+                onComplete?.Invoke(obj);
             }).Start();
 
-        public static void SaveAsync<Obj>(Obj obj, string path, Action onComplete)
-            => new Thread(_ => Save(obj, path, onComplete)).Start();
+        public static void SaveAsync<TObj>(TObj obj, string path, Action onComplete)
+            => new Thread(_ =>
+            {
+                Save(path, obj);
+                onComplete?.Invoke();
+            }).Start();
     }
 }

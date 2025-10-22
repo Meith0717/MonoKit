@@ -11,9 +11,9 @@ namespace MonoKit.Ui
 {
     public class UiSprite(string texture, float scale = 1, Color color = default) : UiElement
     {
-        private Texture2D _texture = ContentProvider.Textures.Get(texture);
+        private Texture2D _texture = ContentProvider.Container<Texture2D>().Get(texture);
 
-        protected string Texture { set => _texture = ContentProvider.Textures.Get(value); }
+        protected string Texture { set => _texture = ContentProvider.Container<Texture2D>().Get(value); }
         public float Scale = scale;
         public Color Color = color;
 

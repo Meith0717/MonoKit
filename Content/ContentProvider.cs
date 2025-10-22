@@ -2,32 +2,45 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
-using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Collections.Generic;
 
 namespace MonoKit.Content
 {
+    /// <summary>
+    /// Provides access to all loaded content containers.
+    /// </summary>
     public sealed class ContentProvider
     {
         private static ContentProvider Instance => _instance.Value;
         private static readonly Lazy<ContentProvider> _instance = new(() => new ContentProvider());
 
-        public static ContentContainer<Texture2D> Textures => Instance._assetsInternal;
-        public static ContentContainer<SpriteFont> Fonts => Instance._fontsInternal;
-        public static ContentContainer<Effect> Effects => Instance._effectsInternal;
-        public static ContentContainer<object> Objects => Instance._objectsInternal;
+        private readonly Dictionary<Type, object> _containers = new();
 
-        private readonly ContentContainer<Texture2D> _assetsInternal;
-        private readonly ContentContainer<SpriteFont> _fontsInternal;
-        private readonly ContentContainer<Effect> _effectsInternal;
-        private readonly ContentContainer<object> _objectsInternal;
+        /// <summary>
+        /// Registers a new content type container if it doesn’t exist.
+        /// </summary>
+        public static void Register<T>() => Instance.RegisterInternal<T>();
 
-        private ContentProvider()
+        /// <summary>
+        /// Gets the container for a given content type. Automatically registers it if missing.
+        /// </summary>
+        public static ContentContainer<T> Container<T>() => Instance.GetContainerInternal<T>();
+
+        private void RegisterInternal<T>()
         {
-            _assetsInternal = new();
-            _fontsInternal = new();
-            _effectsInternal = new();
-            _objectsInternal = new();
+            if (!_containers.ContainsKey(typeof(T)))
+                _containers[typeof(T)] = new ContentContainer<T>();
+        }
+
+        private ContentContainer<T> GetContainerInternal<T>()
+        {
+            if (_containers.TryGetValue(typeof(T), out var container))
+                return (ContentContainer<T>)container;
+
+            var newContainer = new ContentContainer<T>();
+            _containers[typeof(T)] = newContainer;
+            return newContainer;
         }
     }
 }

@@ -65,7 +65,7 @@ namespace MonoKit.Ui
 
         public UiFrame AttachTexture(string texture, float scale = 1)
         {
-            _texture = ContentProvider.Textures.Get(texture);
+            _texture = ContentProvider.Container<Texture2D>().Get(texture);
             _textureScale = scale;
             return this;
         }
