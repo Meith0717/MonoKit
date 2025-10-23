@@ -27,6 +27,8 @@ namespace MonoKit.Content
         /// </summary>
         public static ContentContainer<T> Container<T>() => Instance.GetContainerInternal<T>();
 
+        public static T Get<T>(string id) => Instance.GetContainerInternal<T>().Get(id);
+
         private void RegisterInternal<T>()
         {
             if (!_containers.ContainsKey(typeof(T)))

@@ -2,11 +2,11 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using MonoKit.Input;
 using MonoKit.Rendering;
 using MonoKit.Ui;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using System;
 
 namespace MonoKit.Screens

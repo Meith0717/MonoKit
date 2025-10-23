@@ -2,11 +2,11 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
-using MonoKit.Content;
-using MonoKit.Gameplay;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
+using MonoKit.Content;
+using MonoKit.Gameplay;
 using System;
 
 namespace MonoKit.Extensions
