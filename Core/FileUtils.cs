@@ -2,36 +2,12 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
-using System;
 using System.IO;
 
 namespace MonoKit.Core
 {
-    public class FileHandler
+    public class FileUtils
     {
-        public readonly string RootPath;
-        public readonly string GameSavePath;
-        public readonly string ConfigsSavePath;
-        public readonly string ImagedSavePath;
-
-        public readonly string SettingsFilePath;
-        public readonly string GameSaveFilePath;
-
-        public FileHandler(string rootDir)
-        {
-            string documentPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            RootPath = Path.Combine(documentPath, rootDir);
-            GameSavePath = Path.Combine(RootPath, "saves");
-            ConfigsSavePath = Path.Combine(RootPath, "config");
-            ImagedSavePath = Path.Combine(RootPath, "images");
-            CreateDirectory(RootPath);
-            CreateDirectory(GameSavePath);
-            CreateDirectory(ConfigsSavePath);
-            CreateDirectory(ImagedSavePath);
-            SettingsFilePath = Path.Combine(ConfigsSavePath, "settings.json");
-            GameSaveFilePath = Path.Combine(GameSavePath, "save.sav");
-        }
-
         public static void CreateDirectory(string path)
         {
             if (Directory.Exists(path)) return;

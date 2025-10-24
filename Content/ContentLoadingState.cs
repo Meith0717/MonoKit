@@ -17,7 +17,7 @@ namespace MonoKit.Content
 
         public ContentLoadingState(ContentManager content)
         {
-            _allContent = [.. FileHandler.GetAllFilesInDirectory(content.RootDirectory, System.IO.SearchOption.AllDirectories)];
+            _allContent = [.. FileUtils.GetAllFilesInDirectory(content.RootDirectory, System.IO.SearchOption.AllDirectories)];
             _count = _allContent.Count;
         }
 

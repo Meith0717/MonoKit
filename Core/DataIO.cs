@@ -11,7 +11,7 @@ namespace MonoKit.Core
     {
         public static TObj Load<TObj>(string path, TObj obj)
         {
-            string jsonStr = FileHandler.ReadFile(path);
+            string jsonStr = FileUtils.ReadFile(path);
             obj = (TObj)JsonHandler.PopulateObject(obj, jsonStr);
             return obj;
         }
@@ -20,7 +20,7 @@ namespace MonoKit.Core
         {
             if (obj is null) throw new Exception();
             string jsonStr = JsonHandler.SerializeToJson(obj);
-            FileHandler.CreateFile(path, jsonStr);
+            FileUtils.CreateFile(path, jsonStr);
         }
 
         public static void LoadAsync<TObj>(string path, TObj newObj, Action<TObj> onComplete)
