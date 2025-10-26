@@ -20,9 +20,9 @@ namespace MonoKit.Camera
         private readonly List<ICamera3dBehaviour> _behaviours = new();
 
         public Vector3 Position = new(0f, 0f, 0f);
-        public Vector3 Forward = new(0f, 0f, 1f);  
-        public Vector3 Up = Vector3.Up;                      
-        public Vector3 Right = Vector3.Right;            
+        public Vector3 Forward = new(0f, 0f, 1f);
+        public Vector3 Up = Vector3.Up;
+        public Vector3 Right = Vector3.Right;
 
         public float Fov = float.DegreesToRadians(60f);
         public float NearPlane = 0.1f;
