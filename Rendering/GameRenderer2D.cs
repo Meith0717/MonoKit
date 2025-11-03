@@ -7,10 +7,10 @@ using MonoGame.Extended;
 using MonoKit.Extensions;
 # endif
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using MonoKit.Camera;
 using MonoKit.Gameplay;
 using MonoKit.Runtime;
-using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 
 namespace MonoKit.Rendering
