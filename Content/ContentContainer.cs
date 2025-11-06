@@ -37,10 +37,10 @@ namespace MonoKit.Content
             _content.Add(key, value);
         }
 
-        public void LoadContent(ContentManager contentManager, string contentDirectory, ContentLoadingState contentLoadingState = null)
+        public void LoadContent(ContentManager contentManager, string contentDirectory, SearchOption searchOption = SearchOption.AllDirectories, ContentLoadingState contentLoadingState = null)
         {
             string fullContentDirectory = Path.Combine(contentManager.RootDirectory, contentDirectory);
-            string[] files = FileUtils.GetAllFilesInDirectory(fullContentDirectory, SearchOption.AllDirectories);
+            string[] files = FileUtils.GetAllFilesInDirectory(fullContentDirectory, searchOption);
 
             foreach (var file in files)
             {
