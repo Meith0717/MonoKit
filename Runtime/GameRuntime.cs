@@ -42,7 +42,7 @@ namespace MonoKit.Runtime
             WorldMousePosition = Vector2.Transform(Mouse.GetState().Position.ToVector2(), _camera.ViewInvert);
 #if DEBUG
             var cameraPos = Vector2.Floor(_camera.Position);
-            Debug.WriteLine($"Camera Pos: {cameraPos}\nCamera Zom: {_camera.Zoom}");
+            System.Diagnostics.Debug.WriteLine($"Camera Pos: {cameraPos}\nCamera Zom: {_camera.Zoom}");
 #endif
         }
     }

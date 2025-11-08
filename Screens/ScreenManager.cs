@@ -123,13 +123,6 @@ public class ScreenManager(Game game)
             layer.ApplyResolution(elapsedMilliseconds, uiScale);
         _postProcessingRunner.ApplyResolution(_graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height);
         _lowerRenderTarget?.Dispose();
-        _lowerRenderTarget = new(_graphicsDevice,
-                              _graphicsDevice.Viewport.Width,
-                              _graphicsDevice.Viewport.Height,
-                              false,
-                              SurfaceFormat.Color,
-                              DepthFormat.Depth24Stencil8,
-                              4,
-                              RenderTargetUsage.PreserveContents);
+        _lowerRenderTarget = new(_graphicsDevice, _graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height);
     }
 }

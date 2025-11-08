@@ -37,7 +37,7 @@ namespace MonoKit.Content
             _content.Add(key, value);
         }
 
-        public void LoadContent(ContentManager contentManager, string contentDirectory, SearchOption searchOption = SearchOption.AllDirectories, ContentLoadingState contentLoadingState = null)
+        public void LoadContent(ContentManager contentManager, string contentDirectory, ContentLoadingState contentLoadingState = null, SearchOption searchOption = SearchOption.AllDirectories)
         {
             string fullContentDirectory = Path.Combine(contentManager.RootDirectory, contentDirectory);
             string[] files = FileUtils.GetAllFilesInDirectory(fullContentDirectory, searchOption);
