@@ -15,12 +15,12 @@ namespace MonoKit.Camera
         public void Update(Camera3D owner, InputHandler inputHandler, double elapsedGameTime);
     }
 
-    public class Camera3D(GraphicsDevice graphicsDevice)
+    public class Camera3D(Vector3 positon, Vector3 normal, GraphicsDevice graphicsDevice)
     {
         private readonly List<ICamera3dBehaviour> _behaviours = new();
 
-        public Vector3 Position = new(0f, 0f, 0f);
-        public Vector3 Forward = new(0f, 0f, 1f);
+        public Vector3 Position = positon;
+        public Vector3 Forward = normal;
         public Vector3 Up = Vector3.Up;
         public Vector3 Right = Vector3.Right;
 
