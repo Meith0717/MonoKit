@@ -59,8 +59,8 @@ namespace MonoKit.Rendering
 
     public interface IGameObjRenderer2D
     {
-        public void UpdateEffects(double elapsedMilliseconds);
-        public void DrawEffects(SpriteBatch spriteBatch, Matrix Transformation, RuntimeContainer services, IReadOnlyList<GameObject> gameObjects);
-        public void DrawTextures(SpriteBatch spriteBatch, RuntimeContainer services, IReadOnlyList<GameObject> gameObjects);
+        void UpdateEffects(double elapsedMilliseconds);
+        void DrawEffects(SpriteBatch spriteBatch, Matrix Transformation, RuntimeContainer services, IReadOnlyList<GameObject> gameObjects);
+        void DrawTextures(SpriteBatch spriteBatch, RuntimeContainer services, IReadOnlyList<GameObject> gameObjects);
     }
 }

@@ -25,7 +25,7 @@ namespace MonoKit.Ui
     public interface IButton
     {
         Action OnClickAction { get; set; }
-        public void OveideColor(params Color[] color);
+        void OveideColor(params Color[] color);
     }
 
     public static class UiButton

@@ -9,15 +9,15 @@ using System.Collections.Generic;
 
 namespace MonoKit.Camera
 {
-    public interface ICamera3dBehaviour
+    public interface ICamera3dBehavior
     {
         void Initialize(Camera3D owner);
-        public void Update(Camera3D owner, InputHandler inputHandler, double elapsedGameTime);
+        void Update(Camera3D owner, InputHandler inputHandler, double elapsedGameTime);
     }
 
     public class Camera3D(Vector3 positon, Vector3 normal, GraphicsDevice graphicsDevice)
     {
-        private readonly List<ICamera3dBehaviour> _behaviours = new();
+        private readonly List<ICamera3dBehavior> _behaviours = new();
 
         public Vector3 Position = positon;
         public Vector3 Forward = normal;
@@ -33,7 +33,7 @@ namespace MonoKit.Camera
         public Matrix View { get; private set; }
         public Matrix Projection { get; private set; }
 
-        public void AddBehaviour(ICamera3dBehaviour behaviour)
+        public void AddBehaviour(ICamera3dBehavior behaviour)
         {
             behaviour.Initialize(this);
             _behaviours.Add(behaviour);

@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace MonoKit.Debug
 {
-    public class ConsoleListerner(ConsoleCommands commands)
+    public class ConsoleListener(ConsoleCommands commands)
     {
         private readonly ConsoleCommands _commands = commands;
         private Thread _inputThread;
@@ -29,7 +29,7 @@ namespace MonoKit.Debug
             while (_running)
             {
                 string? input = Console.ReadLine();
-                if (input == null) 
+                if (input == null)
                     continue;
 
                 _commands.Execute(input);

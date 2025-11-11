@@ -10,16 +10,16 @@ using System.Collections.Generic;
 
 namespace MonoKit.Camera
 {
-    public interface ICamera2dBehaviour
+    public interface ICamera2dBehavior
     {
-        public void Initialize(Camera2D owner);
-        public void Update(Camera2D owner, InputHandler inputHandler, double elapsedGameTime);
+        void Initialize(Camera2D owner);
+        void Update(Camera2D owner, InputHandler inputHandler, double elapsedGameTime);
     }
 
     public class Camera2D
     {
         private readonly GraphicsDevice _graphicsDevice;
-        private readonly List<ICamera2dBehaviour> _behaviours = new();
+        private readonly List<ICamera2dBehavior> _behaviours = new();
 
         public Vector2 Position = Vector2.Zero;
         public float ViewportZoom = 1;
@@ -49,7 +49,7 @@ namespace MonoKit.Camera
             Bounds = TransformViewport(viewport, ViewInvert);
         }
 
-        public void AddBehaviour(ICamera2dBehaviour behaviour)
+        public void AddBehaviour(ICamera2dBehavior behaviour)
         {
             behaviour.Initialize(this);
             _behaviours.Add(behaviour);
