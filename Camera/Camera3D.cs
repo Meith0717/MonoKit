@@ -15,12 +15,12 @@ namespace MonoKit.Camera
         void Update(Camera3D owner, InputHandler inputHandler, double elapsedGameTime);
     }
 
-    public class Camera3D(Vector3 positon, Vector3 normal, GraphicsDevice graphicsDevice)
+    public class Camera3D(Vector3 positon, GraphicsDevice graphicsDevice)
     {
         private readonly List<ICamera3dBehavior> _behaviours = new();
 
         public Vector3 Position = positon;
-        public Vector3 Forward = normal;
+        public Vector3 Forward = new(1, 0, 0);
         public Vector3 Up = Vector3.Up;
         public Vector3 Right = Vector3.Right;
 
@@ -29,7 +29,16 @@ namespace MonoKit.Camera
         public float FarPlane = 1000f;
         public float AspectRatio = graphicsDevice.Viewport.AspectRatio;
 
-        public Vector3 Target => Position + Forward;
+        public Vector3 Target
+        {
+            get => Position + Forward;
+            set
+            {
+                Forward = Vector3.Normalize(value - Position);
+                Right = Vector3.Normalize(Vector3.Cross(Forward, Vector3.Up));
+                Up = Vector3.Cross(Right, Forward);
+            }
+        }
         public Matrix View { get; private set; }
         public Matrix Projection { get; private set; }
 
