@@ -9,10 +9,9 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoKit.Camera;
-using MonoKit.Gameplay;
 using MonoKit.Input;
 
-namespace MonoKit.Runtime
+namespace MonoKit.Gameplay
 {
     public class GameRuntime
     {

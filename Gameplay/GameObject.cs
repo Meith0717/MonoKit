@@ -59,8 +59,8 @@ namespace MonoKit.Gameplay
             GC.SuppressFinalize(this);
         }
 
-        public abstract void Initialize(Runtime.RuntimeContainer runtimeServices);
+        public abstract void Initialize(RuntimeContainer runtimeServices);
 
-        public abstract void Update(double elapsedMs, Runtime.RuntimeContainer runtimeServices);
+        public abstract void Update(double elapsedMs, RuntimeContainer runtimeServices);
     }
 }

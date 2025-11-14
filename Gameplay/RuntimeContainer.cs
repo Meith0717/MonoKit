@@ -5,7 +5,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace MonoKit.Runtime
+namespace MonoKit.Gameplay
 {
     public class RuntimeContainer
     {
