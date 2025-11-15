@@ -4,8 +4,8 @@
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoKit.Graphics.Rendering;
 using MonoKit.Input;
-using MonoKit.Rendering;
 using MonoKit.Ui;
 using System;
 

@@ -3,13 +3,13 @@
 // All rights reserved.
 
 # if DEBUG
-using System.Diagnostics;
 #endif
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using MonoKit.Camera;
+using MonoKit.Graphics.Camera;
 using MonoKit.Input;
+using MonoKit.SpatialManagement;
 
 namespace MonoKit.Gameplay
 {

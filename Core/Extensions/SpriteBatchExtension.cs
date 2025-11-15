@@ -9,7 +9,7 @@ using MonoKit.Content;
 using MonoKit.Gameplay;
 using System;
 
-namespace MonoKit.Extensions
+namespace MonoKit.Core.Extensions
 {
     public static class SpriteBatchExtension
     {

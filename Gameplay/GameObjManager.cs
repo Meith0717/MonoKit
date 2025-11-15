@@ -2,6 +2,7 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
+using MonoKit.SpatialManagement;
 using System.Collections.Generic;
 
 namespace MonoKit.Gameplay

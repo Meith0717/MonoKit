@@ -5,7 +5,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace MonoKit.Core
+namespace MonoKit.Core.Diagnostics
 {
     public class FrameCounter(SpriteFont spriteFont)
     {

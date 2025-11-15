@@ -3,7 +3,7 @@
 // All rights reserved.
 
 using Microsoft.Xna.Framework.Content;
-using MonoKit.Core;
+using MonoKit.Core.IO;
 using System.Collections.Generic;
 using System.Linq;
 

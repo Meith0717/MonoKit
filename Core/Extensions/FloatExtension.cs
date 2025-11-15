@@ -5,7 +5,7 @@
 using Microsoft.Xna.Framework;
 using System;
 
-namespace MonoKit.Extensions
+namespace MonoKit.Core.Extensions
 {
     public static class FloatExtension
     {

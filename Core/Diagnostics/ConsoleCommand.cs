@@ -4,7 +4,7 @@
 
 using System;
 
-namespace MonoKit.Debug
+namespace MonoKit.Core.Diagnostics
 {
     public class ConsoleCommand(string name, string description, Action<string[]> execute)
     {

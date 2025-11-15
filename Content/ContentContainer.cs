@@ -5,7 +5,7 @@
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using MonoKit.Core;
+using MonoKit.Core.IO;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;

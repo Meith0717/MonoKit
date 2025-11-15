@@ -5,7 +5,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace MonoKit.Debug
+namespace MonoKit.Core.Diagnostics
 {
     public static class ConsoleManager
     {

@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 using MonoKit.Input;
 using System.Collections.Generic;
 
-namespace MonoKit.Camera
+namespace MonoKit.Graphics.Camera
 {
     public interface ICamera3dBehavior
     {

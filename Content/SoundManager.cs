@@ -4,7 +4,7 @@
 
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
-using MonoKit.Core;
+using MonoKit.Core.IO;
 using System;
 using System.Collections.Generic;
 using System.IO;

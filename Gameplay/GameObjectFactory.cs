@@ -1,4 +1,4 @@
-﻿// GameObjFactory.cs 
+﻿// GameObjectFactory.cs 
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
@@ -8,13 +8,13 @@ using System.Collections.Immutable;
 
 namespace MonoKit.Gameplay
 {
-    public abstract class GameObjFactory<T>
+    public abstract class GameObjectFactory<T>
     {
         private readonly Dictionary<byte, T> _objectPrefabs = new();
         public readonly ImmutableArray<byte> IDs;
         public readonly ImmutableArray<T> Prefabs;
 
-        public GameObjFactory(ContentContainer<object> objectPrefabs)
+        public GameObjectFactory(ContentContainer<object> objectPrefabs)
         {
             byte i = 0;
             var ids = new List<byte>();

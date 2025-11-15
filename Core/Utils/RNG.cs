@@ -4,7 +4,7 @@
 
 using System;
 
-namespace MonoKit.Core
+namespace MonoKit.Core.Utils
 {
     public static class RNG
     {

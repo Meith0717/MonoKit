@@ -5,7 +5,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace MonoKit.Core
+namespace MonoKit.Core.Utils
 {
     public class FixedList<T>(int capacity)
     {

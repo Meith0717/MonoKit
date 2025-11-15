@@ -5,7 +5,7 @@
 using System;
 using System.Threading;
 
-namespace MonoKit.Core
+namespace MonoKit.Core.IO
 {
     public static class DataIO
     {

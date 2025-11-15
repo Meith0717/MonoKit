@@ -3,16 +3,11 @@
 // All rights reserved.
 
 using Newtonsoft.Json;
-using System.Collections.Generic;
-using System.Text.Json;
 
-namespace MonoKit.Core
+namespace MonoKit.Core.IO
 {
     internal static class JsonHandler
     {
-        public static Dictionary<string, JsonElement> LoadJsonInDictionary(string jsonString)
-            => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(jsonString);
-
         public static string SerializeToJson(object obj)
         {
             JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings

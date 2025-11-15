@@ -1,4 +1,4 @@
-﻿// PathManager.cs 
+﻿// PathService.cs 
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
@@ -7,14 +7,14 @@ using System.Collections.Generic;
 using System.IO;
 using static System.Environment;
 
-namespace MonoKit.Core
+namespace MonoKit.Core.IO
 {
-    public class PathManager<TPathId> where TPathId : Enum
+    public class PathService<TPathId> where TPathId : Enum
     {
         public string RootPath { get; }
         private readonly Dictionary<TPathId, string> _paths = new();
 
-        public PathManager(string rootPath = null, SpecialFolder? baseFolder = null)
+        public PathService(string rootPath = null, SpecialFolder? baseFolder = null)
         {
             string folderName = rootPath ?? "MonoKit";
 

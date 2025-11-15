@@ -4,15 +4,16 @@
 
 #if DEBUG
 using MonoGame.Extended;
-using MonoKit.Extensions;
 # endif
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using MonoKit.Camera;
 using MonoKit.Gameplay;
 using System.Collections.Generic;
+using MonoKit.SpatialManagement;
+using MonoKit.Core.Extensions;
+using MonoKit.Graphics.Camera;
 
-namespace MonoKit.Rendering
+namespace MonoKit.Graphics.Rendering
 {
     public class GameRenderer2D(RuntimeContainer services, IGameObjRenderer2D renderer)
     {
@@ -25,7 +26,7 @@ namespace MonoKit.Rendering
         public void Update(double elapsedMilliseconds)
         {
             _culledObjects.Clear();
-            _spatialHashing.GetObjectsInRectangle(_camera.Bounds, _culledObjects);
+            _spatialHashing.GetInRectangle(_camera.Bounds, _culledObjects);
             _gameObjRenderer.UpdateEffects(elapsedMilliseconds);
         }
 

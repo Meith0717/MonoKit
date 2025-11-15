@@ -4,7 +4,7 @@
 
 using System.IO;
 
-namespace MonoKit.Core
+namespace MonoKit.Core.IO
 {
     public class FileUtils
     {

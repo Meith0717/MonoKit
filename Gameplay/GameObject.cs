@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
 using MonoKit.Content;
+using MonoKit.SpatialManagement;
 using Newtonsoft.Json;
 using System;
 using System.Text.Json;
@@ -13,7 +14,7 @@ using System.Text.Json;
 namespace MonoKit.Gameplay
 {
     [Serializable]
-    public abstract class GameObject : IDisposable
+    public abstract class GameObject : IDisposable, ISpatial
     {
         [JsonProperty] private CircleF _boundBox = new();
         [JsonProperty] private readonly float _maxTextureSize;
@@ -42,6 +43,10 @@ namespace MonoKit.Gameplay
 
         // Managing Stuff
         [JsonIgnore] public bool IsDisposed { get; private set; }
+
+        public RectangleF Bounding => BoundBox.BoundingRectangle;
+
+        public bool HasPositionChanged() => Velocity != 0;
 
         protected GameObject(Vector2 position, string textureId, float scale)
         {

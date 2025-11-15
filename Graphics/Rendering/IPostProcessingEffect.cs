@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 
-namespace MonoKit.Rendering
+namespace MonoKit.Graphics.Rendering
 {
     public interface IPostProcessingEffect
     {

@@ -9,16 +9,16 @@ using MonoKit.Content;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MonoKit.Gameplay
+namespace MonoKit.SpatialManagement
 {
     internal class SpatialGrid((int, int) hash, int size)
     {
         private readonly (int, int) _hash = hash;
         public readonly RectangleF Bounds = new(hash.Item1 * size, hash.Item2 * size, size, size);
-        private readonly HashSet<GameObject> _objects = new();
+        private readonly HashSet<ISpatial> _objects = new();
         private readonly object _lock = new();
 
-        public GameObject[] Objects => _objects.ToArray();
+        public ISpatial[] Objects => _objects.ToArray();
 
         public bool IsEmpty
         {
@@ -29,19 +29,19 @@ namespace MonoKit.Gameplay
             }
         }
 
-        public void Add(GameObject item)
+        public void Add(ISpatial item)
         {
             lock (_lock)
                 _objects.Add(item);
         }
 
-        public void Remove(GameObject item)
+        public void Remove(ISpatial item)
         {
             lock (_lock)
                 _objects.Remove(item);
         }
 
-        public void AddObjectsInCircle<T>(CircleF circleF, ref List<T> values) where T : GameObject
+        public void AddObjectsInCircle<T>(CircleF circleF, ref List<T> values)
         {
             lock (_lock)
             {
@@ -52,13 +52,13 @@ namespace MonoKit.Gameplay
                     if (obj is not T)
                         continue;
 
-                    if (circleF.Intersects(obj.BoundBox))
+                    if (circleF.Intersects(obj.Bounding))
                         values.Add((T)obj);
                 }
             }
         }
 
-        public void AddObjectsInRectangle<T>(RectangleF rectangle, ref List<T> values) where T : GameObject
+        public void AddObjectsInRectangle<T>(RectangleF rectangle, ref List<T> values)
         {
             lock (_lock)
             {
@@ -69,13 +69,13 @@ namespace MonoKit.Gameplay
                     if (obj is not T)
                         continue;
 
-                    if (rectangle.Intersects(obj.BoundBox))
+                    if (rectangle.Intersects(obj.Bounding))
                         values.Add((T)obj);
                 }
             }
         }
 
-        public void AddObjects<T>(ref List<T> values) where T : GameObject
+        public void AddObjects<T>(ref List<T> values)
         {
             lock (_lock)
             {
