@@ -4,26 +4,43 @@
 
 using System;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 
 namespace MonoKit.Core.Diagnostics
 {
     public static class ConsoleManager
     {
+        // Only available on Windows — guard with OS checks
+#if WINDOWS
         [DllImport("kernel32.dll")]
         private static extern bool AllocConsole();
 
         [DllImport("kernel32.dll")]
         private static extern bool FreeConsole();
+#endif
 
         public static void Show(string welcomeMessage = "Console initialized.")
         {
-            // AllocConsole(); Only works on Windows
+#if WINDOWS
+            // Only run if executed on Windows (prevents Linux errors)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                try { AllocConsole(); }
+                catch { /* ignore */ }
+            }
+#endif
             Console.WriteLine(welcomeMessage + "\n");
         }
 
         public static void Hide()
         {
-            // FreeConsole(); Only works on windows
+#if WINDOWS
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                try { FreeConsole(); }
+                catch { /* ignore */ }
+            }
+#endif
         }
 
         public static void DrawProgressBar(string info, int progress, int total, int barWidth = 40)
@@ -31,9 +48,11 @@ namespace MonoKit.Core.Diagnostics
             if (Console.IsOutputRedirected)
                 return;
 
-            var percent = (double)progress / total;
-            var filled = (int)(percent * barWidth);
-            var bar = new string('█', filled) + new string(' ', barWidth - filled);
+            double percent = (double)progress / total;
+            int filled = (int)(percent * barWidth);
+
+            string bar = new string('█', filled) + new string(' ', barWidth - filled);
+
             Console.Write($"\r{info} [{bar}] {percent * 100:0.0}%");
         }
 
@@ -42,10 +61,8 @@ namespace MonoKit.Core.Diagnostics
             if (Console.IsOutputRedirected)
                 return;
 
-            var currentLineCursor = Console.CursorTop;
-            Console.SetCursorPosition(0, currentLineCursor);
-            Console.Write(new string(' ', Console.WindowWidth));
-            Console.SetCursorPosition(0, currentLineCursor);
+            Console.Write("\033[2K");
+            Console.Write("\r");
         }
 
     }
