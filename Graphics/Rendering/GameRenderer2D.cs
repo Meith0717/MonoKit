@@ -5,13 +5,13 @@
 #if DEBUG
 using MonoGame.Extended;
 # endif
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using MonoKit.Gameplay;
-using System.Collections.Generic;
-using MonoKit.SpatialManagement;
 using MonoKit.Core.Extensions;
+using MonoKit.Gameplay;
 using MonoKit.Graphics.Camera;
+using MonoKit.SpatialManagement;
 
 namespace MonoKit.Graphics.Rendering
 {
@@ -22,17 +22,19 @@ namespace MonoKit.Graphics.Rendering
         private readonly Camera2D _camera = services.Get<Camera2D>();
         private readonly SpatialHashing _spatialHashing = services.Get<SpatialHashing>();
         private readonly List<GameObject> _culledObjects = new();
+        private float _viewportScale;
 
-        public void Update(double elapsedMilliseconds)
+        public void Update(double elapsedMilliseconds, float viewportScale)
         {
             _culledObjects.Clear();
             _spatialHashing.GetInRectangle(_camera.Bounds, _culledObjects);
             _gameObjRenderer.UpdateEffects(elapsedMilliseconds);
+            _viewportScale = viewportScale;
         }
 
-        public void Begin(SpriteBatch spriteBatch, float viewportScale)
+        public void Begin(SpriteBatch spriteBatch)
         {
-            _camera.UpdateView(viewportScale);
+            _camera.UpdateView(_viewportScale);
             spriteBatch.Begin(transformMatrix: _camera.View, sortMode: SpriteSortMode.BackToFront);
         }
 

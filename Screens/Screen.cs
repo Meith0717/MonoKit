@@ -2,12 +2,12 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoKit.Graphics.Rendering;
 using MonoKit.Input;
 using MonoKit.Ui;
-using System;
 
 namespace MonoKit.Screens
 {
@@ -16,7 +16,7 @@ namespace MonoKit.Screens
         public readonly bool UpdateBelow;
         public readonly bool DrawBelow;
 
-        protected readonly GameServiceContainer ApplicationServices;
+        protected readonly GameServiceContainer AppServices;
         protected readonly ScreenManager ScreenManager;
         protected readonly GraphicsDevice GraphicsDevice;
         protected readonly UiFrame UiRoot;
@@ -25,11 +25,11 @@ namespace MonoKit.Screens
         public IPostProcessingEffect PostProcessingEffect;
         private RenderTarget2D _renderTarget;
 
-        protected Screen(GameServiceContainer applicationServices, bool updateBelow, bool drawBelow)
+        protected Screen(GameServiceContainer appServices, bool updateBelow, bool drawBelow)
         {
-            ApplicationServices = applicationServices;
-            GraphicsDevice = applicationServices.GetService<GraphicsDevice>();
-            ScreenManager = applicationServices.GetService<ScreenManager>();
+            AppServices = appServices;
+            GraphicsDevice = appServices.GetService<GraphicsDevice>();
+            ScreenManager = appServices.GetService<ScreenManager>();
             UpdateBelow = updateBelow;
             DrawBelow = drawBelow;
             _postProcessingRunner = new(GraphicsDevice);

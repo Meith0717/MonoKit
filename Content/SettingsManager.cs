@@ -2,9 +2,9 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
+using System;
 using MonoKit.Graphics;
 using Newtonsoft.Json;
-using System;
 
 namespace MonoKit.Content
 {

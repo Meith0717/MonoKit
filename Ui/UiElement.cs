@@ -5,10 +5,10 @@
 # if DEBUG
 using MonoGame.Extended;
 # endif
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoKit.Input;
-using System;
 
 namespace MonoKit.Ui
 {

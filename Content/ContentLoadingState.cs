@@ -2,10 +2,10 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
-using Microsoft.Xna.Framework.Content;
-using MonoKit.Core.IO;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Xna.Framework.Content;
+using MonoKit.Core.IO;
 
 namespace MonoKit.Content
 {

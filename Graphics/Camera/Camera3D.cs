@@ -2,10 +2,10 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoKit.Input;
-using System.Collections.Generic;
 
 namespace MonoKit.Graphics.Camera
 {

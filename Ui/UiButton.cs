@@ -2,13 +2,13 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
+using System;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoKit.Content;
 using MonoKit.Input;
-using System;
-using System.Linq;
 
 namespace MonoKit.Ui
 {

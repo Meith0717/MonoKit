@@ -2,8 +2,8 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
-using Microsoft.Xna.Framework;
 using System;
+using Microsoft.Xna.Framework;
 
 namespace MonoKit.Core.Extensions
 {
