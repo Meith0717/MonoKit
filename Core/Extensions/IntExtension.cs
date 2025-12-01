@@ -12,7 +12,7 @@ namespace MonoKit.Core.Extensions
         public static string ToRoman(this int value)
         {
             if (value < 1 || value > 3999)
-                throw new ArgumentOutOfRangeException(nameof(value), "Value must be between 1 and 3999");
+                return "?";
 
             var romanNumerals = new[]
             {

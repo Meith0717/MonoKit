@@ -6,10 +6,8 @@ using Microsoft.Xna.Framework;
 
 namespace MonoKit.Ai
 {
-    public abstract class Consideration
+    public interface  IConsideration
     {
-        public abstract float Score();
-
-        protected float Clamp01(float value) => MathHelper.Clamp(value, 0f, 1f);
+        public float Score();
     }
 }

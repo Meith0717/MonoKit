@@ -4,7 +4,7 @@
 
 namespace MonoKit.Ai
 {
-    public interface IAIAction
+    public interface IAiAction
     {
         string Name { get; }
 

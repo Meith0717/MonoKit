@@ -7,15 +7,15 @@ using System.Collections.Generic;
 
 namespace MonoKit.Ai
 {
-    public class AIComponent
+    public class AiComponent
     {
-        private const float _evalInterval = 300f;
-        private float _evalTimer = RNG.Random.Next((int)_evalInterval);
+        private const float EvalInterval = 300f;
+        private float _evalTimer = RNG.Random.Next((int)EvalInterval);
 
-        private readonly List<IAIAction> _actions = [];
-        private IAIAction _currentAction;
+        private readonly List<IAiAction> _actions = [];
+        private IAiAction _currentAction;
 
-        public void AddAction(IAIAction action)
+        public void AddAction(IAiAction action)
         {
             System.ArgumentNullException.ThrowIfNull(action);
             _actions.Add(action);
@@ -25,7 +25,7 @@ namespace MonoKit.Ai
         {
             _evalTimer += (float)elapsedMilliseconds;
 
-            if (_evalTimer >= _evalInterval)
+            if (_evalTimer >= EvalInterval)
             {
                 _evalTimer = 0;
                 EvaluateActions();
@@ -36,26 +36,21 @@ namespace MonoKit.Ai
 
         private void EvaluateActions()
         {
-            float bestScore = 0f;
-            IAIAction best = null;
+            var bestScore = 0f;
+            IAiAction best = null;
 
             foreach (var action in _actions)
             {
-                float s = action.Evaluate();
-                if (s > bestScore)
-                {
-                    bestScore = s;
-                    best = action;
-                }
+                var s = action.Evaluate();
+                if (!(s > bestScore)) continue;
+                bestScore = s;
+                best = action;
             }
 
-            if (best != _currentAction)
-            {
-                _currentAction?.Exit();
-                _currentAction = best;
-                _currentAction?.Enter();
-            }
+            if (best == _currentAction) return;
+            _currentAction?.Exit();
+            _currentAction = best;
+            _currentAction?.Enter();
         }
     }
-
 }

@@ -6,18 +6,17 @@ using System.Collections.Generic;
 
 namespace MonoKit.Ai
 {
-    public class AIManager
+    public class AiManager
     {
-        private readonly List<AIComponent> agents = [];
+        private readonly List<AiComponent> _agents = [];
 
-        public void Register(AIComponent ai) => agents.Add(ai);
-        public void Unregister(AIComponent ai) => agents.Remove(ai);
+        public void Register(AiComponent ai) => _agents.Add(ai);
+        public void Unregister(AiComponent ai) => _agents.Remove(ai);
 
         public void Update(double elapsedMilliseconds)
         {
-            foreach (var ai in agents)
+            foreach (var ai in _agents)
                 ai.Update(elapsedMilliseconds);
         }
     }
-
 }
