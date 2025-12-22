@@ -10,32 +10,27 @@ namespace MonoKit.Gameplay
 {
     public abstract class GameObjectFactory<T>
     {
-        public readonly ImmutableArray<byte> IDs;
-        public readonly ImmutableArray<string> Names;
+        protected readonly byte MaxID;
         public readonly ImmutableArray<T> Prefabs;
+        private readonly Dictionary<string, byte> _namesIdDictionary;
 
         public GameObjectFactory(ContentContainer<object> objectPrefabs)
         {
-            var dataCount = objectPrefabs.Content.Count;
-            
-            byte i = 0;
-            var ids = new List<byte>();
+            byte id = 0;
             var prefabs = new List<T>();
-            var names = new List<string>();
+           _namesIdDictionary = new Dictionary<string, byte>(); 
              
             foreach (var kvp in objectPrefabs.Content)
             {
                 if (kvp.Value is not T data) continue;
                 
-                names.Add(kvp.Key);
-                ids.Add(i);
+                _namesIdDictionary.Add(kvp.Key, id);
                 prefabs.Add(data);
-                i++;
+                id++;
             }
-            
-            IDs = [.. ids];
+
+            MaxID = id;
             Prefabs = [.. prefabs];
-            Names = [.. names];
         }
 
         public T GetPrefab(byte id)
@@ -45,11 +40,10 @@ namespace MonoKit.Gameplay
         
         public T GetPrefab(string name)
         {
-           var id = (byte)Names.IndexOf(name);
-           if (int.IsNegative(id))
-               throw new KeyNotFoundException();
-
-           return GetPrefab(id);
+            if (_namesIdDictionary.TryGetValue(name, out var id))
+                return GetPrefab(id);
+           
+            throw new KeyNotFoundException();
         }
     }
 }
