@@ -11,47 +11,47 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoKit.Core.IO;
 
-namespace MonoKit.Content
+namespace MonoKit.Content;
+
+public class ContentContainer<T>
 {
-    public class ContentContainer<T>
+    private readonly Dictionary<string, T> _content = new();
+    public string[] Loaded => _content.Keys.ToArray();
+
+    public ImmutableDictionary<string, T> Content => _content.ToImmutableDictionary();
+
+    public T Get(string key)
     {
-        private readonly Dictionary<string, T> _content = new();
-        public string[] Loaded => _content.Keys.ToArray();
+        if (_content.ContainsKey(key))
+            return _content[key];
+        MessageBox.Show("Missing content", $"'{key}' of type {typeof(T)}\ncold not be found.", ["ok"]);
+        if (typeof(T) == typeof(Texture2D))
+            return _content["missingContent"];
+        return default;
+    }
 
-        public ImmutableDictionary<string, T> Content => _content.ToImmutableDictionary();
+    public void Add(string key, T value, ContentLoadingState contentLoadingState = null)
+    {
+        if (_content.ContainsKey(key))
+            return;
+        _content.Add(key, value);
+    }
 
-        public T Get(string key)
+    public void LoadContent(ContentManager contentManager, string contentDirectory,
+        ContentLoadingState contentLoadingState = null, SearchOption searchOption = SearchOption.AllDirectories)
+    {
+        var fullContentDirectory = Path.Combine(contentManager.RootDirectory, contentDirectory);
+        var files = FileUtils.GetAllFilesInDirectory(fullContentDirectory, searchOption);
+
+        foreach (var file in files)
         {
-            if (_content.ContainsKey(key))
-                return _content[key];
-            MessageBox.Show("Missing content", $"'{key}' of type {typeof(T)}\ncold not be found.", ["ok"]);
-            if (typeof(T) == typeof(Texture2D))
-                return _content["missingContent"];
-            return default;
-        }
-
-        public void Add(string key, T value, ContentLoadingState contentLoadingState = null)
-        {
-            if (_content.ContainsKey(key))
-                return;
-            _content.Add(key, value);
-        }
-
-        public void LoadContent(ContentManager contentManager, string contentDirectory, ContentLoadingState contentLoadingState = null, SearchOption searchOption = SearchOption.AllDirectories)
-        {
-            string fullContentDirectory = Path.Combine(contentManager.RootDirectory, contentDirectory);
-            string[] files = FileUtils.GetAllFilesInDirectory(fullContentDirectory, searchOption);
-
-            foreach (var file in files)
-            {
-                string directory = Path.GetDirectoryName(file);
-                string contentId = Path.GetFileNameWithoutExtension(file);
-                string relativePath = Path.GetRelativePath(contentManager.RootDirectory, directory);
-                string contentPath = Path.Combine(relativePath, contentId);
-                T content = contentManager.Load<T>(contentPath);
-                Add(contentId, content);
-                contentLoadingState?.AddLoaded(file);
-            }
+            var directory = Path.GetDirectoryName(file);
+            var contentId = Path.GetFileNameWithoutExtension(file);
+            var relativePath = Path.GetRelativePath(contentManager.RootDirectory, directory);
+            var contentPath = Path.Combine(relativePath, contentId);
+            var content = contentManager.Load<T>(contentPath);
+            Add(contentId, content);
+            contentLoadingState?.AddLoaded(file);
         }
     }
 }

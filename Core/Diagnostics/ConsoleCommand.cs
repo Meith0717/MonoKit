@@ -4,12 +4,11 @@
 
 using System;
 
-namespace MonoKit.Core.Diagnostics
+namespace MonoKit.Core.Diagnostics;
+
+public class ConsoleCommand(string name, string description, Action<string[]> execute)
 {
-    public class ConsoleCommand(string name, string description, Action<string[]> execute)
-    {
-        public string Name { get; } = name;
-        public string Description { get; } = description;
-        public Action<string[]> Execute { get; } = execute;
-    }
+    public string Name { get; } = name;
+    public string Description { get; } = description;
+    public Action<string[]> Execute { get; } = execute;
 }

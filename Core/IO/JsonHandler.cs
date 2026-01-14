@@ -4,33 +4,32 @@
 
 using Newtonsoft.Json;
 
-namespace MonoKit.Core.IO
-{
-    internal static class JsonHandler
-    {
-        public static string SerializeToJson(object obj)
-        {
-            JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.Objects,
-                PreserveReferencesHandling = PreserveReferencesHandling.Objects,
-                Formatting = Formatting.Indented
-            };
-            return JsonConvert.SerializeObject(obj, jsonSerializerSettings);
-        }
+namespace MonoKit.Core.IO;
 
-        public static object PopulateObject(object target, string jsonString)
+internal static class JsonHandler
+{
+    public static string SerializeToJson(object obj)
+    {
+        var jsonSerializerSettings = new JsonSerializerSettings
         {
-            if (jsonString is null) return target;
-            JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.Objects,
-                PreserveReferencesHandling = PreserveReferencesHandling.Objects,
-                ObjectCreationHandling = ObjectCreationHandling.Replace,
-                NullValueHandling = NullValueHandling.Ignore,
-            };
-            JsonConvert.PopulateObject(jsonString, target, jsonSerializerSettings);
-            return target;
-        }
+            TypeNameHandling = TypeNameHandling.Objects,
+            PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+            Formatting = Formatting.Indented
+        };
+        return JsonConvert.SerializeObject(obj, jsonSerializerSettings);
+    }
+
+    public static object PopulateObject(object target, string jsonString)
+    {
+        if (jsonString is null) return target;
+        var jsonSerializerSettings = new JsonSerializerSettings
+        {
+            TypeNameHandling = TypeNameHandling.Objects,
+            PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+            ObjectCreationHandling = ObjectCreationHandling.Replace,
+            NullValueHandling = NullValueHandling.Ignore
+        };
+        JsonConvert.PopulateObject(jsonString, target, jsonSerializerSettings);
+        return target;
     }
 }

@@ -5,48 +5,49 @@
 using System;
 using System.Threading;
 
-namespace MonoKit.Core.Diagnostics
+namespace MonoKit.Core.Diagnostics;
+
+public class ConsoleListener(ConsoleCommands commands)
 {
-    public class ConsoleListener(ConsoleCommands commands)
+    private readonly ConsoleCommands _commands = commands;
+    private Thread _inputThread;
+    private bool _running;
+
+    public void Start()
     {
-        private readonly ConsoleCommands _commands = commands;
-        private Thread _inputThread;
-        private bool _running = false;
-
-        public void Start()
+        _running = true;
+        _inputThread = new Thread(InputLoop)
         {
-            _running = true;
-            _inputThread = new Thread(InputLoop)
-            {
-                IsBackground = true,
-                Name = "ConsoleInputThread"
-            };
-            _inputThread.Start();
-        }
+            IsBackground = true,
+            Name = "ConsoleInputThread"
+        };
+        _inputThread.Start();
+    }
 
-        private void InputLoop()
+    private void InputLoop()
+    {
+        while (_running)
         {
-            while (_running)
-            {
-                string input = Console.ReadLine();
-                if (input == null)
-                    continue;
+            var input = Console.ReadLine();
+            if (input == null)
+                continue;
 
-                _commands.Execute(input);
-            }
+            _commands.Execute(input);
         }
+    }
 
 
-        public void Stop()
+    public void Stop()
+    {
+        _running = false;
+        try
         {
-            _running = false;
-            try
-            {
-                if (Console.In.Peek() == -1)
-                    Console.WriteLine();
-            }
-            catch { /* ignore */ }
+            if (Console.In.Peek() == -1)
+                Console.WriteLine();
         }
-
+        catch
+        {
+            /* ignore */
+        }
     }
 }

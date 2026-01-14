@@ -5,77 +5,76 @@
 using System;
 using System.Collections.Generic;
 
-namespace MonoKit.Core.Utils
+namespace MonoKit.Core.Utils;
+
+public class FixedList<T>(int capacity)
 {
-    public class FixedList<T>(int capacity)
+    private readonly T[] _items = new T[capacity];
+
+    public int Count { get; private set; }
+
+    public int Capacity => _items.Length;
+
+    public bool Full => Capacity == Count;
+
+    public T this[int index]
     {
-        private readonly T[] _items = new T[capacity];
-
-        public int Count { get; private set; } = 0;
-
-        public int Capacity => _items.Length;
-
-        public bool Full => Capacity == Count;
-
-        public T this[int index]
-        {
-            get
-            {
-                if (index >= Count || index < 0)
-                    throw new ArgumentOutOfRangeException();
-
-                return _items[index];
-            }
-        }
-
-        public bool TryAdd(T item)
-        {
-            if (Count >= _items.Length)
-                return false;
-
-            _items[Count++] = item;
-            return true;
-        }
-
-        public void RemoveAt(int index)
+        get
         {
             if (index >= Count || index < 0)
                 throw new ArgumentOutOfRangeException();
 
-            for (int i = index; i < Count - 1; i++)
-                _items[i] = _items[i + 1];
-
-            _items[--Count] = default!;
+            return _items[index];
         }
+    }
 
-        public bool TryRemove(T item)
-        {
-            int index = IndexOf(item);
-            if (index == -1)
-                return false;
+    public bool TryAdd(T item)
+    {
+        if (Count >= _items.Length)
+            return false;
 
-            RemoveAt(index);
-            return true;
-        }
+        _items[Count++] = item;
+        return true;
+    }
 
-        public int IndexOf(T item)
-        {
-            var comparer = EqualityComparer<T>.Default;
-            for (int i = 0; i < Count; i++)
-            {
-                if (comparer.Equals(_items[i], item))
-                    return i;
-            }
-            return -1;
-        }
+    public void RemoveAt(int index)
+    {
+        if (index >= Count || index < 0)
+            throw new ArgumentOutOfRangeException();
 
-        public void Clear()
-        {
-            Array.Clear(_items, 0, Count);
-            Count = 0;
-        }
+        for (var i = index; i < Count - 1; i++)
+            _items[i] = _items[i + 1];
 
-        public T[] ToArray()
-            => _items;
+        _items[--Count] = default!;
+    }
+
+    public bool TryRemove(T item)
+    {
+        var index = IndexOf(item);
+        if (index == -1)
+            return false;
+
+        RemoveAt(index);
+        return true;
+    }
+
+    public int IndexOf(T item)
+    {
+        var comparer = EqualityComparer<T>.Default;
+        for (var i = 0; i < Count; i++)
+            if (comparer.Equals(_items[i], item))
+                return i;
+        return -1;
+    }
+
+    public void Clear()
+    {
+        Array.Clear(_items, 0, Count);
+        Count = 0;
+    }
+
+    public T[] ToArray()
+    {
+        return _items;
     }
 }

@@ -5,12 +5,11 @@
 using Microsoft.Xna.Framework;
 using MonoGame.Extended;
 
-namespace MonoKit.SpatialManagement
+namespace MonoKit.Spatial;
+
+public interface ISpatial
 {
-    public interface ISpatial
-    {
-        Vector2 Position { get; }
-        RectangleF Bounding { get; }
-        bool HasPositionChanged();
-    }
+    Vector2 Position { get; }
+    RectangleF Bounding { get; }
+    bool HasPositionChanged();
 }

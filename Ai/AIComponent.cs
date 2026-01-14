@@ -2,55 +2,55 @@
 // Copyright (c) 2023-2025 Thierry Meiers 
 // All rights reserved.
 
+using System;
 using System.Collections.Generic;
 using MonoKit.Core.Utils;
 
-namespace MonoKit.Ai
+namespace MonoKit.Ai;
+
+public class AiComponent
 {
-    public class AiComponent
+    private const float EvalInterval = 300f;
+
+    private readonly List<IAiAction> _actions = [];
+    private IAiAction _currentAction;
+    private float _evalTimer = RNG.Random.Next((int)EvalInterval);
+
+    public void AddAction(IAiAction action)
     {
-        private const float EvalInterval = 300f;
-        private float _evalTimer = RNG.Random.Next((int)EvalInterval);
+        ArgumentNullException.ThrowIfNull(action);
+        _actions.Add(action);
+    }
 
-        private readonly List<IAiAction> _actions = [];
-        private IAiAction _currentAction;
+    public void Update(double elapsedMilliseconds)
+    {
+        _evalTimer += (float)elapsedMilliseconds;
 
-        public void AddAction(IAiAction action)
+        if (_evalTimer >= EvalInterval)
         {
-            System.ArgumentNullException.ThrowIfNull(action);
-            _actions.Add(action);
+            _evalTimer = 0;
+            EvaluateActions();
         }
 
-        public void Update(double elapsedMilliseconds)
+        _currentAction?.Execute(elapsedMilliseconds);
+    }
+
+    private void EvaluateActions()
+    {
+        var bestScore = 0f;
+        IAiAction best = null;
+
+        foreach (var action in _actions)
         {
-            _evalTimer += (float)elapsedMilliseconds;
-
-            if (_evalTimer >= EvalInterval)
-            {
-                _evalTimer = 0;
-                EvaluateActions();
-            }
-
-            _currentAction?.Execute(elapsedMilliseconds);
+            var s = action.Evaluate();
+            if (!(s > bestScore)) continue;
+            bestScore = s;
+            best = action;
         }
 
-        private void EvaluateActions()
-        {
-            var bestScore = 0f;
-            IAiAction best = null;
-
-            foreach (var action in _actions)
-            {
-                var s = action.Evaluate();
-                if (!(s > bestScore)) continue;
-                bestScore = s;
-                best = action;
-            }
-
-            if (best == _currentAction) return;
-            _currentAction?.Exit();
-            _currentAction = best;
-            _currentAction?.Enter();
-        }
+        if (best == _currentAction) return;
+        _currentAction?.Exit();
+        _currentAction = best;
+        _currentAction?.Enter();
     }
 }

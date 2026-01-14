@@ -4,27 +4,27 @@
 
 using System;
 
-namespace MonoKit.Content
+namespace MonoKit.Content;
+
+public sealed class AudioService
 {
-    public sealed class AudioService
+    // Lazy-loaded singleton instance
+    private static readonly Lazy<AudioService> _instance = new(() => new AudioService());
+
+    // Internal content providers
+    private readonly SoundManager _musicsInternal;
+    private readonly SoundManager _soundEffectsInternal;
+
+    // Private constructor
+    private AudioService()
     {
-        // Lazy-loaded singleton instance
-        private static readonly Lazy<AudioService> _instance = new(() => new());
-        private static AudioService Instance => _instance.Value;
-
-        // Static proxy accessors
-        public static SoundManager Musics => Instance._musicsInternal;
-        public static SoundManager SFX => Instance._soundEffectsInternal;
-
-        // Internal content providers
-        private readonly SoundManager _musicsInternal;
-        private readonly SoundManager _soundEffectsInternal;
-
-        // Private constructor
-        private AudioService()
-        {
-            _musicsInternal = new(1);
-            _soundEffectsInternal = new(10);
-        }
+        _musicsInternal = new SoundManager(1);
+        _soundEffectsInternal = new SoundManager(10);
     }
+
+    private static AudioService Instance => _instance.Value;
+
+    // Static proxy accessors
+    public static SoundManager Musics => Instance._musicsInternal;
+    public static SoundManager SFX => Instance._soundEffectsInternal;
 }

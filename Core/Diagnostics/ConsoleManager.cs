@@ -3,14 +3,12 @@
 // All rights reserved.
 
 using System;
-using System.Runtime.InteropServices;
-using System.Runtime.Versioning;
 
-namespace MonoKit.Core.Diagnostics
+namespace MonoKit.Core.Diagnostics;
+
+public static class ConsoleManager
 {
-    public static class ConsoleManager
-    {
-        // Only available on Windows — guard with OS checks
+    // Only available on Windows — guard with OS checks
 #if WINDOWS
         [DllImport("kernel32.dll")]
         private static extern bool AllocConsole();
@@ -19,8 +17,8 @@ namespace MonoKit.Core.Diagnostics
         private static extern bool FreeConsole();
 #endif
 
-        public static void Show(string welcomeMessage = "Console initialized.")
-        {
+    public static void Show(string welcomeMessage = "Console initialized.")
+    {
 #if WINDOWS
             // Only run if executed on Windows (prevents Linux errors)
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -29,11 +27,11 @@ namespace MonoKit.Core.Diagnostics
                 catch { /* ignore */ }
             }
 #endif
-            Console.WriteLine(welcomeMessage + "\n");
-        }
+        Console.WriteLine(welcomeMessage + "\n");
+    }
 
-        public static void Hide()
-        {
+    public static void Hide()
+    {
 #if WINDOWS
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -41,29 +39,27 @@ namespace MonoKit.Core.Diagnostics
                 catch { /* ignore */ }
             }
 #endif
-        }
+    }
 
-        public static void DrawProgressBar(string info, int progress, int total, int barWidth = 40)
-        {
-            if (Console.IsOutputRedirected)
-                return;
+    public static void DrawProgressBar(string info, int progress, int total, int barWidth = 40)
+    {
+        if (Console.IsOutputRedirected)
+            return;
 
-            double percent = (double)progress / total;
-            int filled = (int)(percent * barWidth);
+        var percent = (double)progress / total;
+        var filled = (int)(percent * barWidth);
 
-            string bar = new string('█', filled) + new string(' ', barWidth - filled);
+        var bar = new string('█', filled) + new string(' ', barWidth - filled);
 
-            Console.Write($"\r{info} [{bar}] {percent * 100:0.0}%");
-        }
+        Console.Write($"\r{info} [{bar}] {percent * 100:0.0}%");
+    }
 
-        public static void ClearLine()
-        {
-            if (Console.IsOutputRedirected)
-                return;
+    public static void ClearLine()
+    {
+        if (Console.IsOutputRedirected)
+            return;
 
-            Console.Write("\033[2K");
-            Console.Write("\r");
-        }
-
+        Console.Write("\033[2K");
+        Console.Write("\r");
     }
 }

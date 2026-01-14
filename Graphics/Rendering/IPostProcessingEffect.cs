@@ -6,63 +6,61 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace MonoKit.Graphics.Rendering
+namespace MonoKit.Graphics.Rendering;
+
+public interface IPostProcessingEffect
 {
-    public interface IPostProcessingEffect
+    RenderTarget2D Apply(SpriteBatch spriteBatch, PostProcessingRunner pipeline, RenderTarget2D input);
+}
+
+public class PostProcessingRunner(GraphicsDevice graphicsDevice) : IDisposable
+{
+    private readonly GraphicsDevice _graphicsDevice = graphicsDevice;
+    private readonly RenderTarget2D[] _renderTargets = new RenderTarget2D[2];
+    private int currentIndex;
+
+    public void Dispose()
     {
-        RenderTarget2D Apply(SpriteBatch spriteBatch, PostProcessingRunner pipeline, RenderTarget2D input);
+        foreach (var renderTarget in _renderTargets)
+            renderTarget?.Dispose();
+        GC.SuppressFinalize(this);
     }
 
-    public class PostProcessingRunner(GraphicsDevice graphicsDevice) : IDisposable
+    public RenderTarget2D Pass(Effect effect, SpriteBatch spriteBatch, RenderTarget2D input)
     {
-        private readonly GraphicsDevice _graphicsDevice = graphicsDevice;
-        private readonly RenderTarget2D[] _renderTargets = new RenderTarget2D[2];
-        private int currentIndex = 0;
+        var destination = GetNextRenderTarget();
 
-        public RenderTarget2D Pass(Effect effect, SpriteBatch spriteBatch, RenderTarget2D input)
+        _graphicsDevice.SetRenderTarget(destination);
+        _graphicsDevice.Clear(Color.Transparent);
+
+        spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Opaque, null, null, null, effect);
+        spriteBatch.Draw(input, input.Bounds, Color.White);
+        spriteBatch.End();
+
+        _graphicsDevice.SetRenderTarget(null);
+
+        return destination;
+    }
+
+    public void ApplyResolution(int width, int height)
+    {
+        for (var i = 0; i < _renderTargets.Length; i++)
         {
-            var destination = GetNextRenderTarget();
-
-            _graphicsDevice.SetRenderTarget(destination);
-            _graphicsDevice.Clear(Color.Transparent);
-
-            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Opaque, null, null, null, effect);
-            spriteBatch.Draw(input, input.Bounds, Color.White);
-            spriteBatch.End();
-
-            _graphicsDevice.SetRenderTarget(null);
-
-            return destination;
-        }
-
-        public void ApplyResolution(int width, int height)
-        {
-            for (var i = 0; i < _renderTargets.Length; i++)
-            {
-                _renderTargets[i]?.Dispose();
-                _renderTargets[i] = new RenderTarget2D(
+            _renderTargets[i]?.Dispose();
+            _renderTargets[i] = new RenderTarget2D(
                 _graphicsDevice,
                 width,
                 height,
                 false,
                 SurfaceFormat.Color,
                 DepthFormat.None
-                );
-            }
-        }
-
-        public void Dispose()
-        {
-            foreach (var renderTarget in _renderTargets)
-                renderTarget?.Dispose();
-            GC.SuppressFinalize(this);
-        }
-
-        private RenderTarget2D GetNextRenderTarget()
-        {
-            currentIndex = (currentIndex + 1) % _renderTargets.Length;
-            return _renderTargets[currentIndex];
+            );
         }
     }
 
+    private RenderTarget2D GetNextRenderTarget()
+    {
+        currentIndex = (currentIndex + 1) % _renderTargets.Length;
+        return _renderTargets[currentIndex];
+    }
 }

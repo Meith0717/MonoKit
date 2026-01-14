@@ -4,12 +4,16 @@
 
 using System.Collections;
 
-namespace MonoKit.Input
-{
-    public enum InputEventType { Pressed, Released, Held }
+namespace MonoKit.Input;
 
-    public interface IInputDevice
-    {
-        void Update(double elapsedMilliseconds, BitArray actionFlags);
-    }
+public enum InputEventType
+{
+    Pressed,
+    Released,
+    Held
+}
+
+public interface IInputDevice
+{
+    void Update(double elapsedMilliseconds, BitArray actionFlags);
 }

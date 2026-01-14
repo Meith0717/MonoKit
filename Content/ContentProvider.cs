@@ -5,44 +5,52 @@
 using System;
 using System.Collections.Generic;
 
-namespace MonoKit.Content
+namespace MonoKit.Content;
+
+/// <summary>
+///     Provides access to all loaded content containers.
+/// </summary>
+public sealed class ContentProvider
 {
+    private static readonly Lazy<ContentProvider> _instance = new(() => new ContentProvider());
+
+    private readonly Dictionary<Type, object> _containers = new();
+    private static ContentProvider Instance => _instance.Value;
+
     /// <summary>
-    /// Provides access to all loaded content containers.
+    ///     Registers a new content type container if it doesn’t exist.
     /// </summary>
-    public sealed class ContentProvider
+    public static void Register<T>()
     {
-        private static ContentProvider Instance => _instance.Value;
-        private static readonly Lazy<ContentProvider> _instance = new(() => new ContentProvider());
+        Instance.RegisterInternal<T>();
+    }
 
-        private readonly Dictionary<Type, object> _containers = new();
+    /// <summary>
+    ///     Gets the container for a given content type. Automatically registers it if missing.
+    /// </summary>
+    public static ContentContainer<T> Container<T>()
+    {
+        return Instance.GetContainerInternal<T>();
+    }
 
-        /// <summary>
-        /// Registers a new content type container if it doesn’t exist.
-        /// </summary>
-        public static void Register<T>() => Instance.RegisterInternal<T>();
+    public static T Get<T>(string id)
+    {
+        return Instance.GetContainerInternal<T>().Get(id);
+    }
 
-        /// <summary>
-        /// Gets the container for a given content type. Automatically registers it if missing.
-        /// </summary>
-        public static ContentContainer<T> Container<T>() => Instance.GetContainerInternal<T>();
+    private void RegisterInternal<T>()
+    {
+        if (!_containers.ContainsKey(typeof(T)))
+            _containers[typeof(T)] = new ContentContainer<T>();
+    }
 
-        public static T Get<T>(string id) => Instance.GetContainerInternal<T>().Get(id);
+    private ContentContainer<T> GetContainerInternal<T>()
+    {
+        if (_containers.TryGetValue(typeof(T), out var container))
+            return (ContentContainer<T>)container;
 
-        private void RegisterInternal<T>()
-        {
-            if (!_containers.ContainsKey(typeof(T)))
-                _containers[typeof(T)] = new ContentContainer<T>();
-        }
-
-        private ContentContainer<T> GetContainerInternal<T>()
-        {
-            if (_containers.TryGetValue(typeof(T), out var container))
-                return (ContentContainer<T>)container;
-
-            var newContainer = new ContentContainer<T>();
-            _containers[typeof(T)] = newContainer;
-            return newContainer;
-        }
+        var newContainer = new ContentContainer<T>();
+        _containers[typeof(T)] = newContainer;
+        return newContainer;
     }
 }

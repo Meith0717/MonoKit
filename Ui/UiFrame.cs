@@ -9,72 +9,74 @@ using MonoGame.Extended;
 using MonoKit.Content;
 using MonoKit.Input;
 
-namespace MonoKit.Ui
+namespace MonoKit.Ui;
+
+public class UiFrame : UiElement
 {
-    public class UiFrame() : UiElement
+    private readonly List<UiElement> _elementChilds = new();
+    private Color _color = Color.White;
+    private Texture2D _texture;
+    private float _textureScale = 1;
+
+    public Color Color
     {
-        private readonly List<UiElement> _elementChilds = new();
-        private Texture2D _texture;
-        private float _textureScale = 1;
-        private Color _color = Color.White;
+        set => _color = value;
+    }
 
-        public Color Color { set => _color = value; }
+    protected override void Updater(InputHandler inputHandler)
+    {
+        UpdateSizeIfTextureNotNull();
+        _elementChilds.RemoveAll(c => c.IsDisposed);
+        foreach (var child in _elementChilds)
+            child.Update(inputHandler, Bounds, UiScale);
+    }
 
-        protected override void Updater(InputHandler inputHandler)
-        {
-            UpdateSizeIfTextureNotNull();
-            _elementChilds.RemoveAll(c => c.IsDisposed);
-            foreach (var child in _elementChilds)
-                child.Update(inputHandler, Bounds, UiScale);
-        }
+    protected override void Drawer(SpriteBatch spriteBatch)
+    {
+        if (_texture is not null)
+            spriteBatch.Draw(_texture, Bounds, _color);
+        else if (_color != Color.Transparent)
+            spriteBatch.FillRectangle(Bounds, _color);
 
-        protected override void Drawer(SpriteBatch spriteBatch)
-        {
-            if (_texture is not null)
-                spriteBatch.Draw(_texture, Bounds, _color);
-            else if (_color != Color.Transparent)
-                spriteBatch.FillRectangle(Bounds, _color);
+        foreach (var child in _elementChilds)
+            child.Draw(spriteBatch);
+    }
 
-            foreach (var child in _elementChilds)
-                child.Draw(spriteBatch);
-        }
+    public override void ApplyScale(Rectangle root, float uiScale)
+    {
+        base.ApplyScale(root, uiScale);
+        foreach (var child in _elementChilds)
+            child.ApplyScale(Bounds, uiScale);
+    }
 
-        public override void ApplyScale(Rectangle root, float uiScale)
-        {
-            base.ApplyScale(root, uiScale);
-            foreach (var child in _elementChilds)
-                child.ApplyScale(Bounds, uiScale);
-        }
+    public override void Dispose()
+    {
+        base.Dispose();
+        foreach (var child in _elementChilds)
+            child.Dispose();
+    }
 
-        public override void Dispose()
-        {
-            base.Dispose();
-            foreach (var child in _elementChilds)
-                child.Dispose();
-        }
+    public void Clear()
+    {
+        _elementChilds.Clear();
+    }
 
-        public void Clear()
-        {
-            _elementChilds.Clear();
-        }
+    public void Add(UiElement child)
+    {
+        _elementChilds.Add(child);
+    }
 
-        public void Add(UiElement child)
-        {
-            _elementChilds.Add(child);
-        }
+    public UiFrame AttachTexture(string texture, float scale = 1)
+    {
+        _texture = ContentProvider.Container<Texture2D>().Get(texture);
+        _textureScale = scale;
+        return this;
+    }
 
-        public UiFrame AttachTexture(string texture, float scale = 1)
-        {
-            _texture = ContentProvider.Container<Texture2D>().Get(texture);
-            _textureScale = scale;
-            return this;
-        }
-
-        private void UpdateSizeIfTextureNotNull()
-        {
-            if (_texture is null) return;
-            Width = (int)(_texture.Width * _textureScale);
-            Height = (int)(_texture.Height * _textureScale);
-        }
+    private void UpdateSizeIfTextureNotNull()
+    {
+        if (_texture is null) return;
+        Width = (int)(_texture.Width * _textureScale);
+        Height = (int)(_texture.Height * _textureScale);
     }
 }

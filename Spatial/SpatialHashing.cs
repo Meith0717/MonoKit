@@ -11,133 +11,133 @@ using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
 using MonoKit.Core.Extensions;
 
-namespace MonoKit.SpatialManagement
+namespace MonoKit.Spatial;
+
+public class SpatialHashing(int cellSize)
 {
-    public class SpatialHashing(int cellSize)
+    private readonly ConcurrentDictionary<(int, int), SpatialGrid> _grids = new();
+    private readonly ConcurrentDictionary<ISpatial, List<(int, int)>> _hashes = new();
+    public readonly int CellSize = cellSize;
+    public int Count => _hashes.Count;
+
+    public void Add(ISpatial obj)
     {
-        public int Count => _hashes.Count;
-        public readonly int CellSize = cellSize;
-        private readonly ConcurrentDictionary<(int, int), SpatialGrid> _grids = new();
-        private readonly ConcurrentDictionary<ISpatial, List<(int, int)>> _hashes = new();
-
-        public void Add(ISpatial obj)
+        var start = Vector2.Floor(obj.Bounding.TopLeft / CellSize);
+        var end = Vector2.Ceiling(obj.Bounding.BottomRight / CellSize);
+        for (var x = start.X; x < end.X; x++)
+        for (var y = start.Y; y < end.Y; y++)
         {
-            var start = Vector2.Floor(obj.Bounding.TopLeft / CellSize);
-            var end = Vector2.Ceiling(obj.Bounding.BottomRight / CellSize);
-            for (var x = start.X; x < end.X; x++)
-            {
-                for (var y = start.Y; y < end.Y; y++)
-                {
-                    var hash = ((int)x, (int)y);
-                    _grids.GetOrAdd(hash, _ => new(hash, CellSize)).Add(obj);
-                    _hashes.GetOrAdd(obj, _ => new()).Add(hash);
-                }
-            }
+            var hash = ((int)x, (int)y);
+            _grids.GetOrAdd(hash, _ => new SpatialGrid(hash, CellSize)).Add(obj);
+            _hashes.GetOrAdd(obj, _ => new List<(int, int)>()).Add(hash);
+        }
+    }
+
+    public void Remove(ISpatial obj)
+    {
+        var hashes = _hashes[obj];
+        foreach (var hash in hashes)
+        {
+            if (_grids.TryGetValue(hash, out var grid))
+                grid.Remove(obj);
+            if (grid.IsEmpty)
+                _grids.TryRemove(hash, out _);
         }
 
-        public void Remove(ISpatial obj)
+        _hashes.TryRemove(obj, out _);
+    }
+
+    public void Rearrange()
+    {
+        var movingObjects = _hashes
+            .Where(kvp => kvp.Key.HasPositionChanged())
+            .Select(kvp => kvp.Key)
+            .ToList();
+
+        foreach (var obj in movingObjects)
         {
-            var hashes = _hashes[obj];
-            foreach (var hash in hashes)
-            {
-                if (_grids.TryGetValue(hash, out var grid))
-                    grid.Remove(obj);
-                if (grid.IsEmpty)
-                    _grids.TryRemove(hash, out _);
-            }
-            _hashes.TryRemove(obj, out _);
+            Remove(obj);
+            Add(obj);
         }
+    }
 
-        public void Rearrange()
-        {
-            var movingObjects = _hashes
-                .Where(kvp => kvp.Key.HasPositionChanged())
-                .Select(kvp => kvp.Key)
-                .ToList();
+    public void Clear()
+    {
+        _grids.Clear();
+    }
 
-            foreach (var obj in movingObjects)
-            {
-                Remove(obj);
-                Add(obj);
-            }
-        }
+    public (int, int) Hash(Vector2 vector)
+    {
+        vector *= CellSize;
+        vector.Floor();
 
-        public void Clear()
-        {
-            _grids.Clear();
-        }
+        var x = (int)vector.X;
+        var y = (int)vector.Y;
 
-        public (int, int) Hash(Vector2 vector)
-        {
-            vector *= CellSize;
-            vector.Floor();
+        return (x, y);
+    }
 
-            var x = (int)vector.X;
-            var y = (int)vector.Y;
+    public void GetInRadius<T>(Vector2 position, float radius, List<T> objectsInRadius, bool sortedByDistance = true)
+        where T : ISpatial
+    {
+        var startX = (int)MathF.Floor((position.X - radius) / CellSize);
+        var endX = (int)MathF.Ceiling((position.X + radius) / CellSize);
+        var startY = (int)MathF.Floor((position.Y - radius) / CellSize);
+        var endY = (int)MathF.Ceiling((position.Y + radius) / CellSize);
+        var lookUpCircle = new CircleF(position, radius);
 
-            return (x, y);
-        }
+        for (var x = startX; x < endX; x++)
+        for (var y = startY; y < endY; y++)
+            if (_grids.TryGetValue((x, y), out var grid))
+                grid.AddObjectsInCircle(lookUpCircle, ref objectsInRadius);
 
-        public void GetInRadius<T>(Vector2 position, float radius, List<T> objectsInRadius, bool sortedByDistance = true) where T : ISpatial
-        {
-            var startX = (int)MathF.Floor((position.X - radius) / CellSize);
-            var endX = (int)MathF.Ceiling((position.X + radius) / CellSize);
-            var startY = (int)MathF.Floor((position.Y - radius) / CellSize);
-            var endY = (int)MathF.Ceiling((position.Y + radius) / CellSize);
-            var lookUpCircle = new CircleF(position, radius);
+        if (sortedByDistance)
+            objectsInRadius.AsParallel()
+                .OrderBy(obj =>
+                    Vector2.Distance(position, obj.Position) - float.Max(obj.Bounding.Height, obj.Bounding.Width));
+    }
 
-            for (var x = startX; x < endX; x++)
-                for (var y = startY; y < endY; y++)
-                    if (_grids.TryGetValue((x, y), out var grid))
-                        grid.AddObjectsInCircle(lookUpCircle, ref objectsInRadius);
+    public void GetInRectangle<T>(RectangleF searchRectangle, List<T> objectsInRectangle) where T : ISpatial
+    {
+        var startX = (int)Math.Floor(searchRectangle.Left / CellSize);
+        var endX = (int)Math.Ceiling(searchRectangle.Right / CellSize);
+        var startY = (int)Math.Floor(searchRectangle.Top / CellSize);
+        var endY = (int)Math.Ceiling(searchRectangle.Bottom / CellSize);
 
-            if (sortedByDistance)
-                objectsInRadius.AsParallel()
-                    .OrderBy(obj => Vector2.Distance(position, obj.Position) - float.Max(obj.Bounding.Height, obj.Bounding.Width));
-        }
+        for (var x = startX; x < endX; x++)
+        for (var y = startY; y < endY; y++)
+            if (_grids.TryGetValue((x, y), out var grid))
+                grid.AddObjectsInRectangle(searchRectangle, ref objectsInRectangle);
+    }
 
-        public void GetInRectangle<T>(RectangleF searchRectangle, List<T> objectsInRectangle) where T : ISpatial
-        {
-            var startX = (int)Math.Floor(searchRectangle.Left / CellSize);
-            var endX = (int)Math.Ceiling(searchRectangle.Right / CellSize);
-            var startY = (int)Math.Floor(searchRectangle.Top / CellSize);
-            var endY = (int)Math.Ceiling(searchRectangle.Bottom / CellSize);
+    public void GetInBucket<T>(Vector2 position, List<T> objectsInBucket) where T : ISpatial
+    {
+        if (_grids.TryGetValue(Hash(position), out var bucket))
+            bucket.AddObjects(ref objectsInBucket);
+    }
 
-            for (var x = startX; x < endX; x++)
-                for (var y = startY; y < endY; y++)
-                    if (_grids.TryGetValue((x, y), out var grid))
-                        grid.AddObjectsInRectangle(searchRectangle, ref objectsInRectangle);
-        }
+    public void Draw(SpriteBatch spriteBatch, Vector2 lookUpPosition, float cameraZoom)
+    {
+        foreach (var grid in _grids.Values)
+            grid.Draw(spriteBatch, Color.Red, cameraZoom);
 
-        public void GetInBucket<T>(Vector2 position, List<T> objectsInBucket) where T : ISpatial
-        {
-            if (_grids.TryGetValue(Hash(position), out var bucket))
-                bucket.AddObjects(ref objectsInBucket);
-        }
+        var radius = 100;
+        var radius2 = radius * 2;
+        RectangleF rectangle = new(lookUpPosition - new Vector2(radius), new SizeF(radius2, radius2));
+        var gameObjects = new List<ISpatial>();
+        GetInBucket(lookUpPosition, gameObjects);
+        foreach (var obj in gameObjects)
+            spriteBatch.DrawLine(lookUpPosition, obj.Position, Color.White, 1f / cameraZoom, 0.9f);
+        gameObjects.Clear();
+        spriteBatch.DrawRectangleF(rectangle, Color.Red, cameraZoom);
+        GetInRectangle(rectangle, gameObjects);
+        foreach (var obj in gameObjects)
+            spriteBatch.DrawLine(lookUpPosition, obj.Position, Color.Red, 1f / cameraZoom, 0.99f);
 
-        public void Draw(SpriteBatch spriteBatch, Vector2 lookUpPosition, float cameraZoom)
-        {
-            foreach (var grid in _grids.Values)
-                grid.Draw(spriteBatch, Color.Red, cameraZoom);
-
-            int radius = 100;
-            int radius2 = radius * 2;
-            RectangleF rectangle = new(lookUpPosition - new Vector2(radius), new(radius2, radius2));
-            var gameObjects = new List<ISpatial>();
-            GetInBucket(lookUpPosition, gameObjects);
-            foreach (var obj in gameObjects)
-                spriteBatch.DrawLine(lookUpPosition, obj.Position, Color.White, 1f / cameraZoom, 0.9f);
-            gameObjects.Clear();
-            spriteBatch.DrawRectangleF(rectangle, Color.Red, cameraZoom);
-            GetInRectangle(rectangle, gameObjects);
-            foreach (var obj in gameObjects)
-                spriteBatch.DrawLine(lookUpPosition, obj.Position, Color.Red, 1f / cameraZoom, 0.99f);
-
-            gameObjects.Clear();
-            spriteBatch.DrawCircleF(lookUpPosition, radius, Color.Orange, cameraZoom);
-            GetInRadius(lookUpPosition, radius, gameObjects);
-            foreach (var obj in gameObjects)
-                spriteBatch.DrawLine(lookUpPosition, obj.Position, Color.Orange, 1f / cameraZoom, 0.999f);
-        }
+        gameObjects.Clear();
+        spriteBatch.DrawCircleF(lookUpPosition, radius, Color.Orange, cameraZoom);
+        GetInRadius(lookUpPosition, radius, gameObjects);
+        foreach (var obj in gameObjects)
+            spriteBatch.DrawLine(lookUpPosition, obj.Position, Color.Orange, 1f / cameraZoom, 0.999f);
     }
 }

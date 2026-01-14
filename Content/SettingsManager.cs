@@ -6,31 +6,45 @@ using System;
 using MonoKit.Graphics;
 using Newtonsoft.Json;
 
-namespace MonoKit.Content
+namespace MonoKit.Content;
+
+[Serializable]
+public class SettingsManager
 {
-    [Serializable]
-    public class SettingsManager
+    [JsonProperty] private SettingsState _settings = new(1, .9f, 1, 60, true, false, WindowMode.Windowed, .9f, 1, .5f);
+
+    public SettingsState GetSettings()
     {
-        [JsonProperty]
-        private SettingsState _settings = new(1, .9f, 1, 60, true, false, WindowMode.Windowed, .9f, 1, .5f);
-
-        public SettingsState GetSettings() => _settings;
-
-        public void SetSettings(SettingsState settings) => _settings = settings;
+        return _settings;
     }
 
-    [Serializable]
-    public readonly struct SettingsState(float masterVol, float musicVol, float sfxVol, int refRate, bool showFPS, bool vSync, WindowMode windowMode, float uiScale, float bloomEffect, float bloomThreshold)
+    public void SetSettings(SettingsState settings)
     {
-        [JsonProperty] public readonly float MasterVolume = masterVol;
-        [JsonProperty] public readonly float MusicVolume = musicVol;
-        [JsonProperty] public readonly float SFXVolume = sfxVol;
-        [JsonProperty] public readonly int RefreshRate = refRate;
-        [JsonProperty] public readonly bool ShowFPS = showFPS;
-        [JsonProperty] public readonly bool VSync = vSync;
-        [JsonProperty] public readonly WindowMode WindowMode = windowMode;
-        [JsonProperty] public readonly float UiScale = uiScale;
-        [JsonProperty] public readonly float BloomIntensity = bloomEffect;
-        [JsonProperty] public readonly float BloomThreshold = bloomThreshold;
+        _settings = settings;
     }
+}
+
+[Serializable]
+public readonly struct SettingsState(
+    float masterVol,
+    float musicVol,
+    float sfxVol,
+    int refRate,
+    bool showFPS,
+    bool vSync,
+    WindowMode windowMode,
+    float uiScale,
+    float bloomEffect,
+    float bloomThreshold)
+{
+    [JsonProperty] public readonly float MasterVolume = masterVol;
+    [JsonProperty] public readonly float MusicVolume = musicVol;
+    [JsonProperty] public readonly float SFXVolume = sfxVol;
+    [JsonProperty] public readonly int RefreshRate = refRate;
+    [JsonProperty] public readonly bool ShowFPS = showFPS;
+    [JsonProperty] public readonly bool VSync = vSync;
+    [JsonProperty] public readonly WindowMode WindowMode = windowMode;
+    [JsonProperty] public readonly float UiScale = uiScale;
+    [JsonProperty] public readonly float BloomIntensity = bloomEffect;
+    [JsonProperty] public readonly float BloomThreshold = bloomThreshold;
 }

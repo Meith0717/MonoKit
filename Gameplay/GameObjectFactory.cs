@@ -6,44 +6,43 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using MonoKit.Content;
 
-namespace MonoKit.Gameplay
+namespace MonoKit.Gameplay;
+
+public abstract class GameObjectFactory<T>
 {
-    public abstract class GameObjectFactory<T>
+    private readonly Dictionary<string, byte> _namesIdDictionary;
+    protected readonly byte MaxID;
+    public readonly ImmutableArray<T> Prefabs;
+
+    public GameObjectFactory(ContentContainer<object> objectPrefabs)
     {
-        protected readonly byte MaxID;
-        public readonly ImmutableArray<T> Prefabs;
-        private readonly Dictionary<string, byte> _namesIdDictionary;
+        byte id = 0;
+        var prefabs = new List<T>();
+        _namesIdDictionary = new Dictionary<string, byte>();
 
-        public GameObjectFactory(ContentContainer<object> objectPrefabs)
+        foreach (var kvp in objectPrefabs.Content)
         {
-            byte id = 0;
-            var prefabs = new List<T>();
-           _namesIdDictionary = new Dictionary<string, byte>(); 
-             
-            foreach (var kvp in objectPrefabs.Content)
-            {
-                if (kvp.Value is not T data) continue;
-                
-                _namesIdDictionary.Add(kvp.Key, id);
-                prefabs.Add(data);
-                id++;
-            }
+            if (kvp.Value is not T data) continue;
 
-            MaxID = id;
-            Prefabs = [.. prefabs];
+            _namesIdDictionary.Add(kvp.Key, id);
+            prefabs.Add(data);
+            id++;
         }
 
-        public T GetPrefab(byte id)
-        {
-            return id < Prefabs.Length ? Prefabs[id] : throw new KeyNotFoundException();
-        }
-        
-        public T GetPrefab(string name)
-        {
-            if (_namesIdDictionary.TryGetValue(name, out var id))
-                return GetPrefab(id);
-           
-            throw new KeyNotFoundException();
-        }
+        MaxID = id;
+        Prefabs = [.. prefabs];
+    }
+
+    public T GetPrefab(byte id)
+    {
+        return id < Prefabs.Length ? Prefabs[id] : throw new KeyNotFoundException();
+    }
+
+    public T GetPrefab(string name)
+    {
+        if (_namesIdDictionary.TryGetValue(name, out var id))
+            return GetPrefab(id);
+
+        throw new KeyNotFoundException();
     }
 }

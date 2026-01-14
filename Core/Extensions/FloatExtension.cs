@@ -5,11 +5,12 @@
 using System;
 using Microsoft.Xna.Framework;
 
-namespace MonoKit.Core.Extensions
+namespace MonoKit.Core.Extensions;
+
+public static class FloatExtension
 {
-    public static class FloatExtension
+    public static Vector2 RadiantToDirection(this float value)
     {
-        public static Vector2 RadiantToDirection(this float value)
-            => new(MathF.Cos(value), MathF.Sin(value));
+        return new Vector2(MathF.Cos(value), MathF.Sin(value));
     }
 }

@@ -17,11 +17,11 @@ public class ScreenManager(Game game)
 {
     private readonly Game _game = game;
     private readonly GraphicsDevice _graphicsDevice = game.GraphicsDevice;
-    private readonly Stack<Screen> _screens = new();
-    private readonly ConcurrentQueue<Action<double, float>> _pendingActions = new();
 
     private readonly LinkedList<RenderTarget2D> _lowerRenderTargets = new();
+    private readonly ConcurrentQueue<Action<double, float>> _pendingActions = new();
     private readonly PostProcessingRunner _postProcessingRunner = new(game.GraphicsDevice);
+    private readonly Stack<Screen> _screens = new();
     private RenderTarget2D _lowerRenderTarget;
     private bool _runnEffect;
     public IPostProcessingEffect PostProcessingEffect;
@@ -63,7 +63,7 @@ public class ScreenManager(Game game)
         while (_pendingActions.TryDequeue(out var action))
             action(elapsedMilliseconds, uiScale);
 
-        for (int i = 0; i < _screens.Count; i++)
+        for (var i = 0; i < _screens.Count; i++)
         {
             var screen = _screens.ElementAt(i);
             screen.Update(elapsedMilliseconds, inputHandler, uiScale);
@@ -72,8 +72,15 @@ public class ScreenManager(Game game)
         }
     }
 
-    public void EffectOn() => _runnEffect = true;
-    public void EffectOff() => _runnEffect = false;
+    public void EffectOn()
+    {
+        _runnEffect = true;
+    }
+
+    public void EffectOff()
+    {
+        _runnEffect = false;
+    }
 
     public void Draw(SpriteBatch spriteBatch)
     {
@@ -82,7 +89,7 @@ public class ScreenManager(Game game)
 
         var topScreenTarget = _screens.First().RenderTarget(spriteBatch);
 
-        int i = 0;
+        var i = 0;
         while (_screens.ElementAt(i).DrawBelow)
             i++;
 
@@ -109,7 +116,7 @@ public class ScreenManager(Game game)
 
     public void Exit()
     {
-        for (int i = 0; i < _screens.Count; i++)
+        for (var i = 0; i < _screens.Count; i++)
             _screens.ElementAt(i).Dispose();
 
         _postProcessingRunner.Dispose();
@@ -119,10 +126,11 @@ public class ScreenManager(Game game)
 
     public void OnResolutionChanged(double elapsedMilliseconds, float uiScale)
     {
-        foreach (Screen layer in _screens)
+        foreach (var layer in _screens)
             layer.ApplyResolution(elapsedMilliseconds, uiScale);
         _postProcessingRunner.ApplyResolution(_graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height);
         _lowerRenderTarget?.Dispose();
-        _lowerRenderTarget = new(_graphicsDevice, _graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height);
+        _lowerRenderTarget = new RenderTarget2D(_graphicsDevice, _graphicsDevice.Viewport.Width,
+            _graphicsDevice.Viewport.Height);
     }
 }
