@@ -1,5 +1,5 @@
-﻿// EllypseFExtension.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// EllypseFExtension.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
 
 using Microsoft.Xna.Framework;

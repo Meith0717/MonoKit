@@ -1,5 +1,5 @@
-﻿// SpatialGrid.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// SpatialGrid.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
 
 using System.Collections.Generic;
@@ -13,7 +13,11 @@ namespace MonoKit.Spatial;
 
 internal class SpatialGrid((int, int) hash, int size)
 {
-    private readonly (int, int) _hash = hash;
+    private static readonly SpriteFont Font = ContentProvider
+        .Container<SpriteFont>()
+        .Get("default_font");
+    private readonly string _id = $"ID: ({hash.Item1},{hash.Item2})";
+
     private readonly object _lock = new();
     private readonly HashSet<ISpatial> _objects = new();
     public readonly RectangleF Bounds = new(hash.Item1 * size, hash.Item2 * size, size, size);
@@ -99,19 +103,34 @@ internal class SpatialGrid((int, int) hash, int size)
 
     public void Draw(SpriteBatch spriteBatch, Color color, float cameraZoom)
     {
-        var font = ContentProvider.Container<SpriteFont>().Get("default_font");
-        var pos = Bounds.TopRight - new Vector2(10, -10);
-        var str = $"({_hash.Item1},{_hash.Item2})";
-        var size = font.MeasureString(str) * .2f;
-        pos.X -= size.X;
-        spriteBatch.DrawString(font, str, pos, color, 0, Vector2.Zero, .2f, SpriteEffects.None, 1);
-        spriteBatch.DrawRectangle(Bounds, color, 2f / cameraZoom);
-        pos = Bounds.Position + new Vector2(10, 10);
-        foreach (var obj in _objects)
-        {
-            spriteBatch.DrawString(font, $"({obj.GetType().Name})", pos, color, 0, Vector2.Zero, .2f,
-                SpriteEffects.None, 1);
-            pos.Y += 30;
-        }
+        var position = Bounds.Position + new Vector2(10, 10);
+        spriteBatch.DrawString(
+            Font,
+            _id,
+            position,
+            color,
+            0,
+            Vector2.Zero,
+            .2f,
+            SpriteEffects.None,
+            1
+        );
+
+        position.Y += 25;
+        spriteBatch.DrawString(
+            Font,
+            $"Amount: {_objects.Count}",
+            position,
+            color,
+            0,
+            Vector2.Zero,
+            .2f,
+            SpriteEffects.None,
+            1
+        );
+
+        var bounds = Bounds;
+        bounds.Inflate(.5f, .5f);
+        spriteBatch.DrawRectangle(bounds, color, 1 / cameraZoom);
     }
 }

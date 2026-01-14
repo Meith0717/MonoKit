@@ -1,5 +1,5 @@
-﻿// ContentLoadingState.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// ContentLoadingState.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
 
 using System;
@@ -19,15 +19,16 @@ public class ContentLoadingState
 
     public ContentLoadingState(ContentManager content)
     {
-        _allContent = [.. FileUtils.GetAllFilesInDirectory(content.RootDirectory, SearchOption.AllDirectories)];
+        _allContent =
+        [
+            .. FileUtils.GetAllFilesInDirectory(content.RootDirectory, SearchOption.AllDirectories),
+        ];
         _count = _allContent.Count;
     }
 
-    public double Progress
-        => (double)_loadedContent.Count / _count;
+    public double Progress => (double)_loadedContent.Count / _count;
 
-    public string CurrentLoadedFile
-        => _loadedContent.LastOrDefault(string.Empty);
+    public string CurrentLoadedFile => _loadedContent.LastOrDefault(string.Empty);
 
     public void AddLoaded(string file)
     {

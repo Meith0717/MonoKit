@@ -1,5 +1,5 @@
-﻿// IPostProcessingEffect.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// IPostProcessingEffect.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
 
 using System;
@@ -10,7 +10,11 @@ namespace MonoKit.Graphics.Rendering;
 
 public interface IPostProcessingEffect
 {
-    RenderTarget2D Apply(SpriteBatch spriteBatch, PostProcessingRunner pipeline, RenderTarget2D input);
+    RenderTarget2D Apply(
+        SpriteBatch spriteBatch,
+        PostProcessingRunner pipeline,
+        RenderTarget2D input
+    );
 }
 
 public class PostProcessingRunner(GraphicsDevice graphicsDevice) : IDisposable

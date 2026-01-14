@@ -1,5 +1,5 @@
-﻿// ISpatial.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// ISpatial.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
 
 using Microsoft.Xna.Framework;

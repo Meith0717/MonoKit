@@ -1,5 +1,5 @@
-﻿// ConsoleCommands.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// ConsoleCommands.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
 
 using System;
@@ -25,7 +25,8 @@ public class ConsoleCommands
     public bool Execute(string input)
     {
         var parts = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (parts.Length == 0) return false;
+        if (parts.Length == 0)
+            return false;
 
         var name = parts[0].ToLower();
         var args = parts.Skip(1).ToArray();

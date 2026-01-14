@@ -1,5 +1,5 @@
-﻿// ContentContainer.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// ContentContainer.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
 
 using System.Collections.Generic;
@@ -24,7 +24,11 @@ public class ContentContainer<T>
     {
         if (_content.ContainsKey(key))
             return _content[key];
-        MessageBox.Show("Missing content", $"'{key}' of type {typeof(T)}\ncold not be found.", ["ok"]);
+        MessageBox.Show(
+            "Missing content",
+            $"'{key}' of type {typeof(T)}\ncold not be found.",
+            ["ok"]
+        );
         if (typeof(T) == typeof(Texture2D))
             return _content["missingContent"];
         return default;
@@ -37,8 +41,12 @@ public class ContentContainer<T>
         _content.Add(key, value);
     }
 
-    public void LoadContent(ContentManager contentManager, string contentDirectory,
-        ContentLoadingState contentLoadingState = null, SearchOption searchOption = SearchOption.AllDirectories)
+    public void LoadContent(
+        ContentManager contentManager,
+        string contentDirectory,
+        ContentLoadingState contentLoadingState = null,
+        SearchOption searchOption = SearchOption.AllDirectories
+    )
     {
         var fullContentDirectory = Path.Combine(contentManager.RootDirectory, contentDirectory);
         var files = FileUtils.GetAllFilesInDirectory(fullContentDirectory, searchOption);

@@ -1,5 +1,5 @@
-﻿// ConsoleListerner.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// ConsoleListerner.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
 
 using System;
@@ -16,11 +16,7 @@ public class ConsoleListener(ConsoleCommands commands)
     public void Start()
     {
         _running = true;
-        _inputThread = new Thread(InputLoop)
-        {
-            IsBackground = true,
-            Name = "ConsoleInputThread"
-        };
+        _inputThread = new Thread(InputLoop) { IsBackground = true, Name = "ConsoleInputThread" };
         _inputThread.Start();
     }
 
@@ -35,7 +31,6 @@ public class ConsoleListener(ConsoleCommands commands)
             _commands.Execute(input);
         }
     }
-
 
     public void Stop()
     {

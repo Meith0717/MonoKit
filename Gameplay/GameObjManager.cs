@@ -1,5 +1,5 @@
-﻿// GameObjManager.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// GameObjManager.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
 
 using System.Collections.Generic;
@@ -41,7 +41,8 @@ public class GameObjManager(SpatialHashing spatialHashing, RuntimeContainer serv
 
     public void Update(double elapsedMs)
     {
-        if (_gameObjects is null || _gameObjects.Count == 0) return;
+        if (_gameObjects is null || _gameObjects.Count == 0)
+            return;
 
         for (var i = 0; i < _gameObjects.Count; i++)
         {

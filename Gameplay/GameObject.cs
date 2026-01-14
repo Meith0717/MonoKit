@@ -1,5 +1,5 @@
-﻿// GameObject.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// GameObject.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
 
 using System;
@@ -15,12 +15,23 @@ namespace MonoKit.Gameplay;
 [Serializable]
 public abstract class GameObject : IDisposable, ISpatial
 {
-    [JsonProperty] private readonly float _maxTextureSize;
-    [JsonProperty] private CircleF _boundBox;
-    [JsonProperty] public Vector2 MovingDirection = Vector2.One;
-    [JsonProperty] public int RenderingDepth;
-    [JsonProperty] public Color TextureColor = Color.White;
-    [JsonProperty] public float Velocity;
+    [JsonProperty]
+    private readonly float _maxTextureSize;
+
+    [JsonProperty]
+    private CircleF _boundBox;
+
+    [JsonProperty]
+    public Vector2 MovingDirection = Vector2.One;
+
+    [JsonProperty]
+    public int RenderingDepth;
+
+    [JsonProperty]
+    public Color TextureColor = Color.White;
+
+    [JsonProperty]
+    public float Velocity;
 
     protected GameObject(Vector2 position, string textureId, float scale)
     {
@@ -32,7 +43,8 @@ public abstract class GameObject : IDisposable, ISpatial
     }
 
     // Physic Stuff
-    [JsonIgnore] public CircleF BoundBox => _boundBox;
+    [JsonIgnore]
+    public CircleF BoundBox => _boundBox;
 
     [JsonIgnore]
     public float Scale
@@ -42,14 +54,17 @@ public abstract class GameObject : IDisposable, ISpatial
     }
 
     // Texture Stuff
-    [JsonProperty] public string TextureId { get; private set; }
+    [JsonProperty]
+    public string TextureId { get; private set; }
 
     // Managing Stuff
-    [JsonIgnore] public bool IsDisposed { get; private set; }
+    [JsonIgnore]
+    public bool IsDisposed { get; private set; }
 
     public virtual void Dispose()
     {
-        if (IsDisposed) return;
+        if (IsDisposed)
+            return;
         IsDisposed = true;
         GC.SuppressFinalize(this);
     }

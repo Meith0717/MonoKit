@@ -1,5 +1,5 @@
-﻿// PathService.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// PathService.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
 
 using System;
@@ -9,7 +9,8 @@ using static System.Environment;
 
 namespace MonoKit.Core.IO;
 
-public class PathService<TPathId> where TPathId : Enum
+public class PathService<TPathId>
+    where TPathId : Enum
 {
     private readonly Dictionary<TPathId, string> _paths = new();
 

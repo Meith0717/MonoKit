@@ -1,5 +1,5 @@
-﻿// SpatialHashing.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// SpatialHashing.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
 
 using System;
@@ -77,7 +77,12 @@ public class SpatialHashing(int cellSize)
         return (x, y);
     }
 
-    public void GetInRadius<T>(Vector2 position, float radius, List<T> objectsInRadius, bool sortedByDistance = true)
+    public void GetInRadius<T>(
+        Vector2 position,
+        float radius,
+        List<T> objectsInRadius,
+        bool sortedByDistance = true
+    )
         where T : ISpatial
     {
         var startX = (int)MathF.Floor((position.X - radius) / CellSize);
@@ -92,12 +97,16 @@ public class SpatialHashing(int cellSize)
                 grid.AddObjectsInCircle(lookUpCircle, ref objectsInRadius);
 
         if (sortedByDistance)
-            objectsInRadius.AsParallel()
+            objectsInRadius
+                .AsParallel()
                 .OrderBy(obj =>
-                    Vector2.Distance(position, obj.Position) - float.Max(obj.Bounding.Height, obj.Bounding.Width));
+                    Vector2.Distance(position, obj.Position)
+                    - float.Max(obj.Bounding.Height, obj.Bounding.Width)
+                );
     }
 
-    public void GetInRectangle<T>(RectangleF searchRectangle, List<T> objectsInRectangle) where T : ISpatial
+    public void GetInRectangle<T>(RectangleF searchRectangle, List<T> objectsInRectangle)
+        where T : ISpatial
     {
         var startX = (int)Math.Floor(searchRectangle.Left / CellSize);
         var endX = (int)Math.Ceiling(searchRectangle.Right / CellSize);
@@ -110,7 +119,8 @@ public class SpatialHashing(int cellSize)
                 grid.AddObjectsInRectangle(searchRectangle, ref objectsInRectangle);
     }
 
-    public void GetInBucket<T>(Vector2 position, List<T> objectsInBucket) where T : ISpatial
+    public void GetInBucket<T>(Vector2 position, List<T> objectsInBucket)
+        where T : ISpatial
     {
         if (_grids.TryGetValue(Hash(position), out var bucket))
             bucket.AddObjects(ref objectsInBucket);
@@ -123,7 +133,10 @@ public class SpatialHashing(int cellSize)
 
         var radius = 100;
         var radius2 = radius * 2;
-        RectangleF rectangle = new(lookUpPosition - new Vector2(radius), new SizeF(radius2, radius2));
+        RectangleF rectangle = new(
+            lookUpPosition - new Vector2(radius),
+            new SizeF(radius2, radius2)
+        );
         var gameObjects = new List<ISpatial>();
         GetInBucket(lookUpPosition, gameObjects);
         foreach (var obj in gameObjects)
@@ -138,6 +151,12 @@ public class SpatialHashing(int cellSize)
         spriteBatch.DrawCircleF(lookUpPosition, radius, Color.Orange, cameraZoom);
         GetInRadius(lookUpPosition, radius, gameObjects);
         foreach (var obj in gameObjects)
-            spriteBatch.DrawLine(lookUpPosition, obj.Position, Color.Orange, 1f / cameraZoom, 0.999f);
+            spriteBatch.DrawLine(
+                lookUpPosition,
+                obj.Position,
+                Color.Orange,
+                1f / cameraZoom,
+                0.999f
+            );
     }
 }

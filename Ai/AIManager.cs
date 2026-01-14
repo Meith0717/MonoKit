@@ -1,5 +1,5 @@
-﻿// AIManager.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// AIManager.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
 
 using System.Collections.Generic;

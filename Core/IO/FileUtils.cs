@@ -1,5 +1,5 @@
-﻿// FileUtils.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// FileUtils.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
 
 using System.IO;
@@ -10,13 +10,15 @@ public class FileUtils
 {
     public static void CreateDirectory(string path)
     {
-        if (Directory.Exists(path)) return;
+        if (Directory.Exists(path))
+            return;
         Directory.CreateDirectory(path);
     }
 
     public static void DeleteDirectory(string path)
     {
-        if (!Directory.Exists(path)) return;
+        if (!Directory.Exists(path))
+            return;
         Directory.Delete(path, true);
     }
 
@@ -33,13 +35,15 @@ public class FileUtils
 
     public static void DeleteFile(string path)
     {
-        if (!FileExist(path)) return;
+        if (!FileExist(path))
+            return;
         File.Delete(path);
     }
 
     public static string ReadFile(string path)
     {
-        if (!File.Exists(path)) return null;
+        if (!File.Exists(path))
+            return null;
         using StreamReader streamReader = new(path);
         return streamReader.ReadToEnd();
     }

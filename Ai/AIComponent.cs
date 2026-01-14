@@ -1,5 +1,5 @@
-﻿// AIComponent.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// AIComponent.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
 
 using System;
@@ -43,12 +43,14 @@ public class AiComponent
         foreach (var action in _actions)
         {
             var s = action.Evaluate();
-            if (!(s > bestScore)) continue;
+            if (!(s > bestScore))
+                continue;
             bestScore = s;
             best = action;
         }
 
-        if (best == _currentAction) return;
+        if (best == _currentAction)
+            return;
         _currentAction?.Exit();
         _currentAction = best;
         _currentAction?.Enter();

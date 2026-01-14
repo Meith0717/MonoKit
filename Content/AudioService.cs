@@ -1,5 +1,5 @@
-﻿// AudioService.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// AudioService.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
 
 using System;
@@ -26,5 +26,5 @@ public sealed class AudioService
 
     // Static proxy accessors
     public static SoundManager Musics => Instance._musicsInternal;
-    public static SoundManager SFX => Instance._soundEffectsInternal;
+    public static SoundManager SoundEffects => Instance._soundEffectsInternal;
 }

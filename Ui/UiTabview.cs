@@ -1,5 +1,5 @@
-﻿// UiTabview.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// UiTabview.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
 
 using System.Collections.Generic;
@@ -13,10 +13,11 @@ namespace MonoKit.Ui;
 public enum TabAxix : byte
 {
     X,
-    Y
+    Y,
 }
 
-public sealed class UiTabView<ButtonType>(Color color) : UiElement where ButtonType : UiElement, IButton
+public sealed class UiTabView<ButtonType>(Color color) : UiElement
+    where ButtonType : UiElement, IButton
 {
     private readonly Color _color = color;
     private readonly List<(UiFrame, ButtonType, UiFrame)> _tabs = new();
@@ -76,7 +77,8 @@ public sealed class UiTabView<ButtonType>(Color color) : UiElement where ButtonT
                 button.OveideColor(Color.Red, Color.Red);
         }
 
-        if (_activeFrame is null) return;
+        if (_activeFrame is null)
+            return;
         _activeFrame.Update(inputHandler, Bounds, UiScale);
     }
 

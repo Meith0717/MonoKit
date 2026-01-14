@@ -1,5 +1,5 @@
-﻿// FrameCounter.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// FrameCounter.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
 
 using Microsoft.Xna.Framework;
@@ -50,7 +50,16 @@ public class FrameCounter(SpriteFont spriteFont)
         var strSize = spriteFont.MeasureString(str) * scale * viewpointScale;
         var ofset = new Vector2(10, -10) * scale * viewpointScale;
         var position = new Vector2(viewport.Width - strSize.X, 0) - ofset;
-        spriteBatch.DrawString(spriteFont, str, position, Color.White, 0, Vector2.Zero, scale * viewpointScale,
-            SpriteEffects.None, 1);
+        spriteBatch.DrawString(
+            spriteFont,
+            str,
+            position,
+            Color.White,
+            0,
+            Vector2.Zero,
+            scale * viewpointScale,
+            SpriteEffects.None,
+            1
+        );
     }
 }

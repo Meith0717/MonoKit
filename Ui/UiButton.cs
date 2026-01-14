@@ -1,5 +1,5 @@
-﻿// UiButton.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// UiButton.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
 
 using System;
@@ -57,11 +57,15 @@ public static class UiButton
             base.Updater(inputHandler);
             _uiText?.Update(inputHandler, Bounds, UiScale);
             _buttonBehaviour.Update(inputHandler, Bounds, OnClickAction, Disable);
-            Color = Disable ? _style.TextureDisableColor :
-                _buttonBehaviour.IsHovered ? _style.TextureHoverColor : _style.TextureIdleColor;
+            Color =
+                Disable ? _style.TextureDisableColor
+                : _buttonBehaviour.IsHovered ? _style.TextureHoverColor
+                : _style.TextureIdleColor;
             if (_uiText is not null)
-                _uiText.Color = Disable ? _style.TextDisableColor :
-                    _buttonBehaviour.IsHovered ? _style.TextHoverColor : _style.TextIdleColor;
+                _uiText.Color =
+                    Disable ? _style.TextDisableColor
+                    : _buttonBehaviour.IsHovered ? _style.TextHoverColor
+                    : _style.TextIdleColor;
         }
 
         protected override void Drawer(SpriteBatch spriteBatch)
@@ -112,8 +116,10 @@ public static class UiButton
         {
             _uiText.Update(inputHandler, Bounds, UiScale);
             _buttonBehaviour.Update(inputHandler, Bounds, OnClickAction, Disable);
-            _uiText.Color = Disable ? _style.TextDisableColor :
-                _buttonBehaviour.IsHovered ? _style.TextHoverColor : _style.TextIdleColor;
+            _uiText.Color =
+                Disable ? _style.TextDisableColor
+                : _buttonBehaviour.IsHovered ? _style.TextHoverColor
+                : _style.TextIdleColor;
         }
 
         protected override void Drawer(SpriteBatch spriteBatch)
@@ -141,17 +147,23 @@ internal class ButtonBehaviour
     private bool _wasHovered;
     public bool IsHovered;
 
-    public void Update(InputHandler inputHandler, Rectangle bounds, Action onClickAction, bool isDisabled)
+    public void Update(
+        InputHandler inputHandler,
+        Rectangle bounds,
+        Action onClickAction,
+        bool isDisabled
+    )
     {
         IsHovered = !isDisabled && bounds.Contains(Mouse.GetState().Position);
         _isPressed = IsHovered && inputHandler.HasAction(EngineInputActions.ButtonPressed);
         _wasHovered = IsHovered;
 
         if (IsHovered && !_wasHovered)
-            AudioService.SFX.PlaySound("hoverButton");
+            AudioService.SoundEffects.PlaySound("hoverButton");
 
-        if (!_isPressed) return;
-        AudioService.SFX.PlaySound("clickButton");
+        if (!_isPressed)
+            return;
+        AudioService.SoundEffects.PlaySound("clickButton");
         onClickAction?.Invoke();
     }
 }

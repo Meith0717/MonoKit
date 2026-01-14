@@ -1,5 +1,5 @@
-﻿// GameRuntime.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// GameRuntime.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
 
 # if DEBUG
@@ -39,7 +39,10 @@ public class GameRuntime
         _gameObjManager.Update(elapsedMilliseconds);
         _spatialHashing.Rearrange();
         _camera.Update(elapsedMilliseconds, inputHandler);
-        WorldMousePosition = Vector2.Transform(Mouse.GetState().Position.ToVector2(), _camera.ViewInvert);
+        WorldMousePosition = Vector2.Transform(
+            Mouse.GetState().Position.ToVector2(),
+            _camera.ViewInvert
+        );
 #if DEBUG
         var cameraPos = Vector2.Floor(_camera.Position);
         Debug.WriteLine($"Camera Pos: {cameraPos}\nCamera Zom: {_camera.Zoom}");

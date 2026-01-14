@@ -1,5 +1,5 @@
-﻿// GraphicsController.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// GraphicsController.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
 
 using System;
@@ -13,7 +13,7 @@ public enum WindowMode
 {
     FullScreen,
     Borderless,
-    Windowed
+    Windowed,
 }
 
 public class GraphicsController
@@ -43,8 +43,10 @@ public class GraphicsController
 
             var virtualViewportSize = new SizeF(VirtualWidth, VirtualHeight);
             var currentViewportSize = _graphicsDeviceManager.GraphicsDevice.Viewport.Bounds.Size;
-            ViewportScale = float.Min(currentViewportSize.X / virtualViewportSize.Width,
-                currentViewportSize.Y / virtualViewportSize.Height);
+            ViewportScale = float.Min(
+                currentViewportSize.X / virtualViewportSize.Width,
+                currentViewportSize.Y / virtualViewportSize.Height
+            );
 
             _resolutionWasResized = true;
         };
@@ -53,19 +55,27 @@ public class GraphicsController
         _oldHeight = 400;
 
         var virtualViewportSize = new SizeF(VirtualWidth, VirtualHeight);
-        ViewportScale = float.Min(_oldWidth / virtualViewportSize.Width, _oldHeight / virtualViewportSize.Height);
+        ViewportScale = float.Min(
+            _oldWidth / virtualViewportSize.Width,
+            _oldHeight / virtualViewportSize.Height
+        );
     }
 
     public float ViewportScale { get; private set; }
 
-    public bool ResolutionWasResized => (_resolutionWasResized, _resolutionWasResized = false)._resolutionWasResized;
+    public bool ResolutionWasResized =>
+        (_resolutionWasResized, _resolutionWasResized = false)._resolutionWasResized;
 
-    private static Size MonitorSize => new(GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width,
-        GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height);
+    private static Size MonitorSize =>
+        new(
+            GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width,
+            GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height
+        );
 
     public void ApplyRefreshRate(int value, bool vSync)
     {
-        if (value <= 0) throw new InvalidCastException();
+        if (value <= 0)
+            throw new InvalidCastException();
 
         _graphicsDeviceManager.SynchronizeWithVerticalRetrace = vSync;
         _game.IsFixedTimeStep = !vSync;

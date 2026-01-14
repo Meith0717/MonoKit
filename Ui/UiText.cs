@@ -1,5 +1,5 @@
-﻿// UiText.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// UiText.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
 
 using Microsoft.Xna.Framework;
@@ -45,7 +45,17 @@ public sealed class UiText(string spriteFont, string text = default) : UiElement
     {
         var position = Bounds.Location.ToVector2();
 
-        spriteBatch.DrawString(_font, _text, position, Color, 0, Vector2.Zero, UiScale * _scale, SpriteEffects.None, 1);
+        spriteBatch.DrawString(
+            _font,
+            _text,
+            position,
+            Color,
+            0,
+            Vector2.Zero,
+            UiScale * _scale,
+            SpriteEffects.None,
+            1
+        );
     }
 
     protected override void Updater(InputHandler inputHandler)

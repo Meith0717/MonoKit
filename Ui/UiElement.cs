@@ -1,7 +1,6 @@
-﻿// UiElement.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// UiElement.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
-
 
 using System;
 using Microsoft.Xna.Framework;
@@ -30,7 +29,7 @@ public enum Allign
     Top,
     Bottom,
     CenterH,
-    CenterV
+    CenterV,
 }
 
 public enum FillScale
@@ -40,7 +39,7 @@ public enum FillScale
     Both,
     FillIn,
     Fit,
-    None
+    None,
 }
 
 public abstract class UiElement : IDisposable
@@ -103,16 +102,30 @@ public abstract class UiElement : IDisposable
 
         ManageFillScale(root, FillScale, ref x, ref y, ref width, ref height);
         ManageAllign(root, Allign, ref x, ref y, ref width, ref height);
-        ManageSpacing(root, ref x, ref y, ref width, ref height, HSpace.HasValue ? HSpace * UiScale : null,
-            VSpace.HasValue ? VSpace * UiScale : null);
+        ManageSpacing(
+            root,
+            ref x,
+            ref y,
+            ref width,
+            ref height,
+            HSpace.HasValue ? HSpace * UiScale : null,
+            VSpace.HasValue ? VSpace * UiScale : null
+        );
 
         Bounds = new Rectangle(root.X + x, root.Y + y, width, height);
     }
 
-    private static void ManageFillScale(Rectangle root, FillScale fillScale, ref int x, ref int y, ref int width,
-        ref int height)
+    private static void ManageFillScale(
+        Rectangle root,
+        FillScale fillScale,
+        ref int x,
+        ref int y,
+        ref int width,
+        ref int height
+    )
     {
-        if (fillScale == FillScale.None) return;
+        if (fillScale == FillScale.None)
+            return;
 
         var rootAspectRatio = root.Width / (float)root.Height;
         var aspectRatio = width / (float)height;
@@ -180,7 +193,14 @@ public abstract class UiElement : IDisposable
         }
     }
 
-    private static void ManageAllign(Rectangle root, Allign allign, ref int x, ref int y, ref int width, ref int height)
+    private static void ManageAllign(
+        Rectangle root,
+        Allign allign,
+        ref int x,
+        ref int y,
+        ref int width,
+        ref int height
+    )
     {
         x = allign switch
         {
@@ -200,7 +220,7 @@ public abstract class UiElement : IDisposable
             Allign.None => x,
             Allign.Bottom => x,
             Allign.Top => x,
-            _ => throw new NotImplementedException()
+            _ => throw new NotImplementedException(),
         };
         y = allign switch
         {
@@ -220,12 +240,19 @@ public abstract class UiElement : IDisposable
             Allign.None => y,
             Allign.Left => y,
             Allign.Right => y,
-            _ => throw new NotImplementedException()
+            _ => throw new NotImplementedException(),
         };
     }
 
-    private static void ManageSpacing(Rectangle root, ref int x, ref int y, ref int width, ref int height,
-        float? hSpace, float? vSpace)
+    private static void ManageSpacing(
+        Rectangle root,
+        ref int x,
+        ref int y,
+        ref int width,
+        ref int height,
+        float? hSpace,
+        float? vSpace
+    )
     {
         if (hSpace != null)
         {
@@ -239,8 +266,10 @@ public abstract class UiElement : IDisposable
             }
             else
             {
-                if (spaceLeft < hSpace) x = 0 + (int)hSpace;
-                if (spaceRight < hSpace) x -= (int)hSpace;
+                if (spaceLeft < hSpace)
+                    x = 0 + (int)hSpace;
+                if (spaceRight < hSpace)
+                    x -= (int)hSpace;
             }
         }
 
@@ -256,8 +285,10 @@ public abstract class UiElement : IDisposable
             }
             else
             {
-                if (spaceTop < vSpace) y = 0 + (int)vSpace;
-                if (spaceBottom < vSpace) y -= (int)vSpace;
+                if (spaceTop < vSpace)
+                    y = 0 + (int)vSpace;
+                if (spaceBottom < vSpace)
+                    y -= (int)vSpace;
             }
         }
     }

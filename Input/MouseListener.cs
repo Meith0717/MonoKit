@@ -1,5 +1,5 @@
-﻿// MouseListener.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// MouseListener.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
 
 using System.Collections;
@@ -16,7 +16,7 @@ public enum MouseButton
     Forward,
     Back,
     WheelForward,
-    WheelBack
+    WheelBack,
 }
 
 public class MouseListener(Dictionary<(MouseButton, InputEventType), byte> bindings) : IInputDevice
@@ -30,11 +30,12 @@ public class MouseListener(Dictionary<(MouseButton, InputEventType), byte> bindi
         { MouseButton.Mid, HeldMaxCoolDown },
         { MouseButton.Right, HeldMaxCoolDown },
         { MouseButton.Forward, HeldMaxCoolDown },
-        { MouseButton.Back, HeldMaxCoolDown }
+        { MouseButton.Back, HeldMaxCoolDown },
     };
 
     private readonly Dictionary<MouseButton, (ButtonState, ButtonState)> _buttonsStates = new();
-    private MouseState _currentState, _previousState;
+    private MouseState _currentState,
+        _previousState;
 
     public void Update(double elapsedMilliseconds, BitArray actionFlags)
     {

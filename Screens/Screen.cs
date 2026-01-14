@@ -1,5 +1,5 @@
-// Screen.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+// Screen.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
 
 using System;
@@ -39,7 +39,7 @@ public abstract class Screen : IDisposable
             RelWidth = 1,
             RelHeight = 1,
             FillScale = FillScale.FillIn,
-            Allign = Allign.Center
+            Allign = Allign.Center,
         };
     }
 
@@ -69,15 +69,20 @@ public abstract class Screen : IDisposable
     {
         UiRoot.ApplyScale(GraphicsDevice.Viewport.Bounds, uiScale);
         _renderTarget?.Dispose();
-        _renderTarget = new RenderTarget2D(GraphicsDevice,
+        _renderTarget = new RenderTarget2D(
+            GraphicsDevice,
             GraphicsDevice.Viewport.Width,
             GraphicsDevice.Viewport.Height,
             false,
             SurfaceFormat.Color,
             DepthFormat.Depth24Stencil8,
             4,
-            RenderTargetUsage.PreserveContents);
-        _postProcessingRunner.ApplyResolution(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
+            RenderTargetUsage.PreserveContents
+        );
+        _postProcessingRunner.ApplyResolution(
+            GraphicsDevice.Viewport.Width,
+            GraphicsDevice.Viewport.Height
+        );
     }
 
     public RenderTarget2D RenderTarget(SpriteBatch spriteBatch)

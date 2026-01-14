@@ -1,5 +1,5 @@
-﻿// DataIO.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// DataIO.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
 
 using System;
@@ -18,7 +18,8 @@ public static class DataIO
 
     public static void Save<TObj>(string path, TObj obj)
     {
-        if (obj is null) throw new Exception();
+        if (obj is null)
+            throw new Exception();
         var jsonStr = JsonHandler.SerializeToJson(obj);
         FileUtils.CreateFile(path, jsonStr);
     }

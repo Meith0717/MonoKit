@@ -1,5 +1,5 @@
-﻿// KeyboardListener.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// KeyboardListener.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
 
 using System.Collections;
@@ -9,12 +9,12 @@ using Microsoft.Xna.Framework.Input;
 
 namespace MonoKit.Input;
 
-public class KeyboardListener(Dictionary<(Keys, InputEventType), byte> bindings)
-    : IInputDevice
+public class KeyboardListener(Dictionary<(Keys, InputEventType), byte> bindings) : IInputDevice
 {
     private readonly Dictionary<(Keys, InputEventType), byte> _bindings = bindings;
     private readonly List<(Keys, InputEventType)> _pressedKeyStates = new();
-    private Keys[] _currentPressedKeys, _previousPressedKeys = [];
+    private Keys[] _currentPressedKeys,
+        _previousPressedKeys = [];
 
     public void Update(double elapsedMilliseconds, BitArray actionFlags)
     {

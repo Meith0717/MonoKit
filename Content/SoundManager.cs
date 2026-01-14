@@ -1,5 +1,5 @@
-﻿// SoundManager.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// SoundManager.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
 
 using System;
@@ -24,11 +24,17 @@ public sealed class SoundManager(int maxInstances)
         set => _volume = float.Clamp(value, 0, 1);
     }
 
-    public void LoadContent(ContentManager contentManager, string contentDirectory,
-        ContentLoadingState contentLoadingState = null)
+    public void LoadContent(
+        ContentManager contentManager,
+        string contentDirectory,
+        ContentLoadingState contentLoadingState = null
+    )
     {
         var fullContentDirectory = Path.Combine(contentManager.RootDirectory, contentDirectory);
-        var files = FileUtils.GetAllFilesInDirectory(fullContentDirectory, SearchOption.AllDirectories);
+        var files = FileUtils.GetAllFilesInDirectory(
+            fullContentDirectory,
+            SearchOption.AllDirectories
+        );
 
         for (var i = 0; i < files.Length; i++)
         {
@@ -38,7 +44,8 @@ public sealed class SoundManager(int maxInstances)
             var relativePath = Path.GetRelativePath(contentManager.RootDirectory, directory);
             var contentPath = Path.Combine(relativePath, soundId);
             var sound = contentManager.Load<SoundEffect>(contentPath);
-            var soundInstances = Enumerable.Range(0, _maxInstances)
+            var soundInstances = Enumerable
+                .Range(0, _maxInstances)
                 .Select(_ => sound.CreateInstance())
                 .ToArray();
             _soundEffectInstances[soundId] = soundInstances;
@@ -46,14 +53,22 @@ public sealed class SoundManager(int maxInstances)
         }
     }
 
-    public void PlaySound(string soundId, float volume = 1f, float pan = 0f, bool loop = false, bool interpup = true)
+    public void PlaySound(
+        string soundId,
+        float volume = 1f,
+        float pan = 0f,
+        bool loop = false,
+        bool interpup = true
+    )
     {
         if (!_soundEffectInstances.TryGetValue(soundId, out var soundInstances))
             return;
 
         volume *= _volume;
         pan = float.Clamp(pan, -1, 1);
-        var stoppedSoundInstances = soundInstances.Where(s => s.State == SoundState.Stopped).ToArray();
+        var stoppedSoundInstances = soundInstances
+            .Where(s => s.State == SoundState.Stopped)
+            .ToArray();
 
         var instance = soundInstances.First();
         if (stoppedSoundInstances.Any() && !interpup)

@@ -1,5 +1,5 @@
-﻿// GameObjectFactory.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// GameObjectFactory.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
 
 using System.Collections.Generic;
@@ -22,7 +22,8 @@ public abstract class GameObjectFactory<T>
 
         foreach (var kvp in objectPrefabs.Content)
         {
-            if (kvp.Value is not T data) continue;
+            if (kvp.Value is not T data)
+                continue;
 
             _namesIdDictionary.Add(kvp.Key, id);
             prefabs.Add(data);

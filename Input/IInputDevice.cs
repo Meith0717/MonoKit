@@ -1,5 +1,5 @@
-﻿// IInputDevice.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// IInputDevice.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
 
 using System.Collections;
@@ -10,7 +10,7 @@ public enum InputEventType
 {
     Pressed,
     Released,
-    Held
+    Held,
 }
 
 public interface IInputDevice

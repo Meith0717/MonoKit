@@ -1,7 +1,6 @@
-﻿// GameRenderer2D.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// GameRenderer2D.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
-
 
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
@@ -16,20 +15,25 @@ using MonoGame.Extended;
 
 namespace MonoKit.Graphics.Rendering;
 
-public class GameRenderer2D(RuntimeContainer services, IGameObjRenderer2D renderer)
+public class GameRenderer2D(RuntimeContainer services)
 {
-    private readonly Camera2D _camera = services.Get<Camera2D>();
-    private readonly List<GameObject> _culledObjects = new();
-    private readonly IGameObjRenderer2D _gameObjRenderer = renderer;
-    private readonly RuntimeContainer _services = services;
     private readonly SpatialHashing _spatialHashing = services.Get<SpatialHashing>();
+    private readonly Camera2D _camera = services.Get<Camera2D>();
+    private readonly List<IRenderer2DProcess> _renderer2DProcesses = [];
+    private readonly List<GameObject> _culledObjects = [];
     private float _viewportScale;
+
+    public void AddProcess(IRenderer2DProcess renderer2DProcess)
+    {
+        _renderer2DProcesses.Add(renderer2DProcess);
+    }
 
     public void Update(double elapsedMilliseconds, float viewportScale)
     {
         _culledObjects.Clear();
         _spatialHashing.GetInRectangle(_camera.Bounds, _culledObjects);
-        _gameObjRenderer.UpdateEffects(elapsedMilliseconds);
+        foreach (var renderer2DProcess in _renderer2DProcesses)
+            renderer2DProcess.UpdateEffects(elapsedMilliseconds);
         _viewportScale = viewportScale;
     }
 
@@ -41,32 +45,13 @@ public class GameRenderer2D(RuntimeContainer services, IGameObjRenderer2D render
 
     public void DrawTextures(SpriteBatch spriteBatch)
     {
-        _gameObjRenderer?.DrawTextures(spriteBatch, _services, _culledObjects);
-
-#if DEBUG
-        _spatialHashing?.Draw(spriteBatch, _camera.Position, _camera.Zoom);
-        for (var i = 0; i < _culledObjects.Count; i++)
-        {
-            var obj = _culledObjects[i];
-            spriteBatch.DrawRectangle(obj.BoundBox.ToRectangleF(), Color.Purple, 2 / _camera.Zoom);
-            spriteBatch.DrawLine(obj.Position, obj.Position.InDirection(obj.MovingDirection, obj.Velocity * 500),
-                Color.Blue, 1 / _camera.Zoom, 1);
-        }
-#endif
+        foreach (var renderer2DProcess in _renderer2DProcesses)
+            renderer2DProcess.DrawTextures(spriteBatch, services, _culledObjects);
     }
 
     public void DrawEffects(SpriteBatch spriteBatch)
     {
-        _gameObjRenderer?.DrawEffects(spriteBatch, _camera.View, _services, _culledObjects);
+        foreach (var renderer2DProcess in _renderer2DProcesses)
+            renderer2DProcess.DrawEffects(spriteBatch, _camera.View, services, _culledObjects);
     }
-}
-
-public interface IGameObjRenderer2D
-{
-    void UpdateEffects(double elapsedMilliseconds);
-
-    void DrawEffects(SpriteBatch spriteBatch, Matrix Transformation, RuntimeContainer services,
-        IReadOnlyList<GameObject> gameObjects);
-
-    void DrawTextures(SpriteBatch spriteBatch, RuntimeContainer services, IReadOnlyList<GameObject> gameObjects);
 }

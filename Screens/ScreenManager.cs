@@ -1,5 +1,5 @@
-// ScreenManager.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+// ScreenManager.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
 
 using System;
@@ -28,21 +28,25 @@ public class ScreenManager(Game game)
 
     public void AddScreen(Screen screen)
     {
-        _pendingActions.Enqueue((gT, uI) =>
-        {
-            _screens.Push(screen);
-            screen.Initialize();
-            screen.ApplyResolution(gT, uI);
-        });
+        _pendingActions.Enqueue(
+            (gT, uI) =>
+            {
+                _screens.Push(screen);
+                screen.Initialize();
+                screen.ApplyResolution(gT, uI);
+            }
+        );
     }
 
     public void PopScreen()
     {
-        _pendingActions.Enqueue((_, _) =>
-        {
-            var removedScreen = _screens.Pop();
-            removedScreen?.Dispose();
-        });
+        _pendingActions.Enqueue(
+            (_, _) =>
+            {
+                var removedScreen = _screens.Pop();
+                removedScreen?.Dispose();
+            }
+        );
     }
 
     public void PopScreensUntil(Screen screen)
@@ -84,7 +88,8 @@ public class ScreenManager(Game game)
 
     public void Draw(SpriteBatch spriteBatch)
     {
-        if (_screens.Count == 0) return;
+        if (_screens.Count == 0)
+            return;
         _lowerRenderTargets.Clear();
 
         var topScreenTarget = _screens.First().RenderTarget(spriteBatch);
@@ -104,7 +109,11 @@ public class ScreenManager(Game game)
         spriteBatch.End();
 
         if (_runnEffect)
-            _lowerRenderTarget = PostProcessingEffect?.Apply(spriteBatch, _postProcessingRunner, _lowerRenderTarget);
+            _lowerRenderTarget = PostProcessingEffect?.Apply(
+                spriteBatch,
+                _postProcessingRunner,
+                _lowerRenderTarget
+            );
 
         _graphicsDevice.SetRenderTarget(null);
         _game.GraphicsDevice.Clear(Color.Black);
@@ -128,9 +137,15 @@ public class ScreenManager(Game game)
     {
         foreach (var layer in _screens)
             layer.ApplyResolution(elapsedMilliseconds, uiScale);
-        _postProcessingRunner.ApplyResolution(_graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height);
+        _postProcessingRunner.ApplyResolution(
+            _graphicsDevice.Viewport.Width,
+            _graphicsDevice.Viewport.Height
+        );
         _lowerRenderTarget?.Dispose();
-        _lowerRenderTarget = new RenderTarget2D(_graphicsDevice, _graphicsDevice.Viewport.Width,
-            _graphicsDevice.Viewport.Height);
+        _lowerRenderTarget = new RenderTarget2D(
+            _graphicsDevice,
+            _graphicsDevice.Viewport.Width,
+            _graphicsDevice.Viewport.Height
+        );
     }
 }

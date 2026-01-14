@@ -1,5 +1,5 @@
-﻿// UiSlider.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// UiSlider.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
 
 using Microsoft.Xna.Framework;
@@ -30,7 +30,8 @@ public sealed class UiSlider(bool interactive) : UiElement
 
     protected override void Updater(InputHandler inputHandler)
     {
-        if (!_interactive) return;
+        if (!_interactive)
+            return;
         var mousePos = Mouse.GetState().Position;
         _hovered = Bounds.Contains(mousePos);
         _pressed = _pressed || (_hovered && inputHandler.HasAction(EngineInputActions.SliderHold));

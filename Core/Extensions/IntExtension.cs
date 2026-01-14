@@ -1,7 +1,6 @@
-﻿// IntExtension.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// IntExtension.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
-
 
 using System.Text;
 
@@ -28,7 +27,7 @@ public static class IntExtension
             new { Value = 9, Numeral = "IX" },
             new { Value = 5, Numeral = "V" },
             new { Value = 4, Numeral = "IV" },
-            new { Value = 1, Numeral = "I" }
+            new { Value = 1, Numeral = "I" },
         };
 
         var result = new StringBuilder();

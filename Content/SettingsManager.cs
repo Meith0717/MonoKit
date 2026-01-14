@@ -1,5 +1,5 @@
-﻿// SettingsManager.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// SettingsManager.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
 
 using System;
@@ -11,7 +11,19 @@ namespace MonoKit.Content;
 [Serializable]
 public class SettingsManager
 {
-    [JsonProperty] private SettingsState _settings = new(1, .9f, 1, 60, true, false, WindowMode.Windowed, .9f, 1, .5f);
+    [JsonProperty]
+    private SettingsState _settings = new(
+        1,
+        .9f,
+        1,
+        60,
+        true,
+        false,
+        WindowMode.Windowed,
+        .9f,
+        1,
+        .5f
+    );
 
     public SettingsState GetSettings()
     {
@@ -35,16 +47,36 @@ public readonly struct SettingsState(
     WindowMode windowMode,
     float uiScale,
     float bloomEffect,
-    float bloomThreshold)
+    float bloomThreshold
+)
 {
-    [JsonProperty] public readonly float MasterVolume = masterVol;
-    [JsonProperty] public readonly float MusicVolume = musicVol;
-    [JsonProperty] public readonly float SFXVolume = sfxVol;
-    [JsonProperty] public readonly int RefreshRate = refRate;
-    [JsonProperty] public readonly bool ShowFPS = showFPS;
-    [JsonProperty] public readonly bool VSync = vSync;
-    [JsonProperty] public readonly WindowMode WindowMode = windowMode;
-    [JsonProperty] public readonly float UiScale = uiScale;
-    [JsonProperty] public readonly float BloomIntensity = bloomEffect;
-    [JsonProperty] public readonly float BloomThreshold = bloomThreshold;
+    [JsonProperty]
+    public readonly float MasterVolume = masterVol;
+
+    [JsonProperty]
+    public readonly float MusicVolume = musicVol;
+
+    [JsonProperty]
+    public readonly float SFXVolume = sfxVol;
+
+    [JsonProperty]
+    public readonly int RefreshRate = refRate;
+
+    [JsonProperty]
+    public readonly bool ShowFPS = showFPS;
+
+    [JsonProperty]
+    public readonly bool VSync = vSync;
+
+    [JsonProperty]
+    public readonly WindowMode WindowMode = windowMode;
+
+    [JsonProperty]
+    public readonly float UiScale = uiScale;
+
+    [JsonProperty]
+    public readonly float BloomIntensity = bloomEffect;
+
+    [JsonProperty]
+    public readonly float BloomThreshold = bloomThreshold;
 }

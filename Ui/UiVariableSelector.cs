@@ -1,5 +1,5 @@
-﻿// UiVariableSelector.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// UiVariableSelector.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
 
 using System.Collections.Generic;
@@ -21,22 +21,16 @@ public sealed class UiVariableSelector<T> : UiElement
     {
         _items = [.. items];
 
-        _arrowL = new UiButton.Sprite(leftButton)
-        {
-            Allign = Allign.W
-        };
+        _arrowL = new UiButton.Sprite(leftButton) { Allign = Allign.W };
         _arrowL.OnClickAction += DecreaseIndex;
 
-        _arrowR = new UiButton.Sprite(rightButton)
-        {
-            Allign = Allign.E
-        };
+        _arrowR = new UiButton.Sprite(rightButton) { Allign = Allign.E };
         _arrowR.OnClickAction += IncreaseIndex;
 
         _text = new UiText(spriteFont)
         {
             Allign = Allign.Center,
-            Text = _items[_selectedIndex].ToString()
+            Text = _items[_selectedIndex].ToString(),
         };
     }
 
@@ -72,8 +66,11 @@ public sealed class UiVariableSelector<T> : UiElement
         _arrowR.Update(inputHandler, Bounds, UiScale);
         _text.Update(inputHandler, Bounds, UiScale);
         _text.Text = _items[_selectedIndex].ToString();
-        Height = (int)float.Floor(int.Max(_text.Bounds.Height, int.Max(_arrowL.Bounds.Height, _arrowR.Bounds.Height)) /
-                                  UiScale);
+        Height = (int)
+            float.Floor(
+                int.Max(_text.Bounds.Height, int.Max(_arrowL.Bounds.Height, _arrowR.Bounds.Height))
+                    / UiScale
+            );
     }
 
     protected override void Drawer(SpriteBatch spriteBatch)

@@ -1,5 +1,5 @@
-﻿// UiFrame.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// UiFrame.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
 
 using System.Collections.Generic;
@@ -75,7 +75,8 @@ public class UiFrame : UiElement
 
     private void UpdateSizeIfTextureNotNull()
     {
-        if (_texture is null) return;
+        if (_texture is null)
+            return;
         Width = (int)(_texture.Width * _textureScale);
         Height = (int)(_texture.Height * _textureScale);
     }

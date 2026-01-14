@@ -1,5 +1,5 @@
-﻿// Camera2d.cs 
-// Copyright (c) 2023-2025 Thierry Meiers 
+﻿// Camera2d.cs
+// Copyright (c) 2023-2025 Thierry Meiers
 // All rights reserved.
 
 using System.Collections.Generic;
@@ -35,12 +35,12 @@ public class Camera2D
     public Matrix View { get; private set; }
     public Matrix ViewInvert { get; private set; }
 
-    public void Update(double elapsedGameTime, InputHandler inputHandler)
+    internal void Update(double elapsedGameTime, InputHandler inputHandler)
     {
         _behaviours.ForEach(behaviour => behaviour.Update(this, inputHandler, elapsedGameTime));
     }
 
-    public void UpdateView(float viewportScale)
+    internal void UpdateView(float viewportScale)
     {
         var viewport = _graphicsDevice.Viewport.Bounds;
         ViewportZoom = viewportScale;
@@ -55,11 +55,20 @@ public class Camera2D
         _behaviours.Add(behaviour);
     }
 
-    private static Matrix CreateView(Vector2 cameraPosition, float cameraZoom, int screenWidth, int screenHeight)
+    private static Matrix CreateView(
+        Vector2 cameraPosition,
+        float cameraZoom,
+        int screenWidth,
+        int screenHeight
+    )
     {
-        var translationMatrix = Matrix.CreateTranslation(new Vector3(-cameraPosition.X, -cameraPosition.Y, 0));
+        var translationMatrix = Matrix.CreateTranslation(
+            new Vector3(-cameraPosition.X, -cameraPosition.Y, 0)
+        );
         var scaleMatrix = Matrix.CreateScale(cameraZoom, cameraZoom, 1);
-        var screenCenterMatrix = Matrix.CreateTranslation(new Vector3(screenWidth / 2f, screenHeight / 2f, 0));
+        var screenCenterMatrix = Matrix.CreateTranslation(
+            new Vector3(screenWidth / 2f, screenHeight / 2f, 0)
+        );
 
         return translationMatrix * scaleMatrix * screenCenterMatrix;
     }
@@ -67,12 +76,16 @@ public class Camera2D
     private static RectangleF TransformViewport(Rectangle screenRect, Matrix cameraToWorld)
     {
         var topLeft = Vector2.Transform(screenRect.Location.ToVector2(), cameraToWorld);
-        var bottomRight = Vector2.Transform(new Vector2(screenRect.Right, screenRect.Bottom), cameraToWorld);
+        var bottomRight = Vector2.Transform(
+            new Vector2(screenRect.Right, screenRect.Bottom),
+            cameraToWorld
+        );
 
         return new RectangleF(
             topLeft.X,
             topLeft.Y,
             bottomRight.X - topLeft.X,
-            bottomRight.Y - topLeft.Y);
+            bottomRight.Y - topLeft.Y
+        );
     }
 }
