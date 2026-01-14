@@ -37,7 +37,7 @@ public class GameRenderer2D(RuntimeContainer services)
         _viewportScale = viewportScale;
     }
 
-    public void Begin(SpriteBatch spriteBatch)
+    public void BeginDrawCameraTransformed(SpriteBatch spriteBatch)
     {
         _camera.UpdateView(_viewportScale);
         spriteBatch.Begin(transformMatrix: _camera.View, sortMode: SpriteSortMode.BackToFront);
