@@ -10,7 +10,7 @@ using MonoKit.Gameplay;
 
 namespace MonoKit.Graphics.Rendering;
 
-public interface IRenderer2DProcess
+public interface IGameRendererProcess
 {
     void UpdateEffects(double elapsedMilliseconds);
 

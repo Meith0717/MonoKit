@@ -19,13 +19,13 @@ public class GameRenderer2D(RuntimeContainer services)
 {
     private readonly SpatialHashing _spatialHashing = services.Get<SpatialHashing>();
     private readonly Camera2D _camera = services.Get<Camera2D>();
-    private readonly List<IRenderer2DProcess> _renderer2DProcesses = [];
+    private readonly List<IGameRendererProcess> _renderer2DProcesses = [];
     private readonly List<GameObject> _culledObjects = [];
     private float _viewportScale;
 
-    public void AddProcess(IRenderer2DProcess renderer2DProcess)
+    public void AddProcess(IGameRendererProcess gameRendererProcess)
     {
-        _renderer2DProcesses.Add(renderer2DProcess);
+        _renderer2DProcesses.Add(gameRendererProcess);
     }
 
     public void Update(double elapsedMilliseconds, float viewportScale)
