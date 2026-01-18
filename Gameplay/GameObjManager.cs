@@ -9,50 +9,45 @@ namespace MonoKit.Gameplay;
 
 public class GameObjManager(SpatialHashing spatialHashing, RuntimeContainer services)
 {
-    private readonly List<GameObject> _gameObjects = new();
-    private readonly RuntimeContainer _services = services;
-    private readonly SpatialHashing _spatialHashing = spatialHashing;
+    private readonly List<GameObject> _gameObjects = [];
 
     public IReadOnlyList<GameObject> GameObjects => _gameObjects.AsReadOnly();
 
     public void AddRange(GameObject[] gameObjects)
     {
-        for (var i = 0; i < gameObjects.Length; i++)
+        foreach (var obj in gameObjects)
         {
-            var obj = gameObjects[i];
-            obj.Initialize(_services);
+            obj.Initialize(services);
             _gameObjects.Add(obj);
-            _spatialHashing.Add(obj);
+            spatialHashing.Add(obj);
         }
     }
 
     public void Add(GameObject gameObject)
     {
-        gameObject.Initialize(_services);
+        gameObject.Initialize(services);
         _gameObjects.Add(gameObject);
-        _spatialHashing.Add(gameObject);
+        spatialHashing.Add(gameObject);
     }
 
     public void Remove(GameObject gameObject)
     {
         _gameObjects.Remove(gameObject);
-        _spatialHashing.Remove(gameObject);
+        spatialHashing.Remove(gameObject);
     }
 
     public void Update(double elapsedMs)
     {
-        if (_gameObjects is null || _gameObjects.Count == 0)
+        if (_gameObjects.Count == 0)
             return;
 
-        for (var i = 0; i < _gameObjects.Count; i++)
+        foreach (var obj in _gameObjects)
         {
-            var obj = _gameObjects[i];
-
-            obj.Update(elapsedMs, _services);
+            obj.Update(elapsedMs, services);
             obj.Position += obj.MovingDirection * obj.Velocity * (float)elapsedMs;
 
             if (obj.IsDisposed)
-                _spatialHashing.Remove(obj);
+                spatialHashing.Remove(obj);
         }
 
         _gameObjects.RemoveAll(obj => obj.IsDisposed);
