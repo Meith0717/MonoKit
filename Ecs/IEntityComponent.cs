@@ -5,7 +5,4 @@
 
 namespace MonoKit.ECS;
 
-public interface IEntityComponent
-{
-    void OnEntityDestroyed(Entity entity);
-}
+public interface IEntityComponent { }

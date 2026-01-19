@@ -7,6 +7,11 @@ using System.Collections.Generic;
 
 namespace MonoKit.ECS;
 
+public readonly struct Entity(int id)
+{
+    public readonly int Id = id;
+}
+
 public sealed class EntityManager
 {
     private int _nextId = 0;
@@ -14,9 +19,7 @@ public sealed class EntityManager
 
     public Entity Create()
     {
-        return _freeIds.Count > 0
-            ? new Entity { Id = _freeIds.Pop() }
-            : new Entity { Id = _nextId++ };
+        return _freeIds.Count > 0 ? new Entity(_freeIds.Pop()) : new Entity(_nextId++);
     }
 
     public void Destroy(Entity entity)

@@ -8,11 +8,7 @@ using MonoKit.Gameplay;
 
 namespace MonoKit.ECS;
 
-public interface IEntityComponentSystem
+public interface IEntitySystem
 {
-    void Update(
-        double elapsedMs,
-        RuntimeContainer runtimeContainer,
-        ReadOnlyCollection<Entity> entities
-    );
+    void Update(double elapsedMs, EntityComponentManager entityComponentManager);
 }
