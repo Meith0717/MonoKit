@@ -3,6 +3,6 @@
 // All rights reserved.
 // Portions generated or assisted by AI.
 
-namespace MonoKit.ECS;
+namespace MonoKit.Ecs.Components;
 
-public interface IEntityComponent { }
+public interface IComponent { }

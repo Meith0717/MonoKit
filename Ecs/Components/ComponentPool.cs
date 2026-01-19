@@ -5,14 +5,13 @@
 
 using System;
 
-namespace MonoKit.ECS;
+namespace MonoKit.Ecs.Components;
 
-public class EntityComponentPool<T>
-    where T : struct, IEntityComponent
+public class ComponentPool<T> : IComponentPool
+    where T : struct, IComponent
 {
     public int Count { get; private set; } = 0;
 
-    // Exposed as ReadOnlySpan for high-performance systems (Span vs IEnumerable)
     public ReadOnlySpan<T> AsSpan() => _dense.AsSpan(0, Count);
 
     public ReadOnlySpan<int> EntitiesAsSpan() => _denseEntities.AsSpan(0, Count);
@@ -21,7 +20,7 @@ public class EntityComponentPool<T>
     private T[] _dense = new T[128];
     private int[] _denseEntities = new int[128];
 
-    public EntityComponentPool()
+    public ComponentPool()
     {
         Array.Fill(_sparse, -1);
     }

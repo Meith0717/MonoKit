@@ -5,7 +5,7 @@
 
 using System.Collections.Generic;
 
-namespace MonoKit.ECS;
+namespace MonoKit.Ecs.Entities;
 
 public readonly struct Entity(int id)
 {

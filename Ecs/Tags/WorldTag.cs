@@ -3,6 +3,8 @@
 // All rights reserved.
 // Portions generated or assisted by AI.
 
-namespace MonoKit.ECS;
+using MonoKit.Ecs.Components;
 
-public struct WorldTag : IEntityComponent { }
+namespace MonoKit.Ecs.Tags;
+
+public struct WorldTag : IComponent { }
