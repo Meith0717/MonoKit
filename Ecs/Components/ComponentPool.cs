@@ -1,4 +1,4 @@
-// EntityComponentPool.cs
+// ComponentPool.cs
 // Copyright (c) 2023-2026 Thierry Meiers
 // All rights reserved.
 // Portions generated or assisted by AI.
@@ -8,7 +8,7 @@ using System;
 namespace MonoKit.Ecs.Components;
 
 public class ComponentPool<T> : IComponentPool
-    where T : struct, IComponent
+    where T : struct
 {
     public int Count { get; private set; } = 0;
 

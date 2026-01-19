@@ -1,4 +1,4 @@
-// EntitiesManager.cs
+// ComponentManager.cs
 // Copyright (c) 2023-2026 Thierry Meiers
 // All rights reserved.
 // Portions generated or assisted by AI.
@@ -15,7 +15,7 @@ public class ComponentManager
     private readonly Dictionary<Type, object> _pools = new();
 
     public ComponentPool<T> GetPool<T>()
-        where T : struct, IComponent
+        where T : struct
     {
         var type = typeof(T);
 
@@ -28,19 +28,19 @@ public class ComponentManager
     }
 
     public void AddComponent<T>(Entity entity, T component)
-        where T : struct, IComponent
+        where T : struct
     {
         GetPool<T>().Add(entity.Id, component);
     }
 
     public void RemoveComponent<T>(Entity entity)
-        where T : struct, IComponent
+        where T : struct
     {
         GetPool<T>().Remove(entity.Id);
     }
 
     public bool TryGetComponent<T>(Entity entity, out T component)
-        where T : struct, IComponent
+        where T : struct
     {
         var pool = GetPool<T>();
         component = default;
@@ -53,7 +53,7 @@ public class ComponentManager
     }
 
     public ref T GetComponentRef<T>(Entity entity)
-        where T : struct, IComponent
+        where T : struct
     {
         return ref GetPool<T>().Get(entity.Id);
     }

@@ -7,4 +7,4 @@ using MonoKit.Ecs.Components;
 
 namespace MonoKit.Ecs.Tags;
 
-public struct WorldTag : IComponent { }
+public struct WorldTag { }

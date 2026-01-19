@@ -15,14 +15,14 @@ public class EntityFilter(ComponentManager manager)
     private readonly List<IComponentPool> _excluded = [];
 
     public EntityFilter With<T>()
-        where T : struct, IComponent
+        where T : struct
     {
         _required.Add(manager.GetPool<T>());
         return this;
     }
 
     public EntityFilter Without<T>()
-        where T : struct, IComponent
+        where T : struct
     {
         _excluded.Add(manager.GetPool<T>());
         return this;
@@ -33,7 +33,6 @@ public class EntityFilter(ComponentManager manager)
         if (_required.Count == 0)
             yield break;
 
-        // Optimization: Always iterate the smallest pool
         var smallestPool = _required[0];
         for (var i = 1; i < _required.Count; i++)
         {
@@ -41,7 +40,6 @@ public class EntityFilter(ComponentManager manager)
                 smallestPool = _required[i];
         }
 
-        // Iterate the smallest pool and check against others
         for (var i = 0; i < smallestPool.Count; i++)
         {
             var entityId = smallestPool.GetEntityAt(i);
@@ -55,14 +53,12 @@ public class EntityFilter(ComponentManager manager)
 
     private bool Matches(int entityId)
     {
-        // Check if it has all other required components
         foreach (var pool in _required)
         {
             if (!pool.Has(entityId))
                 return false;
         }
 
-        // Check if it has any excluded components
         foreach (var pool in _excluded)
         {
             if (pool.Has(entityId))
