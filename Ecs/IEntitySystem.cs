@@ -10,5 +10,6 @@ namespace MonoKit.ECS;
 
 public interface IEntitySystem
 {
+    int Priority { get; }
     void Update(double elapsedMs, EntityComponentManager entityComponentManager);
 }
