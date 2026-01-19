@@ -9,6 +9,7 @@ using System.Diagnostics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using MonoKit.Ecs;
 using MonoKit.Graphics.Camera;
 using MonoKit.Input;
 using MonoKit.Spatial;
@@ -17,6 +18,7 @@ namespace MonoKit.Gameplay;
 
 public class GameRuntime
 {
+    private readonly World _world;
     private readonly Camera2D _camera;
     private readonly GameObjManager _gameObjManager;
     private readonly SpatialHashing _spatialHashing;
@@ -24,10 +26,12 @@ public class GameRuntime
 
     public GameRuntime(GraphicsDevice graphicsDevice, int spatialHashingCellSize)
     {
+        _world = new World();
         _camera = new Camera2D(graphicsDevice);
         _spatialHashing = new SpatialHashing(spatialHashingCellSize);
         _gameObjManager = new GameObjManager(_spatialHashing, Services);
 
+        Services.AddService(_world);
         Services.AddService(_camera);
         Services.AddService(_spatialHashing);
         Services.AddService(_gameObjManager);
@@ -37,6 +41,7 @@ public class GameRuntime
 
     public void Update(double elapsedMilliseconds, InputHandler inputHandler)
     {
+        _world.Update(elapsedMilliseconds);
         _gameObjManager.Update(elapsedMilliseconds);
         _spatialHashing.Rearrange();
         _camera.Update(elapsedMilliseconds, inputHandler);
