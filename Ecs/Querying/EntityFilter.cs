@@ -17,14 +17,16 @@ public class EntityFilter(ComponentManager manager)
     public EntityFilter With<T>()
         where T : struct
     {
-        _required.Add(manager.GetPool<T>());
+        if (manager.TryGetPool<T>(out var pool))
+            _required.Add(pool);
         return this;
     }
 
     public EntityFilter Without<T>()
         where T : struct
     {
-        _excluded.Add(manager.GetPool<T>());
+        if (manager.TryGetPool<T>(out var pool))
+            _excluded.Add(pool);
         return this;
     }
 

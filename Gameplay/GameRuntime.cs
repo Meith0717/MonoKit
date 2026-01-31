@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoKit.Ecs;
+using MonoKit.Ecs.Systems;
 using MonoKit.Graphics.Camera;
 using MonoKit.Input;
 using MonoKit.Spatial;
@@ -22,6 +23,7 @@ public class GameRuntime
     private readonly Camera2D _camera;
     private readonly GameObjManager _gameObjManager;
     private readonly SpatialHashing _spatialHashing;
+    private readonly EcsSpatialHash _ecsSpatialHash;
     public readonly RuntimeContainer Services = new();
 
     public GameRuntime(GraphicsDevice graphicsDevice, int spatialHashingCellSize)
@@ -29,12 +31,16 @@ public class GameRuntime
         _world = new World();
         _camera = new Camera2D(graphicsDevice);
         _spatialHashing = new SpatialHashing(spatialHashingCellSize);
+        _ecsSpatialHash = new EcsSpatialHash(spatialHashingCellSize);
         _gameObjManager = new GameObjManager(_spatialHashing, Services);
 
         Services.AddService(_world);
         Services.AddService(_camera);
         Services.AddService(_spatialHashing);
+        Services.AddService(_ecsSpatialHash);
         Services.AddService(_gameObjManager);
+
+        _world.Systems.Add(new SpatialHashSystem(_ecsSpatialHash));
     }
 
     public Vector2 WorldMousePosition { get; private set; }

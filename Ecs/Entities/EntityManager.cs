@@ -24,6 +24,7 @@ public sealed class EntityManager
 
     public void Destroy(Entity entity)
     {
+        // TODO consider preventing double-destroy
         _freeIds.Push(entity.Id);
     }
 }

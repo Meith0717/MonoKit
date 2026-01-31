@@ -14,48 +14,46 @@ public class ComponentManager
 {
     private readonly Dictionary<Type, object> _pools = new();
 
-    public ComponentPool<T> GetPool<T>()
+    public bool TryGetPool<T>(out ComponentPool<T> pool)
         where T : struct
     {
         var type = typeof(T);
+        pool = null;
 
-        if (_pools.TryGetValue(type, out var pool))
-            return (ComponentPool<T>)pool;
+        if (!_pools.TryGetValue(type, out var value))
+            return false;
+
+        pool = (ComponentPool<T>)value;
+        return true;
+    }
+
+    public ComponentPool<T> GetOrCreatePool<T>()
+        where T : struct
+    {
+        var type = typeof(T);
+        if (TryGetPool<T>(out var pool))
+            return pool;
 
         pool = new ComponentPool<T>();
         _pools[type] = pool;
-        return (ComponentPool<T>)pool;
+        return pool;
     }
 
     public void AddComponent<T>(Entity entity, T component)
-        where T : struct
-    {
-        GetPool<T>().Add(entity.Id, component);
-    }
+        where T : struct => GetOrCreatePool<T>().Add(entity.Id, component);
 
     public void RemoveComponent<T>(Entity entity)
         where T : struct
     {
-        GetPool<T>().Remove(entity.Id);
+        if (TryGetPool<T>(out var pool))
+            pool.Remove(entity.Id);
     }
 
     public bool TryGetComponent<T>(Entity entity, out T component)
         where T : struct
     {
-        var pool = GetPool<T>();
         component = default;
-
-        if (!pool.Has(entity.Id))
-            return false;
-
-        component = pool.Get(entity.Id);
-        return true;
-    }
-
-    public ref T GetComponentRef<T>(Entity entity)
-        where T : struct
-    {
-        return ref GetPool<T>().Get(entity.Id);
+        return TryGetPool<T>(out var pool) && pool.TryGet(entity.Id, out component);
     }
 
     public EntityFilter CreateFilter()

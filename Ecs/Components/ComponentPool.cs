@@ -97,9 +97,13 @@ public class ComponentPool<T> : IComponentPool
         return entityId < _sparse.Length && _sparse[entityId] != -1;
     }
 
-    public ref T Get(int entityId)
+    public bool TryGet(int entityId, out T component)
     {
-        return ref _dense[_sparse[entityId]];
+        component = default;
+        if (!Has(entityId))
+            return false;
+        component = _dense[entityId];
+        return true;
     }
 
     public ref T GetAt(int index) => ref _dense[index];
