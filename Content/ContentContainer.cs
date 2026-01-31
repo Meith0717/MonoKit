@@ -13,11 +13,12 @@ using MonoKit.Core.IO;
 namespace MonoKit.Content;
 
 public class ContentContainer<T> : IEnumerable<(int, string, T)>
+    where T : class
 {
     private readonly List<T> _content = new();
     private readonly Dictionary<string, int> _nameToId = new();
 
-    public IReadOnlyCollection<T> Loaded => _content.AsReadOnly();
+    public IReadOnlyCollection<T> Content => _content.AsReadOnly();
 
     public T Get(string key)
     {
@@ -30,7 +31,7 @@ public class ContentContainer<T> : IEnumerable<(int, string, T)>
             ["ok"]
         );
 
-        return default;
+        return null;
     }
 
     public T Get(int id) => id >= 0 && id < _content.Count ? _content[id] : default;
@@ -57,6 +58,20 @@ public class ContentContainer<T> : IEnumerable<(int, string, T)>
             Add(contentId, content);
             contentLoadingState?.AddLoaded(file);
         }
+    }
+
+    public ContentContainer<T2> Cast<T2>()
+        where T2 : class
+    {
+        var result = new ContentContainer<T2>();
+
+        foreach (var (id, name, value) in this)
+        {
+            if (value is T2 casted)
+                result.Add(name, casted);
+        }
+
+        return result;
     }
 
     public IEnumerator<(int, string, T)> GetEnumerator()

@@ -13,39 +13,42 @@ namespace MonoKit.Content;
 /// </summary>
 public sealed class ContentProvider
 {
-    private static readonly Lazy<ContentProvider> _instance = new(() => new ContentProvider());
-
+    private static readonly Lazy<ContentProvider> Instance = new(() => new ContentProvider());
     private readonly Dictionary<Type, object> _containers = new();
-    private static ContentProvider Instance => _instance.Value;
 
     /// <summary>
     ///     Registers a new content type container if it doesn’t exist.
     /// </summary>
     public static void Register<T>()
+        where T : class
     {
-        Instance.RegisterInternal<T>();
+        Instance.Value.RegisterInternal<T>();
     }
 
     /// <summary>
     ///     Gets the container for a given content type. Automatically registers it if missing.
     /// </summary>
     public static ContentContainer<T> Container<T>()
+        where T : class
     {
-        return Instance.GetContainerInternal<T>();
+        return Instance.Value.GetContainerInternal<T>();
     }
 
     public static T Get<T>(string id)
+        where T : class
     {
-        return Instance.GetContainerInternal<T>().Get(id);
+        return Instance.Value.GetContainerInternal<T>().Get(id);
     }
 
     private void RegisterInternal<T>()
+        where T : class
     {
         if (!_containers.ContainsKey(typeof(T)))
             _containers[typeof(T)] = new ContentContainer<T>();
     }
 
     private ContentContainer<T> GetContainerInternal<T>()
+        where T : class
     {
         if (_containers.TryGetValue(typeof(T), out var container))
             return (ContentContainer<T>)container;
