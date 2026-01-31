@@ -10,6 +10,6 @@ namespace MonoKit.Gameplay
     public abstract class GameObjectFactory<T>(ContentContainer<object> contentProvider)
         where T : class
     {
-        protected readonly ContentContainer<T> ContentProvider = contentProvider.Cast<T>();
+        public readonly ContentContainer<T> ContentProvider = contentProvider.Cast<T>();
     }
 }
