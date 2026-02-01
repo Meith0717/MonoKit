@@ -3,6 +3,7 @@
 // All rights reserved.
 // Portions generated or assisted by AI.
 
+using System;
 using System.Collections.Generic;
 using MonoKit.Ecs.Components;
 using MonoKit.Ecs.Entities;
@@ -50,6 +51,25 @@ public class EntityFilter(ComponentManager manager)
             {
                 yield return new Entity(entityId);
             }
+        }
+    }
+
+    public void ForEach(Action<Entity> action)
+    {
+        if (_required.Count == 0)
+            return;
+
+        var smallestPool = _required[0];
+        for (var i = 1; i < _required.Count; i++)
+            if (_required[i].Count < smallestPool.Count)
+                smallestPool = _required[i];
+
+        var count = smallestPool.Count;
+        for (var i = 0; i < count; i++)
+        {
+            var entityId = smallestPool.GetEntityAt(i);
+            if (Matches(entityId))
+                action(new Entity(entityId));
         }
     }
 

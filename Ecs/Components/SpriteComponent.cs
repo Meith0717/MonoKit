@@ -10,6 +10,6 @@ namespace MonoKit.Ecs.Components;
 public struct SpriteComponent
 {
     public int Texture2DId;
-    public int Height;
+    public byte Height;
     public Color Color;
 }

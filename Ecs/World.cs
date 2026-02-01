@@ -26,7 +26,7 @@ public sealed class World
 
     public void Update(double elapsedMs)
     {
-        Systems.Update(elapsedMs, Components);
+        Systems.Update(elapsedMs, this);
     }
 
     public Entity CreateEntity()

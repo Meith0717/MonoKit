@@ -21,34 +21,7 @@ public class ComponentPool<T> : IComponentPool
     private T[] _dense = new T[128];
     private int[] _denseEntities = new int[128];
 
-    internal ComponentPool()
-    {
-        Array.Fill(_sparse, -1);
-    }
-
-    private void EnsureSparse(int entityId)
-    {
-        if (entityId < _sparse.Length)
-            return;
-
-        var oldSize = _sparse.Length;
-        var newSize = oldSize;
-        while (newSize <= entityId)
-            newSize *= 2;
-
-        Array.Resize(ref _sparse, newSize);
-        Array.Fill(_sparse, -1, oldSize, newSize - oldSize);
-    }
-
-    private void EnsureDense()
-    {
-        if (Count < _dense.Length)
-            return;
-
-        var newSize = _dense.Length * 2;
-        Array.Resize(ref _dense, newSize);
-        Array.Resize(ref _denseEntities, newSize);
-    }
+    internal ComponentPool() => Array.Fill(_sparse, -1);
 
     public void Add(int entityId, T component)
     {
@@ -117,5 +90,29 @@ public class ComponentPool<T> : IComponentPool
     {
         for (var i = 0; i < Count; i++)
             yield return (_denseEntities[i], i, _dense[i].GetHashCode());
+    }
+
+    private void EnsureSparse(int entityId)
+    {
+        if (entityId < _sparse.Length)
+            return;
+
+        var oldSize = _sparse.Length;
+        var newSize = oldSize;
+        while (newSize <= entityId)
+            newSize *= 2;
+
+        Array.Resize(ref _sparse, newSize);
+        Array.Fill(_sparse, -1, oldSize, newSize - oldSize);
+    }
+
+    private void EnsureDense()
+    {
+        if (Count < _dense.Length)
+            return;
+
+        var newSize = _dense.Length * 2;
+        Array.Resize(ref _dense, newSize);
+        Array.Resize(ref _denseEntities, newSize);
     }
 }

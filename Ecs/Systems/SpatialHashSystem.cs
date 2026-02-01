@@ -13,23 +13,24 @@ public class SpatialHashSystem(EcsSpatialHash grid) : ISystem, IOnEntityDestroye
 {
     public int Priority => 1;
 
-    public void Update(double elapsedMs, ComponentManager components)
+    public void Update(double elapsedMs, World world)
     {
+        var components = world.Components;
         var query = components.CreateFilter().With<TransformComponent>().With<ColliderComponent>();
 
-        foreach (var entity in query.Execute())
+        query.ForEach(e =>
         {
-            if (!components.TryGetComponent<TransformComponent>(entity, out var transform))
-                continue;
-            if (!components.TryGetComponent<ColliderComponent>(entity, out var collider))
-                continue;
+            if (!components.TryGetComponent<TransformComponent>(e, out var transform))
+                return;
+            if (!components.TryGetComponent<ColliderComponent>(e, out var collider))
+                return;
 
-            grid.UpdateEntity(entity.Id, transform.Position, collider.Width, collider.Height);
-        }
+            grid.UpdateEntity(e, transform.Position, collider.Width, collider.Height);
+        });
     }
 
     public void OnEntityDestroyed(Entity entity)
     {
-        grid.RemoveEntity(entity.Id);
+        grid.RemoveEntity(entity);
     }
 }

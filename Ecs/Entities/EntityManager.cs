@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace MonoKit.Ecs.Entities;
 
-public readonly struct Entity(int id)
+public readonly record struct Entity(int id)
 {
     public readonly int Id = id;
 }

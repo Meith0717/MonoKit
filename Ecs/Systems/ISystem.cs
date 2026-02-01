@@ -11,7 +11,7 @@ namespace MonoKit.Ecs.Systems;
 public interface ISystem
 {
     int Priority { get; }
-    void Update(double elapsedMs, ComponentManager componentManager);
+    void Update(double elapsedMs, World world);
 }
 
 public interface IOnEntityDestroyed : ISystem

@@ -7,32 +7,33 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
+using MonoKit.Ecs.Entities;
 
 namespace MonoKit.Spatial;
 
 public class EcsSpatialHash(int cellSize)
 {
-    private readonly Dictionary<(int, int), List<int>> _grids = new();
-    private readonly Dictionary<int, List<(int, int)>> _entityHashes = new();
+    private readonly Dictionary<(int, int), List<Entity>> _grids = new();
+    private readonly Dictionary<Entity, List<(int, int)>> _entityHashes = new();
     public readonly int CellSize = cellSize;
 
-    public void UpdateEntity(int entityId, Vector2 position, int width, int height)
+    public void UpdateEntity(Entity entity, Vector2 position, int width, int height)
     {
-        if (_entityHashes.TryGetValue(entityId, out var oldHashes))
+        if (_entityHashes.TryGetValue(entity, out var oldHashes))
         {
             foreach (var hash in oldHashes)
             {
-                if (_grids.TryGetValue(hash, out var cell))
-                {
-                    cell.Remove(entityId);
-                    if (cell.Count == 0)
-                        _grids.Remove(hash);
-                }
+                if (!_grids.TryGetValue(hash, out var cell))
+                    continue;
+
+                cell.Remove(entity);
+                if (cell.Count == 0)
+                    _grids.Remove(hash);
             }
             oldHashes.Clear();
         }
         else
-            _entityHashes[entityId] = [];
+            _entityHashes[entity] = [];
 
         var bottomRight = position + new Vector2(width, height);
         var start = Vector2.Floor(position / CellSize);
@@ -43,30 +44,30 @@ public class EcsSpatialHash(int cellSize)
         {
             var hash = (x, y);
             if (!_grids.ContainsKey(hash))
-                _grids[hash] = new List<int>();
+                _grids[hash] = [];
 
-            _grids[hash].Add(entityId);
-            _entityHashes[entityId].Add(hash);
+            _grids[hash].Add(entity);
+            _entityHashes[entity].Add(hash);
         }
     }
 
-    public void RemoveEntity(int entityId)
+    public void RemoveEntity(Entity entity)
     {
-        if (!_entityHashes.Remove(entityId, out var hashes))
+        if (!_entityHashes.Remove(entity, out var hashes))
             return;
 
         foreach (var hash in hashes)
         {
-            if (_grids.TryGetValue(hash, out var cell))
-            {
-                cell.Remove(entityId);
-                if (cell.Count == 0)
-                    _grids.Remove(hash);
-            }
+            if (!_grids.TryGetValue(hash, out var cell))
+                continue;
+
+            cell.Remove(entity);
+            if (cell.Count == 0)
+                _grids.Remove(hash);
         }
     }
 
-    public void GetInRadius(Vector2 pos, float radius, List<int> results)
+    public void GetInRadius(Vector2 pos, float radius, List<Entity> results)
     {
         var startX = (int)float.Floor((pos.X - radius) / CellSize);
         var endX = (int)float.Ceiling((pos.X + radius) / CellSize);

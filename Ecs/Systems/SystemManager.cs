@@ -20,7 +20,7 @@ public class SystemManager
         _isDirty = true;
     }
 
-    public void Update(double elapsedMs, ComponentManager componentManager)
+    public void Update(double elapsedMs, World world)
     {
         if (_isDirty)
         {
@@ -29,7 +29,7 @@ public class SystemManager
         }
 
         foreach (var system in _systems)
-            system.Update(elapsedMs, componentManager);
+            system.Update(elapsedMs, world);
     }
 
     public void NotifyEntityDestroyed(Entity entity)
