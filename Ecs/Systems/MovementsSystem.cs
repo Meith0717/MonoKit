@@ -1,29 +1,30 @@
-// SpatialHashSystem.cs
+// MovementsSystem.cs
 // Copyright (c) 2023-2026 Thierry Meiers
 // All rights reserved.
 // Portions generated or assisted by AI.
 
 using MonoKit.Ecs.Components;
-using MonoKit.Spatial;
 
 namespace MonoKit.Ecs.Systems;
 
-public class SpatialHashSystem(EcsSpatialHash grid) : ISystem
+public class MovementsSystem : ISystem
 {
-    public int Priority => 1;
+    public int Priority { get; } = 0;
 
     public void Update(double elapsedMs, ComponentManager components)
     {
-        var query = components.CreateFilter().With<TransformComponent>().With<ColliderComponent>();
+        var query = components.CreateFilter().With<TransformComponent>().With<VelocityComponent>();
 
         foreach (var entity in query.Execute())
         {
             if (!components.TryGetComponent<TransformComponent>(entity, out var transform))
                 continue;
-            if (!components.TryGetComponent<ColliderComponent>(entity, out var collider))
+            if (!components.TryGetComponent<VelocityComponent>(entity, out var velocity))
                 continue;
 
-            grid.UpdateEntity(entity.Id, transform.Position, collider.Width, collider.Height);
+            transform.Position += velocity.Linear * (float)elapsedMs;
+
+            components.AddComponent(entity, transform);
         }
     }
 }

@@ -24,7 +24,11 @@ public class EcsSpatialHash(int cellSize)
             foreach (var hash in oldHashes)
             {
                 if (_grids.TryGetValue(hash, out var cell))
+                {
                     cell.Remove(entityId);
+                    if (cell.Count == 0)
+                        _grids.Remove(hash);
+                }
             }
             oldHashes.Clear();
         }
@@ -55,7 +59,11 @@ public class EcsSpatialHash(int cellSize)
         foreach (var hash in hashes)
         {
             if (_grids.TryGetValue(hash, out var cell))
+            {
                 cell.Remove(entityId);
+                if (cell.Count == 0)
+                    _grids.Remove(hash);
+            }
         }
     }
 

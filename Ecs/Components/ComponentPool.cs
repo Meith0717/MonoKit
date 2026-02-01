@@ -102,7 +102,9 @@ public class ComponentPool<T> : IComponentPool
         component = default;
         if (!Has(entityId))
             return false;
-        component = _dense[entityId];
+
+        var componentIndex = _sparse[entityId];
+        component = _dense[componentIndex];
         return true;
     }
 

@@ -41,6 +41,7 @@ public class GameRuntime
         Services.AddService(_gameObjManager);
 
         _world.Systems.Add(new SpatialHashSystem(_ecsSpatialHash));
+        _world.Systems.Add(new MovementsSystem());
     }
 
     public Vector2 WorldMousePosition { get; private set; }
