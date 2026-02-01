@@ -3,8 +3,6 @@
 // All rights reserved.
 // Portions generated or assisted by AI.
 
-using MonoGame.Extended;
-
 namespace MonoKit.Ecs.Components;
 
 public struct ColliderComponent

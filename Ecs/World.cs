@@ -7,7 +7,6 @@
 
 using MonoKit.Ecs.Components;
 using MonoKit.Ecs.Entities;
-using MonoKit.Ecs.Querying;
 using MonoKit.Ecs.Systems;
 using MonoKit.Ecs.Tags;
 
