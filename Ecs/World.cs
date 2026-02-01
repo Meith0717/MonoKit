@@ -15,20 +15,40 @@ namespace MonoKit.Ecs;
 
 public sealed class World
 {
-    public EntityManager Entities { get; } = new();
+    private readonly EntityManager _entityManager = new();
     public ComponentManager Components { get; } = new();
     public SystemManager Systems { get; } = new();
 
     public World()
     {
-        var worldEntity = Entities.Create();
+        var worldEntity = _entityManager.Create();
         Components.AddComponent(worldEntity, new WorldTag());
     }
-
-    public EntityFilter Query() => new EntityFilter(Components);
 
     public void Update(double elapsedMs)
     {
         Systems.Update(elapsedMs, Components);
+    }
+
+    public Entity CreateEntity()
+    {
+        return _entityManager.Create();
+    }
+
+    public void DestroyEntity(Entity entity)
+    {
+        Systems.NotifyEntityDestroyed(entity);
+        Components.RemoveAllComponents(entity);
+        _entityManager.Destroy(entity);
+    }
+
+    public override string ToString()
+    {
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine("================ WORLD STATE ================");
+        sb.AppendLine(Components.ToString());
+        sb.AppendLine(Systems.ToString());
+        sb.AppendLine("=============================================");
+        return sb.ToString();
     }
 }

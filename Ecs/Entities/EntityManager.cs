@@ -16,15 +16,39 @@ public sealed class EntityManager
 {
     private int _nextId = 0;
     private readonly Stack<int> _freeIds = new();
+    private readonly List<bool> _alive = new();
 
     public Entity Create()
     {
-        return _freeIds.Count > 0 ? new Entity(_freeIds.Pop()) : new Entity(_nextId++);
+        int id;
+        if (_freeIds.Count > 0)
+        {
+            id = _freeIds.Pop();
+            _alive[id] = true;
+        }
+        else
+        {
+            id = _nextId++;
+            _alive.Add(true);
+        }
+        return new Entity(id);
     }
 
-    public void Destroy(Entity entity)
+    public bool Destroy(Entity entity)
     {
-        // TODO consider preventing double-destroy
+        if (entity.Id < 0 || entity.Id >= _alive.Count)
+            return false;
+
+        if (!_alive[entity.Id])
+            return false;
+
+        _alive[entity.Id] = false;
         _freeIds.Push(entity.Id);
+        return true;
+    }
+
+    public bool IsAlive(Entity entity)
+    {
+        return entity.Id >= 0 && entity.Id < _alive.Count && _alive[entity.Id];
     }
 }

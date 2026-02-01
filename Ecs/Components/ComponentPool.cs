@@ -4,6 +4,7 @@
 // Portions generated or assisted by AI.
 
 using System;
+using System.Collections.Generic;
 
 namespace MonoKit.Ecs.Components;
 
@@ -20,7 +21,7 @@ public class ComponentPool<T> : IComponentPool
     private T[] _dense = new T[128];
     private int[] _denseEntities = new int[128];
 
-    public ComponentPool()
+    internal ComponentPool()
     {
         Array.Fill(_sparse, -1);
     }
@@ -111,4 +112,10 @@ public class ComponentPool<T> : IComponentPool
     public ref T GetAt(int index) => ref _dense[index];
 
     public int GetEntityAt(int index) => _denseEntities[index];
+
+    public IEnumerable<(int entityId, int denseIndex, int hash)> GetMappings()
+    {
+        for (var i = 0; i < Count; i++)
+            yield return (_denseEntities[i], i, _dense[i].GetHashCode());
+    }
 }

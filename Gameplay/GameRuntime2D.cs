@@ -17,30 +17,29 @@ using MonoKit.Spatial;
 
 namespace MonoKit.Gameplay;
 
-public class GameRuntime
+public class GameRuntime2D
 {
     private readonly World _world;
     private readonly Camera2D _camera;
     private readonly GameObjManager _gameObjManager;
     private readonly SpatialHashing _spatialHashing;
-    private readonly EcsSpatialHash _ecsSpatialHash;
     public readonly RuntimeContainer Services = new();
 
-    public GameRuntime(GraphicsDevice graphicsDevice, int spatialHashingCellSize)
+    public GameRuntime2D(GraphicsDevice graphicsDevice, int spatialHashingCellSize)
     {
         _world = new World();
         _camera = new Camera2D(graphicsDevice);
         _spatialHashing = new SpatialHashing(spatialHashingCellSize);
-        _ecsSpatialHash = new EcsSpatialHash(spatialHashingCellSize);
         _gameObjManager = new GameObjManager(_spatialHashing, Services);
+        var ecsSpatialHash = new EcsSpatialHash(spatialHashingCellSize);
 
         Services.AddService(_world);
         Services.AddService(_camera);
         Services.AddService(_spatialHashing);
-        Services.AddService(_ecsSpatialHash);
+        Services.AddService(ecsSpatialHash);
         Services.AddService(_gameObjManager);
 
-        _world.Systems.Add(new SpatialHashSystem(_ecsSpatialHash));
+        _world.Systems.Add(new SpatialHashSystem(ecsSpatialHash));
         _world.Systems.Add(new MovementsSystem());
     }
 
@@ -56,9 +55,5 @@ public class GameRuntime
             Mouse.GetState().Position.ToVector2(),
             _camera.ViewInvert
         );
-#if DEBUG
-        var cameraPos = Vector2.Floor(_camera.Position);
-        Debug.WriteLine($"Camera Pos: {cameraPos}\nCamera Zom: {_camera.Zoom}");
-#endif
     }
 }

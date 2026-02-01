@@ -4,11 +4,12 @@
 // Portions generated or assisted by AI.
 
 using MonoKit.Ecs.Components;
+using MonoKit.Ecs.Entities;
 using MonoKit.Spatial;
 
 namespace MonoKit.Ecs.Systems;
 
-public class SpatialHashSystem(EcsSpatialHash grid) : ISystem
+public class SpatialHashSystem(EcsSpatialHash grid) : ISystem, IOnEntityDestroyed
 {
     public int Priority => 1;
 
@@ -25,5 +26,10 @@ public class SpatialHashSystem(EcsSpatialHash grid) : ISystem
 
             grid.UpdateEntity(entity.Id, transform.Position, collider.Width, collider.Height);
         }
+    }
+
+    public void OnEntityDestroyed(Entity entity)
+    {
+        grid.RemoveEntity(entity.Id);
     }
 }

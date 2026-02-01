@@ -5,6 +5,7 @@
 
 using System.Collections.Generic;
 using MonoKit.Ecs.Components;
+using MonoKit.Ecs.Entities;
 
 namespace MonoKit.Ecs.Systems;
 
@@ -29,5 +30,27 @@ public class SystemManager
 
         foreach (var system in _systems)
             system.Update(elapsedMs, componentManager);
+    }
+
+    public void NotifyEntityDestroyed(Entity entity)
+    {
+        foreach (var system in _systems)
+        {
+            if (system is IOnEntityDestroyed listener)
+                listener.OnEntityDestroyed(entity);
+        }
+    }
+
+    public override string ToString()
+    {
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine("--- System Manager (Execution Order) ---");
+        var displayList = new List<ISystem>(_systems);
+        displayList.Sort((a, b) => a.Priority.CompareTo(b.Priority));
+
+        foreach (var system in displayList)
+            sb.AppendLine($"[{system.Priority}] {system.GetType().Name}");
+
+        return sb.ToString();
     }
 }

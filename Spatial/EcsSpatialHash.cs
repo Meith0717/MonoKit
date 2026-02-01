@@ -14,7 +14,6 @@ public class EcsSpatialHash(int cellSize)
 {
     private readonly Dictionary<(int, int), List<int>> _grids = new();
     private readonly Dictionary<int, List<(int, int)>> _entityHashes = new();
-
     public readonly int CellSize = cellSize;
 
     public void UpdateEntity(int entityId, Vector2 position, int width, int height)
@@ -87,7 +86,7 @@ public class EcsSpatialHash(int cellSize)
         var rect = new RectangleF(0, 0, CellSize, CellSize);
         foreach (var ((x, y), _) in _grids)
         {
-            rect.Position = new Vector2(x, y) * cellSize;
+            rect.Position = new Vector2(x, y) * CellSize;
             spriteBatch.DrawRectangle(rect, color, thickness);
         }
     }

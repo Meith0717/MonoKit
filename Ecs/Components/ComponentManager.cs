@@ -27,18 +27,6 @@ public class ComponentManager
         return true;
     }
 
-    public ComponentPool<T> GetOrCreatePool<T>()
-        where T : struct
-    {
-        var type = typeof(T);
-        if (TryGetPool<T>(out var pool))
-            return pool;
-
-        pool = new ComponentPool<T>();
-        _pools[type] = pool;
-        return pool;
-    }
-
     public void AddComponent<T>(Entity entity, T component)
         where T : struct => GetOrCreatePool<T>().Add(entity.Id, component);
 
@@ -59,5 +47,38 @@ public class ComponentManager
     public EntityFilter CreateFilter()
     {
         return new EntityFilter(this);
+    }
+
+    internal void RemoveAllComponents(Entity entity)
+    {
+        foreach (var pool in _pools.Values)
+            ((IComponentPool)pool).Remove(entity.Id);
+    }
+
+    private ComponentPool<T> GetOrCreatePool<T>()
+        where T : struct
+    {
+        var type = typeof(T);
+        if (TryGetPool<T>(out var pool))
+            return pool;
+
+        pool = new ComponentPool<T>();
+        _pools[type] = pool;
+        return pool;
+    }
+
+    public override string ToString()
+    {
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine("--- Component Pools ---");
+        foreach (var entry in _pools)
+        {
+            var pool = (IComponentPool)entry.Value;
+            sb.AppendLine($"Pool<{entry.Key.Name}> (Count: {pool.Count})");
+
+            foreach (var (entityId, denseIndex, hash) in pool.GetMappings())
+                sb.AppendLine($"  Entity {entityId:D3} -> DenseIndex {denseIndex:D3} (#{hash})");
+        }
+        return sb.ToString();
     }
 }
