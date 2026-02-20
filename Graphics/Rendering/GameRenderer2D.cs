@@ -6,6 +6,8 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
+using MonoKit.Ecs;
+using MonoKit.Ecs.Entities;
 using MonoKit.Gameplay;
 using MonoKit.Graphics.Camera;
 using MonoKit.Spatial;
@@ -56,6 +58,61 @@ public class GameRenderer2D(RuntimeContainer services)
         WasBeginCalled();
         foreach (var renderer2DProcess in _renderer2DProcesses)
             renderer2DProcess.DrawEffects(spriteBatch, _camera.View, services, _culledObjects);
+    }
+
+    private void WasBeginCalled()
+    {
+        if (_hasBegan)
+            return;
+        throw new Exception("Call BeginDrawCameraTransformed");
+    }
+}
+
+public class EcsGameRenderer2D(RuntimeContainer services)
+{
+    private readonly World _world = services.Get<World>();
+    private readonly Camera2D _camera = services.Get<Camera2D>();
+    private readonly EcsSpatialHash _spatialHash = services.Get<EcsSpatialHash>();
+    private readonly List<IEcsGameRendererProcess> _renderer2DProcesses = [];
+    private readonly List<Entity> _culledEntities = [];
+    private float _viewportScale;
+    private bool _hasBegan;
+
+    public void AddProcess(IEcsGameRendererProcess gameRendererProcess)
+    {
+        _renderer2DProcesses.Add(gameRendererProcess);
+    }
+
+    public void Update(double elapsedMilliseconds, float viewportScale)
+    {
+        _hasBegan = false;
+
+        _culledEntities.Clear();
+        _spatialHash.GetInRectangle(_camera.Bounds, _culledEntities);
+        foreach (var renderer2DProcess in _renderer2DProcesses)
+            renderer2DProcess.UpdateEffects(elapsedMilliseconds);
+        _viewportScale = viewportScale;
+    }
+
+    public void BeginDrawCameraTransformed(SpriteBatch spriteBatch)
+    {
+        _hasBegan = true;
+        _camera.UpdateView(_viewportScale);
+        spriteBatch.Begin(transformMatrix: _camera.View, sortMode: SpriteSortMode.BackToFront);
+    }
+
+    public void DrawTextures(SpriteBatch spriteBatch)
+    {
+        WasBeginCalled();
+        foreach (var renderer2DProcess in _renderer2DProcesses)
+            renderer2DProcess.DrawTextures(spriteBatch, _world, _culledEntities);
+    }
+
+    public void DrawEffects(SpriteBatch spriteBatch)
+    {
+        WasBeginCalled();
+        foreach (var renderer2DProcess in _renderer2DProcesses)
+            renderer2DProcess.DrawEffects(spriteBatch, _camera.View, _world, _culledEntities);
     }
 
     private void WasBeginCalled()

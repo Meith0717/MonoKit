@@ -4,7 +4,6 @@
 // Portions generated or assisted by AI.
 
 using System.Collections.Generic;
-using MonoKit.Ecs.Components;
 using MonoKit.Ecs.Entities;
 
 namespace MonoKit.Ecs.Systems;

@@ -40,6 +40,12 @@ public sealed class ContentProvider
         return Instance.Value.GetContainerInternal<T>().Get(id);
     }
 
+    public static T Get<T>(int id)
+        where T : class
+    {
+        return Instance.Value.GetContainerInternal<T>().Get(id);
+    }
+
     private void RegisterInternal<T>()
         where T : class
     {

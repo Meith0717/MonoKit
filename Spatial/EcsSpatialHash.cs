@@ -82,6 +82,19 @@ public class EcsSpatialHash(int cellSize)
         }
     }
 
+    public void GetInRectangle(RectangleF searchRectangle, List<Entity> results)
+    {
+        var startX = (int)float.Floor(searchRectangle.Left / CellSize);
+        var endX = (int)float.Ceiling(searchRectangle.Right / CellSize);
+        var startY = (int)float.Floor(searchRectangle.Top / CellSize);
+        var endY = (int)float.Ceiling(searchRectangle.Bottom / CellSize);
+
+        for (var x = startX; x < endX; x++)
+        for (var y = startY; y < endY; y++)
+            if (_grids.TryGetValue((x, y), out var cell))
+                results.AddRange(cell);
+    }
+
     public void DrawDebug(SpriteBatch spriteBatch, Color color, float thickness = 1f)
     {
         var rect = new RectangleF(0, 0, CellSize, CellSize);

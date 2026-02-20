@@ -10,5 +10,5 @@ namespace MonoKit.Ecs.Components;
 public struct VelocityComponent
 {
     public Vector2 Linear;
-    public Vector2 Angular;
+    public float Angular;
 }

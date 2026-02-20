@@ -6,6 +6,8 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoKit.Ecs;
+using MonoKit.Ecs.Entities;
 using MonoKit.Gameplay;
 
 namespace MonoKit.Graphics.Rendering;
@@ -26,4 +28,18 @@ public interface IGameRendererProcess
         RuntimeContainer services,
         IReadOnlyList<GameObject> gameObjects
     );
+}
+
+public interface IEcsGameRendererProcess
+{
+    void UpdateEffects(double elapsedMilliseconds);
+
+    void DrawEffects(
+        SpriteBatch spriteBatch,
+        Matrix transformMatrix,
+        World world,
+        IReadOnlyList<Entity> entities
+    );
+
+    void DrawTextures(SpriteBatch spriteBatch, World world, IReadOnlyList<Entity> entities);
 }
