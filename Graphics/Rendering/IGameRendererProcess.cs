@@ -3,6 +3,7 @@
 // All rights reserved.
 // Portions generated or assisted by AI.
 
+using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -12,6 +13,7 @@ using MonoKit.Gameplay;
 
 namespace MonoKit.Graphics.Rendering;
 
+[Obsolete("Will be replaced by ECS system")]
 public interface IGameRendererProcess
 {
     void UpdateEffects(double elapsedMilliseconds);

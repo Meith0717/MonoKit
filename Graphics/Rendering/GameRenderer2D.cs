@@ -14,6 +14,7 @@ using MonoKit.Spatial;
 
 namespace MonoKit.Graphics.Rendering;
 
+[Obsolete("Will be replaced by ECS system")]
 public class GameRenderer2D(RuntimeContainer services)
 {
     private readonly SpatialHashing _spatialHashing = services.Get<SpatialHashing>();

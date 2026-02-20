@@ -95,7 +95,7 @@ public class EcsSpatialHash(int cellSize)
                 results.AddRange(cell);
     }
 
-    public void DrawDebug(SpriteBatch spriteBatch, Color color, float thickness = 1f)
+    public void DrawDebug(SpriteBatch spriteBatch, Color color, float thickness)
     {
         var rect = new RectangleF(0, 0, CellSize, CellSize);
         foreach (var ((x, y), _) in _grids)
