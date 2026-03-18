@@ -12,7 +12,14 @@ namespace MonoKit.Ecs.Components;
 
 public class ComponentManager
 {
-    private readonly Dictionary<Type, object> _pools = new();
+    private readonly Dictionary<Type, object> _pools;
+    private readonly EntityQuery _query;
+
+    public ComponentManager()
+    {
+        _pools = [];
+        _query = new EntityQuery(this);
+    }
 
     public bool TryGetPool<T>(out ComponentPool<T> pool)
         where T : struct
@@ -44,9 +51,9 @@ public class ComponentManager
         return TryGetPool<T>(out var pool) && pool.TryGet(entity.Id, out component);
     }
 
-    public EntityFilter CreateFilter()
+    public EntityQuery GetQuery()
     {
-        return new EntityFilter(this);
+        return _query;
     }
 
     internal void RemoveAllComponents(Entity entity)

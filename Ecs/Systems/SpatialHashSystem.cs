@@ -16,7 +16,7 @@ public class SpatialHashSystem(EcsSpatialHash grid) : ISystem, IOnEntityDestroye
     public void Update(double elapsedMs, World world)
     {
         var components = world.Components;
-        var query = components.CreateFilter().With<TransformComponent>().With<ColliderComponent>();
+        var query = components.GetQuery().With<TransformComponent>().With<ColliderComponent>();
 
         query.ForEach(e =>
         {

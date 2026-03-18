@@ -14,17 +14,17 @@ public class MovementsSystem : ISystem
     public void Update(double elapsedMs, World world)
     {
         var components = world.Components;
-        var query = components.CreateFilter().With<TransformComponent>().With<VelocityComponent>();
+        var query = components.GetQuery().With<TransformComponent>().With<MovementComponent>();
 
         query.ForEach(e =>
         {
             if (!components.TryGetComponent<TransformComponent>(e, out var transform))
                 return;
-            if (!components.TryGetComponent<VelocityComponent>(e, out var velocity))
+            if (!components.TryGetComponent<MovementComponent>(e, out var velocity))
                 return;
 
-            transform.Position += velocity.Linear * (float)elapsedMs;
-            transform.Rotation += velocity.Angular * (float)elapsedMs;
+            transform.Position += velocity.LinearVelocity * (float)elapsedMs;
+            transform.Rotation += velocity.AngularVelocity * (float)elapsedMs;
 
             components.AddComponent(e, transform);
         });

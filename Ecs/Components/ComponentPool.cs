@@ -53,15 +53,12 @@ public class ComponentPool<T> : IComponentPool
 
         var lastIndex = Count - 1;
 
-        // Swap with the last element to keep the array dense
         _dense[denseIndex] = _dense[lastIndex];
         var movedEntity = _denseEntities[lastIndex];
         _denseEntities[denseIndex] = movedEntity;
 
-        // Update the sparse map for the moved entity
         _sparse[movedEntity] = denseIndex;
 
-        // Clear the removed entity
         _sparse[entityId] = -1;
         Count--;
     }

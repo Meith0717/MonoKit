@@ -42,7 +42,7 @@ public class GameObjManager(SpatialHashing spatialHashing, RuntimeContainer serv
         if (_gameObjects.Count == 0)
             return;
 
-        foreach (var obj in _gameObjects)
+        foreach (var obj in _gameObjects.ToArray())
         {
             obj.Update(elapsedMs, services);
             obj.Position += obj.MovingDirection * obj.Velocity * (float)elapsedMs;

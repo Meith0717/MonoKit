@@ -28,8 +28,8 @@ public class GameRuntime2D
         _camera = new Camera2D(graphicsDevice);
         _spatialHashing = new SpatialHashing(spatialHashingCellSize);
         _gameObjManager = new GameObjManager(_spatialHashing, Services);
-        var ecsSpatialHash = new EcsSpatialHash(spatialHashingCellSize);
 
+        var ecsSpatialHash = new EcsSpatialHash(spatialHashingCellSize);
         Services.AddService(_world);
         Services.AddService(_camera);
         Services.AddService(_spatialHashing);
@@ -38,6 +38,7 @@ public class GameRuntime2D
 
         _world.Systems.Add(new SpatialHashSystem(ecsSpatialHash));
         _world.Systems.Add(new MovementsSystem());
+        _world.Systems.Add(new DestroySystem());
     }
 
     public Vector2 WorldMousePosition { get; private set; }
