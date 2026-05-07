@@ -6,20 +6,15 @@
 using System;
 using System.Collections.Generic;
 using MonoKit.Ecs.Entities;
-using MonoKit.Ecs.Querying;
 
 namespace MonoKit.Ecs.Components;
 
 public class ComponentManager
 {
-    private readonly Dictionary<Type, object> _pools;
-    private readonly EntityQuery _query;
+    private readonly Dictionary<Type, object> _pools = [];
 
-    public ComponentManager()
-    {
-        _pools = [];
-        _query = new EntityQuery(this);
-    }
+    public event Action<Entity, Type> OnComponentAdded;
+    public event Action<Entity, Type> OnComponentRemoved;
 
     public bool TryGetPool<T>(out ComponentPool<T> pool)
         where T : struct
@@ -44,25 +39,34 @@ public class ComponentManager
         return ref component;
     }
 
-    public void AddComponent<T>(Entity entity, T component)
-        where T : struct => GetOrCreatePool<T>().Add(entity.Id, component);
+    public void Add<T>(Entity entity, T component)
+        where T : struct
+    {
+        GetOrCreatePool<T>().Add(entity.Id, component);
+        OnComponentAdded?.Invoke(entity, typeof(T));
+    }
 
     public void RemoveComponent<T>(Entity entity)
         where T : struct
     {
         if (TryGetPool<T>(out var pool))
+        {
             pool.Remove(entity.Id);
-    }
-
-    public EntityQuery GetQuery()
-    {
-        return _query;
+            OnComponentRemoved?.Invoke(entity, typeof(T));
+        }
     }
 
     internal void RemoveAllComponents(Entity entity)
     {
-        foreach (var pool in _pools.Values)
-            ((IComponentPool)pool).Remove(entity.Id);
+        foreach (var kvp in _pools)
+        {
+            var pool = (IComponentPool)kvp.Value;
+            if (pool.Has(entity.Id))
+            {
+                pool.Remove(entity.Id);
+                OnComponentRemoved?.Invoke(entity, kvp.Key);
+            }
+        }
     }
 
     public ComponentPool<T> GetOrCreatePool<T>()

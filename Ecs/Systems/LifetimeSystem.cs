@@ -1,39 +1,40 @@
-// DestroySystem.cs
+// LifetimeSystem.cs
 // Copyright (c) 2023-2026 Thierry Meiers
 // All rights reserved.
 // Portions generated or assisted by AI.
 
-using Microsoft.Xna.Framework.Graphics;
 using MonoKit.Ecs.Components;
+using MonoKit.Ecs.Querying;
 
 namespace MonoKit.Ecs.Systems;
 
-public class DestroySystem : ISystem
+public class LifetimeSystem : ISystem
 {
     public int Priority { get; } = -100;
+    private EntityTypeTracker _tracker;
     private ComponentPool<Lifetime> _lifetimePool;
 
-    public void Initialize(ComponentManager components)
+    public void Initialize(World world)
     {
-        _lifetimePool = components.GetOrCreatePool<Lifetime>();
+        _tracker = world.TypeTracker;
+        _lifetimePool = world.Components.GetOrCreatePool<Lifetime>();
     }
 
     public void Update(double elapsedMs, World world)
     {
-        var components = world.Components;
-        var query = components.GetQuery().With<Lifetime>();
+        var entities = _tracker.GetEntitiesWith<Lifetime>();
 
-        query.ForEach(e =>
+        foreach (var e in entities)
         {
             ref var lifetime = ref _lifetimePool.Get(e.Id);
 
             if (lifetime.DestroyNow || lifetime.CoolDown <= 0)
             {
                 world.DestroyEntity(e);
-                return;
+                continue;
             }
 
             lifetime.CoolDown -= (float)elapsedMs;
-        });
+        }
     }
 }

@@ -7,6 +7,7 @@
 
 using MonoKit.Ecs.Components;
 using MonoKit.Ecs.Entities;
+using MonoKit.Ecs.Querying;
 using MonoKit.Ecs.Systems;
 using MonoKit.Ecs.Tags;
 
@@ -16,13 +17,19 @@ public sealed class World
 {
     private readonly EntityManager _entityManager = new();
     public ComponentManager Components { get; } = new();
+    public EntityTypeTracker TypeTracker { get; }
     public SystemManager Systems { get; }
 
     public World()
     {
+        TypeTracker = new EntityTypeTracker();
+        Components.OnComponentAdded += TypeTracker.OnComponentAdded;
+        Components.OnComponentRemoved += TypeTracker.OnComponentRemoved;
+
         var worldEntity = _entityManager.Create();
-        Components.AddComponent(worldEntity, new WorldTag());
-        Systems = new SystemManager(Components);
+        TypeTracker.TrackEntity(worldEntity);
+        Components.Add(worldEntity, new WorldTag());
+        Systems = new SystemManager(this);
     }
 
     public void Update(double elapsedMs)
@@ -32,12 +39,15 @@ public sealed class World
 
     public Entity CreateEntity()
     {
-        return _entityManager.Create();
+        var entity = _entityManager.Create();
+        TypeTracker.TrackEntity(entity);
+        return entity;
     }
 
     public void DestroyEntity(Entity entity)
     {
         Systems.NotifyEntityDestroyed(entity);
+        TypeTracker.OnEntityDestroyed(entity);
         Components.RemoveAllComponents(entity);
         _entityManager.Destroy(entity);
     }

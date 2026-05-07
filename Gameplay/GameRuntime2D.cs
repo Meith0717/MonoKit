@@ -38,7 +38,7 @@ public class GameRuntime2D
 
         // _world.Systems.Add(new SpatialHashSystem(ecsSpatialHash));
         _world.Systems.Add(new MovementsSystem());
-        _world.Systems.Add(new DestroySystem());
+        _world.Systems.Add(new LifetimeSystem());
     }
 
     public Vector2 WorldMousePosition { get; private set; }

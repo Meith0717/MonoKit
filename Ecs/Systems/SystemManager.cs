@@ -4,19 +4,18 @@
 // Portions generated or assisted by AI.
 
 using System.Collections.Generic;
-using MonoKit.Ecs.Components;
 using MonoKit.Ecs.Entities;
 
 namespace MonoKit.Ecs.Systems;
 
-public class SystemManager(ComponentManager components)
+public class SystemManager(World world)
 {
     private readonly List<ISystem> _systems = [];
     private bool _isDirty = false;
 
     public void Add(ISystem system)
     {
-        system.Initialize(components);
+        system.Initialize(world);
         _systems.Add(system);
         _isDirty = true;
     }
