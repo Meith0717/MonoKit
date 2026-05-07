@@ -17,8 +17,8 @@ public class ComponentPool<T> : IComponentPool
 
     public ReadOnlySpan<int> EntitiesAsSpan() => _denseEntities.AsSpan(0, Count);
 
-    private int[] _sparse = new int[128];
-    private T[] _dense = new T[128];
+    private int[] _sparse = new int[128]; // The index = entityId contains the index of the component
+    private T[] _dense = new T[128]; // Contains the Components
     private int[] _denseEntities = new int[128];
 
     internal ComponentPool() => Array.Fill(_sparse, -1);
@@ -27,16 +27,17 @@ public class ComponentPool<T> : IComponentPool
     {
         EnsureSparse(entityId);
 
+        // Update the component
         if (_sparse[entityId] != -1)
         {
-            _dense[_sparse[entityId]] = component;
+            var componentIndex = _sparse[entityId];
+            _dense[componentIndex] = component;
             return;
         }
 
         EnsureDense();
-
+        // Add new component
         var denseIndex = Count++;
-
         _sparse[entityId] = denseIndex;
         _dense[denseIndex] = component;
         _denseEntities[denseIndex] = entityId;
@@ -68,18 +69,15 @@ public class ComponentPool<T> : IComponentPool
         return entityId < _sparse.Length && _sparse[entityId] != -1;
     }
 
-    public bool TryGet(int entityId, out T component)
+    public ref T Get(int entityId)
     {
-        component = default;
         if (!Has(entityId))
-            return false;
+            throw new ArgumentException($"Entity {entityId} has no component {typeof(T).Name}.");
 
         var componentIndex = _sparse[entityId];
-        component = _dense[componentIndex];
-        return true;
+        ref var component = ref _dense[componentIndex];
+        return ref component;
     }
-
-    public ref T GetAt(int index) => ref _dense[index];
 
     public int GetEntityAt(int index) => _denseEntities[index];
 

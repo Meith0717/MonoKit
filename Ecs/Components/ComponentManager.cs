@@ -44,11 +44,14 @@ public class ComponentManager
             pool.Remove(entity.Id);
     }
 
-    public bool TryGetComponent<T>(Entity entity, out T component)
+    public ref T GetComponent<T>(Entity entity)
         where T : struct
     {
-        component = default;
-        return TryGetPool<T>(out var pool) && pool.TryGet(entity.Id, out component);
+        if (!TryGetPool<T>(out var pool))
+            throw new KeyNotFoundException();
+
+        ref var component = ref pool.Get(entity.Id);
+        return ref component;
     }
 
     public EntityQuery GetQuery()

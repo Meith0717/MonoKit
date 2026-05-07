@@ -14,21 +14,19 @@ public class DestroySystem : ISystem
     public void Update(double elapsedMs, World world)
     {
         var components = world.Components;
-        var query = components.GetQuery().With<DestroyComponent>();
+        var query = components.GetQuery().With<Lifetime>();
 
         query.ForEach(e =>
         {
-            if (!components.TryGetComponent<DestroyComponent>(e, out var destroy))
-                return;
+            ref var lifetime = ref components.GetComponent<Lifetime>(e);
 
-            if (destroy.DestroyNow || destroy.CoolDown <= 0)
+            if (lifetime.DestroyNow || lifetime.CoolDown <= 0)
             {
                 world.DestroyEntity(e);
                 return;
             }
 
-            destroy.CoolDown -= (float)elapsedMs;
-            components.AddComponent(e, destroy);
+            lifetime.CoolDown -= (float)elapsedMs;
         });
     }
 }

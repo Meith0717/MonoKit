@@ -1,4 +1,4 @@
-// Draw2dComponent.cs
+// Transform2D.cs
 // Copyright (c) 2023-2026 Thierry Meiers
 // All rights reserved.
 // Portions generated or assisted by AI.
@@ -7,11 +7,8 @@ using Microsoft.Xna.Framework;
 
 namespace MonoKit.Ecs.Components;
 
-public struct Draw2dComponent
+public struct Transform2D
 {
-    public int Id;
-    public float Width;
-    public float Height;
-    public Color Color;
-    public float LayerDepth;
+    public Vector2 Position;
+    public float Rotation;
 }

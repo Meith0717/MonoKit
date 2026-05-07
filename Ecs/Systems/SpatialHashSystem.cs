@@ -16,14 +16,12 @@ public class SpatialHashSystem(EcsSpatialHash grid) : ISystem, IOnEntityDestroye
     public void Update(double elapsedMs, World world)
     {
         var components = world.Components;
-        var query = components.GetQuery().With<TransformComponent>().With<ColliderComponent>();
+        var query = components.GetQuery().With<Transform2D>().With<Collider2D>();
 
         query.ForEach(e =>
         {
-            if (!components.TryGetComponent<TransformComponent>(e, out var transform))
-                return;
-            if (!components.TryGetComponent<ColliderComponent>(e, out var collider))
-                return;
+            var transform = components.GetComponent<Transform2D>(e);
+            var collider = components.GetComponent<Collider2D>(e);
 
             grid.UpdateEntity(e, transform.Position, collider.Width, collider.Height);
         });
