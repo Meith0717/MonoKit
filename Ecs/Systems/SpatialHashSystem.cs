@@ -12,6 +12,14 @@ namespace MonoKit.Ecs.Systems;
 public class SpatialHashSystem(EcsSpatialHash grid) : ISystem, IOnEntityDestroyed
 {
     public int Priority => 1;
+    private ComponentPool<Transform2D> _transform2DPool;
+    private ComponentPool<Collider2D> _collider2DPool;
+
+    public void Initialize(ComponentManager components)
+    {
+        _transform2DPool = components.GetOrCreatePool<Transform2D>();
+        _collider2DPool = components.GetOrCreatePool<Collider2D>();
+    }
 
     public void Update(double elapsedMs, World world)
     {
@@ -20,8 +28,8 @@ public class SpatialHashSystem(EcsSpatialHash grid) : ISystem, IOnEntityDestroye
 
         query.ForEach(e =>
         {
-            var transform = components.GetComponent<Transform2D>(e);
-            var collider = components.GetComponent<Collider2D>(e);
+            ref var transform = ref _transform2DPool.Get(e.Id);
+            ref var collider = ref _collider2DPool.Get(e.Id);
 
             grid.UpdateEntity(e, transform.Position, collider.Width, collider.Height);
         });

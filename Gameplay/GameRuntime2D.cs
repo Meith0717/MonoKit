@@ -36,7 +36,7 @@ public class GameRuntime2D
         Services.AddService(ecsSpatialHash);
         Services.AddService(_gameObjManager);
 
-        _world.Systems.Add(new SpatialHashSystem(ecsSpatialHash));
+        // _world.Systems.Add(new SpatialHashSystem(ecsSpatialHash));
         _world.Systems.Add(new MovementsSystem());
         _world.Systems.Add(new DestroySystem());
     }

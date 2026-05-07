@@ -3,6 +3,7 @@
 // All rights reserved.
 // Portions generated or assisted by AI.
 
+using MonoKit.Ecs.Components;
 using MonoKit.Ecs.Entities;
 
 namespace MonoKit.Ecs.Systems;
@@ -10,6 +11,8 @@ namespace MonoKit.Ecs.Systems;
 public interface ISystem
 {
     int Priority { get; }
+
+    void Initialize(ComponentManager componentManager);
     void Update(double elapsedMs, World world);
 }
 

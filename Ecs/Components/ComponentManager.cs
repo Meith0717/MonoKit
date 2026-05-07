@@ -34,16 +34,6 @@ public class ComponentManager
         return true;
     }
 
-    public void AddComponent<T>(Entity entity, T component)
-        where T : struct => GetOrCreatePool<T>().Add(entity.Id, component);
-
-    public void RemoveComponent<T>(Entity entity)
-        where T : struct
-    {
-        if (TryGetPool<T>(out var pool))
-            pool.Remove(entity.Id);
-    }
-
     public ref T GetComponent<T>(Entity entity)
         where T : struct
     {
@@ -52,6 +42,16 @@ public class ComponentManager
 
         ref var component = ref pool.Get(entity.Id);
         return ref component;
+    }
+
+    public void AddComponent<T>(Entity entity, T component)
+        where T : struct => GetOrCreatePool<T>().Add(entity.Id, component);
+
+    public void RemoveComponent<T>(Entity entity)
+        where T : struct
+    {
+        if (TryGetPool<T>(out var pool))
+            pool.Remove(entity.Id);
     }
 
     public EntityQuery GetQuery()
@@ -65,7 +65,7 @@ public class ComponentManager
             ((IComponentPool)pool).Remove(entity.Id);
     }
 
-    private ComponentPool<T> GetOrCreatePool<T>()
+    public ComponentPool<T> GetOrCreatePool<T>()
         where T : struct
     {
         var type = typeof(T);

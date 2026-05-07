@@ -16,12 +16,13 @@ public sealed class World
 {
     private readonly EntityManager _entityManager = new();
     public ComponentManager Components { get; } = new();
-    public SystemManager Systems { get; } = new();
+    public SystemManager Systems { get; }
 
     public World()
     {
         var worldEntity = _entityManager.Create();
         Components.AddComponent(worldEntity, new WorldTag());
+        Systems = new SystemManager(Components);
     }
 
     public void Update(double elapsedMs)
