@@ -73,7 +73,7 @@ public class EcsGameRenderer2D(RuntimeContainer services)
 {
     private readonly World _world = services.Get<World>();
     private readonly Camera2D _camera = services.Get<Camera2D>();
-    private readonly EcsSpatialHash _spatialHash = services.Get<EcsSpatialHash>();
+    private readonly EcsSpatialHash2D _spatialHash2D = services.Get<EcsSpatialHash2D>();
     private readonly List<IEcsGameRendererProcess> _renderer2DProcesses = [];
     private readonly List<Entity> _culledEntities = [];
     private float _viewportScale;
@@ -89,7 +89,7 @@ public class EcsGameRenderer2D(RuntimeContainer services)
         _hasBegan = false;
 
         _culledEntities.Clear();
-        _spatialHash.GetInRectangle(_camera.Bounds, _culledEntities);
+        _spatialHash2D.GetInRectangle(_camera.Bounds, _culledEntities);
         foreach (var renderer2DProcess in _renderer2DProcesses)
             renderer2DProcess.UpdateEffects(elapsedMilliseconds);
         _viewportScale = viewportScale;

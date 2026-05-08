@@ -29,15 +29,15 @@ public class GameRuntime2D
         _spatialHashing = new SpatialHashing(spatialHashingCellSize);
         _gameObjManager = new GameObjManager(_spatialHashing, Services);
 
-        var ecsSpatialHash = new EcsSpatialHash(spatialHashingCellSize);
+        var ecsSpatialHash = new EcsSpatialHash2D(spatialHashingCellSize);
         Services.AddService(_world);
         Services.AddService(_camera);
         Services.AddService(_spatialHashing);
         Services.AddService(ecsSpatialHash);
         Services.AddService(_gameObjManager);
 
-        // _world.Systems.Add(new SpatialHashSystem(ecsSpatialHash));
-        _world.Systems.Add(new MovementsSystem());
+        _world.Systems.Add(new SpatialHashSystem2D(ecsSpatialHash));
+        _world.Systems.Add(new MovementsSystem2D());
         _world.Systems.Add(new LifetimeSystem());
     }
 

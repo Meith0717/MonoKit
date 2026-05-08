@@ -3,6 +3,7 @@
 // All rights reserved.
 // Portions generated or assisted by AI.
 
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoKit.Content;
@@ -35,6 +36,7 @@ public sealed class UiText(string spriteFont, string text = default) : UiElement
     }
 
     public Color Color { private get; set; } = Color.Black;
+    public Func<string> TextProvider { get; set; }
 
     public override void ApplyScale(Rectangle root, float uiScale = 1)
     {
@@ -61,7 +63,8 @@ public sealed class UiText(string spriteFont, string text = default) : UiElement
 
     protected override void Updater(InputHandler inputHandler)
     {
-        ;
+        if (TextProvider != null)
+            Text = TextProvider();
     }
 
     private void UpdateSize()

@@ -20,6 +20,12 @@ public class SystemManager(World world)
         _isDirty = true;
     }
 
+    public void Remove(ISystem system)
+    {
+        _systems.Remove(system);
+        _isDirty = true;
+    }
+
     public void Update(double elapsedMs, World world)
     {
         if (_isDirty)

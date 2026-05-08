@@ -20,6 +20,8 @@ public sealed class World
     public EntityTypeTracker TypeTracker { get; }
     public SystemManager Systems { get; }
 
+    public int EntityCount => _entityManager.Count;
+
     public World()
     {
         TypeTracker = new EntityTypeTracker();

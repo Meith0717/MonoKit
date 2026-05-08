@@ -1,4 +1,4 @@
-// EcsSpatialHash.cs
+// EcsSpatialHash2D.cs
 // Copyright (c) 2023-2026 Thierry Meiers
 // All rights reserved.
 // Portions generated or assisted by AI.
@@ -11,7 +11,7 @@ using MonoKit.Ecs.Entities;
 
 namespace MonoKit.Spatial;
 
-public class EcsSpatialHash(int cellSize)
+public class EcsSpatialHash2D(int cellSize)
 {
     private readonly Dictionary<(int, int), List<Entity>> _grids = new();
     private readonly Dictionary<Entity, List<(int, int)>> _entityHashes = new();

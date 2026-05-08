@@ -87,7 +87,7 @@ public class ScreenManager(Game game)
         _runnEffect = false;
     }
 
-    public void Draw(SpriteBatch spriteBatch)
+    public void DrawWithRenderTarget(SpriteBatch spriteBatch)
     {
         if (_screens.Count == 0)
             return;
@@ -122,6 +122,16 @@ public class ScreenManager(Game game)
         spriteBatch.Draw(_lowerRenderTarget, Vector2.Zero, Color.White);
         spriteBatch.Draw(topScreenTarget, Vector2.Zero, Color.White);
         spriteBatch.End();
+    }
+
+    public void Draw(SpriteBatch spriteBatch)
+    {
+        foreach (var screen in _screens.Reverse())
+        {
+            screen.Draw(spriteBatch);
+            if (screen.DrawBelow)
+                break;
+        }
     }
 
     public void Exit()

@@ -10,7 +10,7 @@ using MonoKit.Spatial;
 
 namespace MonoKit.Ecs.Systems;
 
-public class SpatialHashSystem3D(EcsSpatialHash3D grid) : ISystem, IOnEntityDestroyed
+public class SpatialHashSystem3D(EcsSpatialHash3D grid) : ISystem
 {
     public int Priority => 1;
     public EcsSpatialHash3D Grid { get; } = grid;
@@ -31,17 +31,13 @@ public class SpatialHashSystem3D(EcsSpatialHash3D grid) : ISystem, IOnEntityDest
     {
         var entities = _tracker.GetEntitiesWith<Transform3D, Collider3D>();
 
+        _grid.Clear();
         foreach (var e in entities)
         {
             ref var transform = ref _transformPool.Get(e.Id);
             ref var collider = ref _colliderPool.Get(e.Id);
 
-            _grid.UpdateEntity(e, transform.Position, collider.Size);
+            _grid.Add(e, transform.Position, collider.Size);
         }
-    }
-
-    public void OnEntityDestroyed(Entity entity)
-    {
-        _grid.RemoveEntity(entity);
     }
 }

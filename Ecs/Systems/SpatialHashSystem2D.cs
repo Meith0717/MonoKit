@@ -1,4 +1,4 @@
-// SpatialHashSystem.cs
+// SpatialHashSystem2D.cs
 // Copyright (c) 2023-2026 Thierry Meiers
 // All rights reserved.
 // Portions generated or assisted by AI.
@@ -10,7 +10,7 @@ using MonoKit.Spatial;
 
 namespace MonoKit.Ecs.Systems;
 
-public class SpatialHashSystem(EcsSpatialHash grid) : ISystem, IOnEntityDestroyed
+public class SpatialHashSystem2D(EcsSpatialHash2D grid) : ISystem, IOnEntityDestroyed
 {
     public int Priority => 1;
     private EntityTypeTracker _tracker;

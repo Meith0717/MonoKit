@@ -63,7 +63,9 @@ public abstract class Screen : IDisposable
 
     public virtual void Draw(SpriteBatch spriteBatch)
     {
-        ;
+        spriteBatch.Begin();
+        UiRoot.Draw(spriteBatch);
+        spriteBatch.End();
     }
 
     public virtual void ApplyResolution(double elapsedMilliseconds, float uiScale)
@@ -91,9 +93,6 @@ public abstract class Screen : IDisposable
         GraphicsDevice.SetRenderTarget(_renderTarget);
         GraphicsDevice.Clear(Color.Transparent);
         Draw(spriteBatch);
-        spriteBatch.Begin();
-        UiRoot.Draw(spriteBatch);
-        spriteBatch.End();
         GraphicsDevice.SetRenderTarget(null);
 
         if (PostProcessingEffect is not null)

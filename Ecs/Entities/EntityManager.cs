@@ -18,6 +18,8 @@ public sealed class EntityManager
     private readonly Stack<int> _freeIds = new();
     private readonly List<bool> _alive = new();
 
+    public int Count { get; private set; }
+
     public Entity Create()
     {
         int id;
@@ -31,6 +33,7 @@ public sealed class EntityManager
             id = _nextId++;
             _alive.Add(true);
         }
+        Count++;
         return new Entity(id);
     }
 
@@ -44,6 +47,7 @@ public sealed class EntityManager
 
         _alive[entity.Id] = false;
         _freeIds.Push(entity.Id);
+        Count--;
         return true;
     }
 

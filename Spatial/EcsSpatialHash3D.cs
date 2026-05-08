@@ -1,186 +1,132 @@
-// EcsSpatialHash3D.cs
-// Copyright (c) 2023-2026 Thierry Meiers
-// All rights reserved.
-// Portions generated or assisted by AI.
-
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using MonoKit.Ecs.Entities;
 
 namespace MonoKit.Spatial;
 
-public class EcsSpatialHash3D(int cellSize)
+public sealed class EcsSpatialHash3D
 {
-    private readonly Dictionary<(int, int, int), List<Entity>> _grids = new();
-    private readonly Dictionary<Entity, List<(int, int, int)>> _entityHashes = new();
-    public readonly int CellSize = cellSize;
+    private readonly Dictionary<long, List<Entity>> _grids;
+    private readonly List<List<Entity>> _activeCells;
 
-    public void UpdateEntity(Entity entity, Vector3 position, Vector3 size)
+    private readonly float _inverseCellSize;
+
+    public readonly int CellSize;
+
+    public EcsSpatialHash3D(int cellSize, int capacity = 1024)
     {
-        if (_entityHashes.TryGetValue(entity, out var oldHashes))
-        {
-            foreach (var hash in oldHashes)
-            {
-                if (!_grids.TryGetValue(hash, out var cell))
-                    continue;
+        CellSize = cellSize;
+        _inverseCellSize = 1f / cellSize;
 
-                cell.Remove(entity);
-                if (cell.Count == 0)
-                    _grids.Remove(hash);
-            }
-            oldHashes.Clear();
-        }
-        else
-            _entityHashes[entity] = [];
-
-        var bottomFar = position + size;
-        var start = Vector3.Floor(position / CellSize);
-        var end = Vector3.Ceiling(bottomFar / CellSize);
-
-        for (var x = (int)start.X; x < (int)end.X; x++)
-        for (var y = (int)start.Y; y < (int)end.Y; y++)
-        for (var z = (int)start.Z; z < (int)end.Z; z++)
-        {
-            var hash = (x, y, z);
-            if (!_grids.ContainsKey(hash))
-                _grids[hash] = [];
-
-            _grids[hash].Add(entity);
-            _entityHashes[entity].Add(hash);
-        }
+        _grids = new Dictionary<long, List<Entity>>(capacity);
+        _activeCells = new List<List<Entity>>(capacity);
     }
 
-    public void RemoveEntity(Entity entity)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static long Hash(int x, int y, int z)
     {
-        if (!_entityHashes.Remove(entity, out var hashes))
-            return;
+        return ((long)x * 73856093) ^ ((long)y * 19349663) ^ ((long)z * 83492791);
+    }
 
-        foreach (var hash in hashes)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int ToCell(float value)
+    {
+        return (int)float.Floor(value * _inverseCellSize);
+    }
+
+    public void Clear()
+    {
+        foreach (var cell in _activeCells)
+            cell.Clear();
+
+        _activeCells.Clear();
+        _grids.Clear();
+    }
+
+    public void Add(Entity entity, Vector3 position, Vector3 size)
+    {
+        int startX = ToCell(position.X);
+        int startY = ToCell(position.Y);
+        int startZ = ToCell(position.Z);
+
+        int endX;
+        int endY;
+        int endZ;
+
+        if (size == Vector3.Zero)
         {
-            if (!_grids.TryGetValue(hash, out var cell))
-                continue;
+            endX = startX + 1;
+            endY = startY + 1;
+            endZ = startZ + 1;
+        }
+        else
+        {
+            endX = (int)float.Ceiling((position.X + size.X) * _inverseCellSize);
+            endY = (int)float.Ceiling((position.Y + size.Y) * _inverseCellSize);
+            endZ = (int)float.Ceiling((position.Z + size.Z) * _inverseCellSize);
+        }
 
-            cell.Remove(entity);
+        for (int x = startX; x < endX; x++)
+        for (int y = startY; y < endY; y++)
+        for (int z = startZ; z < endZ; z++)
+        {
+            long hash = Hash(x, y, z);
+
+            if (!_grids.TryGetValue(hash, out var cell))
+            {
+                cell = new List<Entity>(8);
+                _grids.Add(hash, cell);
+            }
+
             if (cell.Count == 0)
-                _grids.Remove(hash);
+                _activeCells.Add(cell);
+
+            cell.Add(entity);
         }
     }
 
     public void GetInRadius(Vector3 pos, float radius, List<Entity> results)
     {
-        var startX = (int)float.Floor((pos.X - radius) / CellSize);
-        var endX = (int)float.Ceiling((pos.X + radius) / CellSize);
-        var startY = (int)float.Floor((pos.Y - radius) / CellSize);
-        var endY = (int)float.Ceiling((pos.Y + radius) / CellSize);
-        var startZ = (int)float.Floor((pos.Z - radius) / CellSize);
-        var endZ = (int)float.Ceiling((pos.Z + radius) / CellSize);
+        int startX = ToCell(pos.X - radius);
+        int endX = ToCell(pos.X + radius) + 1;
 
-        for (var x = startX; x < endX; x++)
-        for (var y = startY; y < endY; y++)
-        for (var z = startZ; z < endZ; z++)
+        int startY = ToCell(pos.Y - radius);
+        int endY = ToCell(pos.Y + radius) + 1;
+
+        int startZ = ToCell(pos.Z - radius);
+        int endZ = ToCell(pos.Z + radius) + 1;
+
+        for (int x = startX; x < endX; x++)
+        for (int y = startY; y < endY; y++)
+        for (int z = startZ; z < endZ; z++)
         {
-            if (_grids.TryGetValue((x, y, z), out var cell))
+            long hash = Hash(x, y, z);
+
+            if (_grids.TryGetValue(hash, out var cell))
                 results.AddRange(cell);
         }
     }
 
     public void GetInBox(BoundingBox box, List<Entity> results)
     {
-        var min = box.Min;
-        var max = box.Max;
+        int startX = ToCell(box.Min.X);
+        int endX = ToCell(box.Max.X) + 1;
 
-        var startX = (int)float.Floor(min.X / CellSize);
-        var endX = (int)float.Ceiling(max.X / CellSize);
-        var startY = (int)float.Floor(min.Y / CellSize);
-        var endY = (int)float.Ceiling(max.Y / CellSize);
-        var startZ = (int)float.Floor(min.Z / CellSize);
-        var endZ = (int)float.Ceiling(max.Z / CellSize);
+        int startY = ToCell(box.Min.Y);
+        int endY = ToCell(box.Max.Y) + 1;
 
-        for (var x = startX; x < endX; x++)
-        for (var y = startY; y < endY; y++)
-        for (var z = startZ; z < endZ; z++)
-            if (_grids.TryGetValue((x, y, z), out var cell))
+        int startZ = ToCell(box.Min.Z);
+        int endZ = ToCell(box.Max.Z) + 1;
+
+        for (int x = startX; x < endX; x++)
+        for (int y = startY; y < endY; y++)
+        for (int z = startZ; z < endZ; z++)
+        {
+            long hash = Hash(x, y, z);
+
+            if (_grids.TryGetValue(hash, out var cell))
                 results.AddRange(cell);
-    }
-
-    public void DrawDebug(
-        GraphicsDevice graphics,
-        Matrix view,
-        Matrix projection,
-        BasicEffect effect,
-        Color color
-    )
-    {
-        graphics.RasterizerState = RasterizerState.CullNone;
-        graphics.DepthStencilState = DepthStencilState.Default;
-        graphics.BlendState = BlendState.Opaque;
-
-        var size = CellSize;
-
-        var vertices = new VertexPositionColor[8]
-        {
-            new(new Vector3(0, 0, 0), color),
-            new(new Vector3(size, 0, 0), color),
-            new(new Vector3(size, size, 0), color),
-            new(new Vector3(0, size, 0), color),
-            new(new Vector3(0, 0, size), color),
-            new(new Vector3(size, 0, size), color),
-            new(new Vector3(size, size, size), color),
-            new(new Vector3(0, size, size), color),
-        };
-
-        short[] indices =
-        {
-            0,
-            1,
-            1,
-            2,
-            2,
-            3,
-            3,
-            0,
-            4,
-            5,
-            5,
-            6,
-            6,
-            7,
-            7,
-            4,
-            0,
-            4,
-            1,
-            5,
-            2,
-            6,
-            3,
-            7,
-        };
-
-        effect.View = view;
-        effect.Projection = projection;
-        effect.World = Matrix.Identity;
-        effect.VertexColorEnabled = true;
-
-        foreach (var ((x, y, z), _) in _grids)
-        {
-            effect.World = Matrix.CreateTranslation(new Vector3(x, y, z) * CellSize);
-
-            foreach (var pass in effect.CurrentTechnique.Passes)
-            {
-                pass.Apply();
-
-                graphics.DrawUserIndexedPrimitives(
-                    PrimitiveType.LineList,
-                    vertices,
-                    0,
-                    8,
-                    indices,
-                    0,
-                    12
-                );
-            }
         }
     }
 }
