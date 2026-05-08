@@ -1,4 +1,4 @@
-// MovementsSystem.cs
+// MovementsSystem2D.cs
 // Copyright (c) 2023-2026 Thierry Meiers
 // All rights reserved.
 // Portions generated or assisted by AI.
@@ -9,7 +9,7 @@ using MonoKit.Ecs.Querying;
 
 namespace MonoKit.Ecs.Systems;
 
-public class MovementsSystem : ISystem
+public class MovementsSystem2D : ISystem
 {
     public int Priority { get; } = 0;
     private EntityTypeTracker _tracker;
