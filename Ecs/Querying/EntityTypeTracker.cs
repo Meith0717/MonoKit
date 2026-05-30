@@ -9,6 +9,15 @@ using MonoKit.Ecs.Entities;
 
 namespace MonoKit.Ecs.Querying;
 
+/// <summary>
+/// Tracks which entities have which component types for fast querying.
+/// Optimized for high-frequency queries with minimal allocations.
+/// 
+/// Key optimizations:
+/// - Single-component queries return internal HashSet (zero allocation)
+/// - Multi-component queries iterate smallest set, check membership in others
+/// - Avoids creating intermediate HashSet copies
+/// </summary>
 public class EntityTypeTracker
 {
     private readonly Dictionary<Type, HashSet<Entity>> _typeToEntities = new();
@@ -52,209 +61,223 @@ public class EntityTypeTracker
         }
     }
 
-    // Fast intersection: returns ALL entities with T1 AND T2
-    public HashSet<Entity> GetEntitiesWith<T1, T2>()
+    // ==================== Single Component Queries ====================
+
+    /// <summary>
+    /// Returns entities with component T. Zero allocation - returns internal set.
+    /// WARNING: Do NOT modify the returned collection.
+    /// </summary>
+    public IReadOnlyCollection<Entity> GetEntitiesWith<T>() where T : struct
+    {
+        return _typeToEntities.TryGetValue(typeof(T), out var set) 
+            ? set 
+            : Array.Empty<Entity>();
+    }
+
+    /// <summary>
+    /// Returns entities with component type. Zero allocation.
+    /// </summary>
+    public IReadOnlyCollection<Entity> GetEntitiesWith(Type componentType)
+    {
+        return _typeToEntities.TryGetValue(componentType, out var set) 
+            ? set 
+            : Array.Empty<Entity>();
+    }
+
+    // ==================== Two Component Queries ====================
+
+    /// <summary>
+    /// Returns entities with components T1 AND T2.
+    /// Iterates the smaller set, checks membership in the larger.
+    /// </summary>
+    public IReadOnlyCollection<Entity> GetEntitiesWith<T1, T2>()
         where T1 : struct
         where T2 : struct
     {
-        var type1 = typeof(T1);
-        var type2 = typeof(T2);
+        if (!_typeToEntities.TryGetValue(typeof(T1), out var set1) ||
+            !_typeToEntities.TryGetValue(typeof(T2), out var set2))
+            return Array.Empty<Entity>();
 
-        if (!_typeToEntities.TryGetValue(type1, out var set1) ||
-            !_typeToEntities.TryGetValue(type2, out var set2))
-            return new HashSet<Entity>();
-
-        // Intersect smaller set into larger (faster)
-        if (set1.Count > set2.Count)
-            (set1, set2) = (set2, set1);
-
-        var result = new HashSet<Entity>(set1);
-        result.IntersectWith(set2);
-        return result;
+        // Iterate smaller set, check against larger
+        return set1.Count <= set2.Count 
+            ? FilterTwo(set1, set2)
+            : FilterTwo(set2, set1);
     }
 
-    // For 1 component
-    public HashSet<Entity> GetEntitiesWith<T>() where T : struct
+    private List<Entity> FilterTwo(HashSet<Entity> smaller, HashSet<Entity> larger)
     {
-        var type = typeof(T);
-        return _typeToEntities.TryGetValue(type, out var set) 
-            ? new HashSet<Entity>(set) 
-            : new HashSet<Entity>();
-    }
-
-    // For 3+ components
-    public HashSet<Entity> GetEntitiesWith(params Type[] types)
-    {
-        if (types.Length == 0) return new HashSet<Entity>();
-        if (!_typeToEntities.TryGetValue(types[0], out var result))
-            return new HashSet<Entity>();
-
-        result = new HashSet<Entity>(result);
-        for (int i = 1; i < types.Length; i++)
+        var result = new List<Entity>(smaller.Count);
+        foreach (var entity in smaller)
         {
-            if (_typeToEntities.TryGetValue(types[i], out var next))
-                result.IntersectWith(next);
-            else
-                return new HashSet<Entity>();
+            if (larger.Contains(entity))
+                result.Add(entity);
         }
         return result;
     }
 
-    // For generic 3-4 component queries with type safety
-    public HashSet<Entity> GetEntitiesWith<T1, T2, T3>()
+    // ==================== Three Component Queries ====================
+
+    /// <summary>
+    /// Returns entities with components T1, T2, T3.
+    /// Finds smallest set, iterates it, checks membership in the other two.
+    /// </summary>
+    public IReadOnlyCollection<Entity> GetEntitiesWith<T1, T2, T3>()
         where T1 : struct
         where T2 : struct
         where T3 : struct
     {
-        var type1 = typeof(T1);
-        var type2 = typeof(T2);
-        var type3 = typeof(T3);
-
-        if (!_typeToEntities.TryGetValue(type1, out var set1) ||
-            !_typeToEntities.TryGetValue(type2, out var set2) ||
-            !_typeToEntities.TryGetValue(type3, out var set3))
-            return new HashSet<Entity>();
+        if (!_typeToEntities.TryGetValue(typeof(T1), out var set1) ||
+            !_typeToEntities.TryGetValue(typeof(T2), out var set2) ||
+            !_typeToEntities.TryGetValue(typeof(T3), out var set3))
+            return Array.Empty<Entity>();
 
         // Find smallest set
-        var sets = new[] { set1, set2, set3 };
-        Array.Sort(sets, (a, b) => a.Count.CompareTo(b.Count));
+        var smallest = FindSmallest(set1, set2, set3);
+        var other1 = GetOther(smallest, set1, set2, set3);
+        var other2 = GetOther(smallest, other1, set1, set2, set3);
 
-        var result = new HashSet<Entity>(sets[0]);
-        result.IntersectWith(sets[1]);
-        result.IntersectWith(sets[2]);
+        return FilterThree(smallest, other1, other2);
+    }
+
+    private static HashSet<Entity> FindSmallest(HashSet<Entity> a, HashSet<Entity> b, HashSet<Entity> c)
+    {
+        if (a.Count <= b.Count && a.Count <= c.Count) return a;
+        if (b.Count <= a.Count && b.Count <= c.Count) return b;
+        return c;
+    }
+
+    private static HashSet<Entity> GetOther(HashSet<Entity> exclude, HashSet<Entity> a, HashSet<Entity> b, HashSet<Entity> c)
+    {
+        if (exclude != a) return a;
+        if (exclude != b) return b;
+        return c;
+    }
+
+    private static HashSet<Entity> GetOther(HashSet<Entity> exclude, HashSet<Entity> exclude2, 
+        HashSet<Entity> a, HashSet<Entity> b, HashSet<Entity> c)
+    {
+        if (exclude != a && exclude2 != a) return a;
+        if (exclude != b && exclude2 != b) return b;
+        return c;
+    }
+
+    private List<Entity> FilterThree(HashSet<Entity> smallest, HashSet<Entity> other1, HashSet<Entity> other2)
+    {
+        var result = new List<Entity>(smallest.Count);
+        foreach (var entity in smallest)
+        {
+            if (other1.Contains(entity) && other2.Contains(entity))
+                result.Add(entity);
+        }
         return result;
     }
 
-    public HashSet<Entity> GetEntitiesWith<T1, T2, T3, T4>()
+    // ==================== Four Component Queries ====================
+
+    /// <summary>
+    /// Returns entities with components T1, T2, T3, T4.
+    /// Finds smallest set, iterates it, checks membership in the other three.
+    /// </summary>
+    public IReadOnlyCollection<Entity> GetEntitiesWith<T1, T2, T3, T4>()
         where T1 : struct
         where T2 : struct
         where T3 : struct
         where T4 : struct
     {
-        var type1 = typeof(T1);
-        var type2 = typeof(T2);
-        var type3 = typeof(T3);
-        var type4 = typeof(T4);
+        if (!_typeToEntities.TryGetValue(typeof(T1), out var set1) ||
+            !_typeToEntities.TryGetValue(typeof(T2), out var set2) ||
+            !_typeToEntities.TryGetValue(typeof(T3), out var set3) ||
+            !_typeToEntities.TryGetValue(typeof(T4), out var set4))
+            return Array.Empty<Entity>();
 
-        if (!_typeToEntities.TryGetValue(type1, out var set1) ||
-            !_typeToEntities.TryGetValue(type2, out var set2) ||
-            !_typeToEntities.TryGetValue(type3, out var set3) ||
-            !_typeToEntities.TryGetValue(type4, out var set4))
-            return new HashSet<Entity>();
+        // Find smallest set
+        var smallest = FindSmallest(set1, set2, set3, set4);
+        var others = new HashSet<Entity>[3];
+        int idx = 0;
+        if (set1 != smallest) others[idx++] = set1;
+        if (set2 != smallest) others[idx++] = set2;
+        if (set3 != smallest) others[idx++] = set3;
+        if (set4 != smallest) others[idx++] = set4;
 
-        var sets = new[] { set1, set2, set3, set4 };
-        Array.Sort(sets, (a, b) => a.Count.CompareTo(b.Count));
+        return FilterFour(smallest, others[0], others[1], others[2]);
+    }
 
-        var result = new HashSet<Entity>(sets[0]);
-        for (int i = 1; i < 4; i++)
-            result.IntersectWith(sets[i]);
+    private static HashSet<Entity> FindSmallest(HashSet<Entity> a, HashSet<Entity> b, HashSet<Entity> c, HashSet<Entity> d)
+    {
+        var smallest = a;
+        if (b.Count < smallest.Count) smallest = b;
+        if (c.Count < smallest.Count) smallest = c;
+        if (d.Count < smallest.Count) smallest = d;
+        return smallest;
+    }
+
+    private List<Entity> FilterFour(HashSet<Entity> smallest, HashSet<Entity> other1, HashSet<Entity> other2, HashSet<Entity> other3)
+    {
+        var result = new List<Entity>(smallest.Count);
+        foreach (var entity in smallest)
+        {
+            if (other1.Contains(entity) && other2.Contains(entity) && other3.Contains(entity))
+                result.Add(entity);
+        }
         return result;
     }
+
+    // ==================== Variable Component Queries ====================
+
+    /// <summary>
+    /// Returns entities with all specified component types.
+    /// Finds smallest set, iterates it, checks membership in all others.
+    /// </summary>
+    public IReadOnlyCollection<Entity> GetEntitiesWith(params Type[] types)
+    {
+        if (types.Length == 0) return Array.Empty<Entity>();
+        
+        // Find the smallest set
+        HashSet<Entity> smallest = null;
+        foreach (var type in types)
+        {
+            if (!_typeToEntities.TryGetValue(type, out var set))
+                return Array.Empty<Entity>();
+            if (smallest == null || set.Count < smallest.Count)
+                smallest = set;
+        }
+
+        // Collect all other sets
+        var otherSets = new List<HashSet<Entity>>(types.Length - 1);
+        foreach (var type in types)
+        {
+            if (_typeToEntities.TryGetValue(type, out var set) && set != smallest)
+                otherSets.Add(set);
+        }
+
+        return FilterMany(smallest, otherSets);
+    }
+
+    private List<Entity> FilterMany(HashSet<Entity> smallest, List<HashSet<Entity>> others)
+    {
+        var result = new List<Entity>(smallest.Count);
+        foreach (var entity in smallest)
+        {
+            bool hasAll = true;
+            foreach (var other in others)
+            {
+                if (!other.Contains(entity))
+                {
+                    hasAll = false;
+                    break;
+                }
+            }
+            if (hasAll)
+                result.Add(entity);
+        }
+        return result;
+    }
+
+    // ==================== Utility Methods ====================
 
     public int GetEntityCount<T>() where T : struct
     {
         return _typeToEntities.TryGetValue(typeof(T), out var set) ? set.Count : 0;
-    }
-
-    // Zero-allocation query: caller provides buffer
-    public ReadOnlySpan<Entity> GetEntitiesWith<T1, T2>(Span<Entity> buffer)
-        where T1 : struct
-        where T2 : struct
-    {
-        var type1 = typeof(T1);
-        var type2 = typeof(T2);
-
-        if (!_typeToEntities.TryGetValue(type1, out var set1) ||
-            !_typeToEntities.TryGetValue(type2, out var set2))
-            return ReadOnlySpan<Entity>.Empty;
-
-        // Intersect smaller set into buffer
-        var (smaller, larger) = set1.Count < set2.Count ? (set1, set2) : (set2, set1);
-        
-        int count = 0;
-        foreach (var e in smaller)
-        {
-            if (count >= buffer.Length) break;
-            if (larger.Contains(e))
-                buffer[count++] = e;
-        }
-        return buffer.Slice(0, count);
-    }
-
-    // Zero-allocation for 1 component
-    public ReadOnlySpan<Entity> GetEntitiesWith<T>(Span<Entity> buffer) where T : struct
-    {
-        var type = typeof(T);
-        if (!_typeToEntities.TryGetValue(type, out var set) || set.Count == 0)
-            return ReadOnlySpan<Entity>.Empty;
-        
-        int count = 0;
-        foreach (var e in set)
-        {
-            if (count >= buffer.Length) break;
-            buffer[count++] = e;
-        }
-        return buffer.Slice(0, count);
-    }
-
-    // Zero-allocation for 3 components
-    public ReadOnlySpan<Entity> GetEntitiesWith<T1, T2, T3>(Span<Entity> buffer)
-        where T1 : struct
-        where T2 : struct
-        where T3 : struct
-    {
-        var type1 = typeof(T1);
-        var type2 = typeof(T2);
-        var type3 = typeof(T3);
-
-        if (!_typeToEntities.TryGetValue(type1, out var set1) ||
-            !_typeToEntities.TryGetValue(type2, out var set2) ||
-            !_typeToEntities.TryGetValue(type3, out var set3))
-            return ReadOnlySpan<Entity>.Empty;
-
-        // Sort sets by size: smallest first
-        var sets = new[] { set1, set2, set3 };
-        Array.Sort(sets, (a, b) => a.Count.CompareTo(b.Count));
-
-        int count = 0;
-        foreach (var e in sets[0])
-        {
-            if (count >= buffer.Length) break;
-            if (sets[1].Contains(e) && sets[2].Contains(e))
-                buffer[count++] = e;
-        }
-        return buffer.Slice(0, count);
-    }
-
-    // Zero-allocation for 4 components
-    public ReadOnlySpan<Entity> GetEntitiesWith<T1, T2, T3, T4>(Span<Entity> buffer)
-        where T1 : struct
-        where T2 : struct
-        where T3 : struct
-        where T4 : struct
-    {
-        var type1 = typeof(T1);
-        var type2 = typeof(T2);
-        var type3 = typeof(T3);
-        var type4 = typeof(T4);
-
-        if (!_typeToEntities.TryGetValue(type1, out var set1) ||
-            !_typeToEntities.TryGetValue(type2, out var set2) ||
-            !_typeToEntities.TryGetValue(type3, out var set3) ||
-            !_typeToEntities.TryGetValue(type4, out var set4))
-            return ReadOnlySpan<Entity>.Empty;
-
-        var sets = new[] { set1, set2, set3, set4 };
-        Array.Sort(sets, (a, b) => a.Count.CompareTo(b.Count));
-
-        int count = 0;
-        foreach (var e in sets[0])
-        {
-            if (count >= buffer.Length) break;
-            if (sets[1].Contains(e) && sets[2].Contains(e) && sets[3].Contains(e))
-                buffer[count++] = e;
-        }
-        return buffer.Slice(0, count);
     }
 
     public bool HasComponent(Entity entity, Type componentType)
@@ -266,5 +289,99 @@ public class EntityTypeTracker
     public bool HasComponent<T>(Entity entity) where T : struct
     {
         return HasComponent(entity, typeof(T));
+    }
+
+    // ==================== Zero-Allocation Span Methods ====================
+    // These require caller to provide a buffer of sufficient size.
+    // Useful when entity count is known and buffer can be pooled.
+
+    public ReadOnlySpan<Entity> GetEntitiesWith<T>(Span<Entity> buffer) where T : struct
+    {
+        if (!_typeToEntities.TryGetValue(typeof(T), out var set) || set.Count == 0)
+            return ReadOnlySpan<Entity>.Empty;
+        
+        if (set.Count > buffer.Length)
+            throw new ArgumentException("Buffer too small", nameof(buffer));
+        
+        var i = 0;
+        foreach (var entity in set)
+        {
+            buffer[i++] = entity;
+        }
+        return buffer.Slice(0, set.Count);
+    }
+
+    public ReadOnlySpan<Entity> GetEntitiesWith<T1, T2>(Span<Entity> buffer)
+        where T1 : struct
+        where T2 : struct
+    {
+        if (!_typeToEntities.TryGetValue(typeof(T1), out var set1) ||
+            !_typeToEntities.TryGetValue(typeof(T2), out var set2))
+            return ReadOnlySpan<Entity>.Empty;
+
+        var (smaller, larger) = set1.Count <= set2.Count ? (set1, set2) : (set2, set1);
+        
+        int count = 0;
+        foreach (var entity in smaller)
+        {
+            if (count >= buffer.Length) break;
+            if (larger.Contains(entity))
+                buffer[count++] = entity;
+        }
+        return buffer.Slice(0, count);
+    }
+
+    public ReadOnlySpan<Entity> GetEntitiesWith<T1, T2, T3>(Span<Entity> buffer)
+        where T1 : struct
+        where T2 : struct
+        where T3 : struct
+    {
+        if (!_typeToEntities.TryGetValue(typeof(T1), out var set1) ||
+            !_typeToEntities.TryGetValue(typeof(T2), out var set2) ||
+            !_typeToEntities.TryGetValue(typeof(T3), out var set3))
+            return ReadOnlySpan<Entity>.Empty;
+
+        var smallest = FindSmallest(set1, set2, set3);
+        var other1 = GetOther(smallest, set1, set2, set3);
+        var other2 = GetOther(smallest, other1, set1, set2, set3);
+
+        int count = 0;
+        foreach (var entity in smallest)
+        {
+            if (count >= buffer.Length) break;
+            if (other1.Contains(entity) && other2.Contains(entity))
+                buffer[count++] = entity;
+        }
+        return buffer.Slice(0, count);
+    }
+
+    public ReadOnlySpan<Entity> GetEntitiesWith<T1, T2, T3, T4>(Span<Entity> buffer)
+        where T1 : struct
+        where T2 : struct
+        where T3 : struct
+        where T4 : struct
+    {
+        if (!_typeToEntities.TryGetValue(typeof(T1), out var set1) ||
+            !_typeToEntities.TryGetValue(typeof(T2), out var set2) ||
+            !_typeToEntities.TryGetValue(typeof(T3), out var set3) ||
+            !_typeToEntities.TryGetValue(typeof(T4), out var set4))
+            return ReadOnlySpan<Entity>.Empty;
+
+        var smallest = FindSmallest(set1, set2, set3, set4);
+        var others = new HashSet<Entity>[3];
+        int idx = 0;
+        if (set1 != smallest) others[idx++] = set1;
+        if (set2 != smallest) others[idx++] = set2;
+        if (set3 != smallest) others[idx++] = set3;
+        if (set4 != smallest) others[idx++] = set4;
+
+        int count = 0;
+        foreach (var entity in smallest)
+        {
+            if (count >= buffer.Length) break;
+            if (others[0].Contains(entity) && others[1].Contains(entity) && others[2].Contains(entity))
+                buffer[count++] = entity;
+        }
+        return buffer.Slice(0, count);
     }
 }

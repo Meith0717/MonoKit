@@ -11,7 +11,7 @@ using MonoKit.Input;
 
 namespace MonoKit.Ui;
 
-public enum TabAxix : byte
+public enum TabAxis : byte
 {
     X,
     Y,
@@ -33,11 +33,11 @@ public sealed class UiTabView<ButtonType>(Color color) : UiElement
         _tabs.Add((buttonFrame, button, tabFrame));
     }
 
-    public void Initialize(TabAxix axix, float tabButtonRatio)
+    public void Initialize(TabAxis axis, float tabButtonRatio)
     {
         var tabCount = _tabs.Count;
 
-        if (axix == TabAxix.Y)
+        if (axis == TabAxis.Y)
             for (var i = 0; i < _tabs.Count; i++)
             {
                 var (buttonFrame, _, frame) = _tabs[i];
@@ -45,14 +45,14 @@ public sealed class UiTabView<ButtonType>(Color color) : UiElement
 
                 frame.RelWidth = 1f - tabButtonRatio;
                 frame.RelHeight = 1f;
-                frame.Allign = Allign.E;
+                frame.Align = Align.E;
 
                 buttonFrame.RelX = 0;
                 buttonFrame.RelY = i * (1f / 10);
                 buttonFrame.RelWidth = tabButtonRatio;
                 buttonFrame.RelHeight = 1f / 10;
             }
-        else if (axix == TabAxix.X)
+        else if (axis == TabAxis.X)
             for (var i = 0; i < _tabs.Count; i++)
             {
                 var (buttonFrame, _, frame) = _tabs[i];
@@ -60,7 +60,7 @@ public sealed class UiTabView<ButtonType>(Color color) : UiElement
 
                 frame.RelWidth = 1f;
                 frame.RelHeight = 1f - tabButtonRatio;
-                frame.Allign = Allign.S;
+                frame.Align = Align.S;
 
                 buttonFrame.RelX = i * (1f / tabCount);
                 buttonFrame.RelY = 0;
@@ -75,7 +75,7 @@ public sealed class UiTabView<ButtonType>(Color color) : UiElement
         {
             buttonFrame.Update(inputHandler, Bounds, UiScale);
             if (_activeFrame == frame)
-                button.OveideColor(Color.Red, Color.Red);
+                button.OverrideColor(Color.Red, Color.Red);
         }
 
         if (_activeFrame is null)

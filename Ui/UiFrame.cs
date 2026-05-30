@@ -14,7 +14,7 @@ namespace MonoKit.Ui;
 
 public class UiFrame : UiElement
 {
-    private readonly List<UiElement> _elementChilds = new();
+    private readonly List<UiElement> _children = new();
     private Color _color = Color.White;
     private Texture2D _texture;
     private float _textureScale = 1;
@@ -27,8 +27,8 @@ public class UiFrame : UiElement
     protected override void Updater(InputHandler inputHandler)
     {
         UpdateSizeIfTextureNotNull();
-        _elementChilds.RemoveAll(c => c.IsDisposed);
-        foreach (var child in _elementChilds)
+        _children.RemoveAll(c => c.IsDisposed);
+        foreach (var child in _children)
             child.Update(inputHandler, Bounds, UiScale);
     }
 
@@ -39,32 +39,32 @@ public class UiFrame : UiElement
         else if (_color != Color.Transparent)
             spriteBatch.FillRectangle(Bounds, _color);
 
-        foreach (var child in _elementChilds)
+        foreach (var child in _children)
             child.Draw(spriteBatch);
     }
 
     public override void ApplyScale(Rectangle root, float uiScale)
     {
         base.ApplyScale(root, uiScale);
-        foreach (var child in _elementChilds)
+        foreach (var child in _children)
             child.ApplyScale(Bounds, uiScale);
     }
 
     public override void Dispose()
     {
         base.Dispose();
-        foreach (var child in _elementChilds)
+        foreach (var child in _children)
             child.Dispose();
     }
 
     public void Clear()
     {
-        _elementChilds.Clear();
+        _children.Clear();
     }
 
     public void Add(UiElement child)
     {
-        _elementChilds.Add(child);
+        _children.Add(child);
     }
 
     public UiFrame AttachTexture(string texture, float scale = 1)

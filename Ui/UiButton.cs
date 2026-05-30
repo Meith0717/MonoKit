@@ -26,7 +26,7 @@ public struct ButtonStyle()
 public interface IButton
 {
     Action OnClickAction { get; set; }
-    void OveideColor(params Color[] color);
+    void OverrideColor(params Color[] color);
 }
 
 public static class UiButton
@@ -45,7 +45,7 @@ public static class UiButton
 
         public Action OnClickAction { get; set; }
 
-        public void OveideColor(params Color[] color)
+        public void OverrideColor(params Color[] color)
         {
             if (color.Length > 0)
                 _uiText.Color = color.First();
@@ -107,7 +107,7 @@ public static class UiButton
 
         public Action OnClickAction { get; set; }
 
-        public void OveideColor(params Color[] color)
+        public void OverrideColor(params Color[] color)
         {
             if (color.Length > 0)
                 _uiText.Color = color.First();

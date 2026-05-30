@@ -26,7 +26,7 @@ public sealed class UiSlider(bool interactive) : UiElement
     }
 
     public Color BgColor { private get; set; } = new(20, 20, 20);
-    public Color IdeColor { private get; set; } = Color.MonoGameOrange;
+    public Color Color { private get; set; } = Color.MonoGameOrange;
     public Color HoverColor { private get; set; } = Color.Orange;
 
     protected override void Updater(InputHandler inputHandler)
@@ -73,6 +73,6 @@ public sealed class UiSlider(bool interactive) : UiElement
             rectangle.Width = (int)(rectangle.Width * _sliderValue);
         }
 
-        spriteBatch.FillRectangle(rectangle, _hovered || _pressed ? HoverColor : IdeColor);
+        spriteBatch.FillRectangle(rectangle, _hovered || _pressed ? HoverColor : Color);
     }
 }

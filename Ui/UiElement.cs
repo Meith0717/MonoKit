@@ -13,7 +13,7 @@ using MonoGame.Extended;
 
 namespace MonoKit.Ui;
 
-public enum Allign
+public enum Align
 {
     N,
     NE,
@@ -45,19 +45,22 @@ public enum FillScale
 
 public abstract class UiElement : IDisposable
 {
-    public Allign Allign = Allign.None;
+    public Align Align = Align.None;
     public FillScale FillScale = FillScale.None;
-    public int? Height = null;
 
     public int? HSpace = null;
+    public int? VSpace = null;
+
     public float RelHeight = .1f;
     public float RelWidth = .1f;
+    public int? Width = null;
+    public int? Height = null;
 
     public float RelX = 0;
     public float RelY = 0;
-    public int? VSpace = null;
+    public float? X = null;
+    public float? Y = null;
 
-    public int? Width = null;
     public Rectangle Bounds { get; private set; }
     public bool IsDisposed { get; private set; }
     protected float UiScale { get; private set; }
@@ -95,22 +98,22 @@ public abstract class UiElement : IDisposable
 
     private void UpdateBounds(Rectangle root)
     {
-        var x = (int)float.Floor(root.Width * RelX);
-        var y = (int)float.Floor(root.Height * RelY);
+        var x = (int)float.Floor(X * UiScale ?? root.Width * RelX);
+        var y = (int)float.Floor(Y * UiScale ?? root.Height * RelY);
 
         var width = (int)float.Floor(Width * UiScale ?? root.Width * RelWidth);
         var height = (int)float.Floor(Height * UiScale ?? root.Height * RelHeight);
 
         ManageFillScale(root, FillScale, ref x, ref y, ref width, ref height);
-        ManageAllign(root, Allign, ref x, ref y, ref width, ref height);
+        ManageAlign(root, Align, ref x, ref y, ref width, ref height);
         ManageSpacing(
             root,
             ref x,
             ref y,
             ref width,
             ref height,
-            HSpace.HasValue ? HSpace * UiScale : null,
-            VSpace.HasValue ? VSpace * UiScale : null
+            HSpace * UiScale,
+            VSpace * UiScale
         );
 
         Bounds = new Rectangle(root.X + x, root.Y + y, width, height);
@@ -194,53 +197,53 @@ public abstract class UiElement : IDisposable
         }
     }
 
-    private static void ManageAllign(
+    private static void ManageAlign(
         Rectangle root,
-        Allign allign,
+        Align align,
         ref int x,
         ref int y,
         ref int width,
         ref int height
     )
     {
-        x = allign switch
+        x = align switch
         {
-            Allign.NW => 0,
-            Allign.SW => 0,
-            Allign.W => 0,
-            Allign.Left => 0,
-            Allign.N => (root.Width - width) / 2,
-            Allign.Center => (root.Width - width) / 2,
-            Allign.CenterV => (root.Width - width) / 2,
-            Allign.S => (root.Width - width) / 2,
-            Allign.NE => root.Width - width,
-            Allign.E => root.Width - width,
-            Allign.Right => root.Width - width,
-            Allign.SE => root.Width - width,
-            Allign.CenterH => x,
-            Allign.None => x,
-            Allign.Bottom => x,
-            Allign.Top => x,
+            Align.NW => 0,
+            Align.SW => 0,
+            Align.W => 0,
+            Align.Left => 0,
+            Align.N => (root.Width - width) / 2,
+            Align.Center => (root.Width - width) / 2,
+            Align.CenterV => (root.Width - width) / 2,
+            Align.S => (root.Width - width) / 2,
+            Align.NE => root.Width - width,
+            Align.E => root.Width - width,
+            Align.Right => root.Width - width,
+            Align.SE => root.Width - width,
+            Align.CenterH => x,
+            Align.None => x,
+            Align.Bottom => x,
+            Align.Top => x,
             _ => throw new NotImplementedException(),
         };
-        y = allign switch
+        y = align switch
         {
-            Allign.NW => 0,
-            Allign.N => 0,
-            Allign.NE => 0,
-            Allign.Top => 0,
-            Allign.E => (root.Height - height) / 2,
-            Allign.W => (root.Height - height) / 2,
-            Allign.Center => (root.Height - height) / 2,
-            Allign.CenterH => (root.Height - height) / 2,
-            Allign.SE => root.Height - height,
-            Allign.S => root.Height - height,
-            Allign.Bottom => root.Height - height,
-            Allign.SW => root.Height - height,
-            Allign.CenterV => y,
-            Allign.None => y,
-            Allign.Left => y,
-            Allign.Right => y,
+            Align.NW => 0,
+            Align.N => 0,
+            Align.NE => 0,
+            Align.Top => 0,
+            Align.E => (root.Height - height) / 2,
+            Align.W => (root.Height - height) / 2,
+            Align.Center => (root.Height - height) / 2,
+            Align.CenterH => (root.Height - height) / 2,
+            Align.SE => root.Height - height,
+            Align.S => root.Height - height,
+            Align.Bottom => root.Height - height,
+            Align.SW => root.Height - height,
+            Align.CenterV => y,
+            Align.None => y,
+            Align.Left => y,
+            Align.Right => y,
             _ => throw new NotImplementedException(),
         };
     }

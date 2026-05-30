@@ -1,32 +1,50 @@
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Threading; // Required for ThreadLocal
 using Microsoft.Xna.Framework;
 using MonoKit.Ecs.Entities;
 
 namespace MonoKit.Spatial;
 
-public sealed class EcsSpatialHash3D
+public sealed class EcsSpatialHash3D : ISpatialGrid3D, IDisposable
 {
-    private readonly Dictionary<long, List<Entity>> _grids;
-    private readonly List<List<Entity>> _activeCells;
-
+    private readonly Dictionary<long, List<Entry>> _grids;
+    private readonly List<List<Entry>> _activeCells;
+    private readonly float _cellSize;
     private readonly float _inverseCellSize;
 
-    public readonly int CellSize;
+    // FIX: ThreadLocal gives each CPU core its own independent filter workspace
+    private readonly ThreadLocal<HashSet<Entity>> _duplicateFilter;
 
-    public EcsSpatialHash3D(int cellSize, int capacity = 1024)
+    private struct Entry(Entity entity, Vector3 position)
     {
-        CellSize = cellSize;
+        public readonly Entity Entity = entity;
+        public readonly Vector3 Position = position;
+    }
+
+    public EcsSpatialHash3D(float cellSize, int capacity = 1024)
+    {
+        _cellSize = cellSize;
         _inverseCellSize = 1f / cellSize;
 
-        _grids = new Dictionary<long, List<Entity>>(capacity);
-        _activeCells = new List<List<Entity>>(capacity);
+        _grids = new Dictionary<long, List<Entry>>(capacity);
+        _activeCells = new List<List<Entry>>(capacity);
+
+        // Lazily allocates a unique HashSet per active execution thread
+        _duplicateFilter = new ThreadLocal<HashSet<Entity>>(
+            () => new HashSet<Entity>(),
+            trackAllValues: false
+        );
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static long Hash(int x, int y, int z)
     {
-        return ((long)x * 73856093) ^ ((long)y * 19349663) ^ ((long)z * 83492791);
+        unchecked
+        {
+            return ((long)x * 73856093L) ^ ((long)y * 19349663L) ^ ((long)z * 83492791L);
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -37,22 +55,23 @@ public sealed class EcsSpatialHash3D
 
     public void Clear()
     {
-        foreach (var cell in _activeCells)
-            cell.Clear();
+        for (int i = 0; i < _activeCells.Count; i++)
+        {
+            _activeCells[i].Clear();
+        }
 
         _activeCells.Clear();
-        _grids.Clear();
     }
 
     public void Add(Entity entity, Vector3 position, Vector3 size)
     {
-        int startX = ToCell(position.X);
-        int startY = ToCell(position.Y);
-        int startZ = ToCell(position.Z);
+        var startX = ToCell(position.X);
+        var startY = ToCell(position.Y);
+        var startZ = ToCell(position.Z);
 
-        int endX;
-        int endY;
-        int endZ;
+        int endX,
+            endY,
+            endZ;
 
         if (size == Vector3.Zero)
         {
@@ -67,66 +86,109 @@ public sealed class EcsSpatialHash3D
             endZ = (int)float.Ceiling((position.Z + size.Z) * _inverseCellSize);
         }
 
-        for (int x = startX; x < endX; x++)
-        for (int y = startY; y < endY; y++)
-        for (int z = startZ; z < endZ; z++)
+        for (var x = startX; x < endX; x++)
+        for (var y = startY; y < endY; y++)
+        for (var z = startZ; z < endZ; z++)
         {
-            long hash = Hash(x, y, z);
+            var hash = Hash(x, y, z);
 
             if (!_grids.TryGetValue(hash, out var cell))
             {
-                cell = new List<Entity>(8);
+                cell = new List<Entry>();
                 _grids.Add(hash, cell);
             }
 
             if (cell.Count == 0)
                 _activeCells.Add(cell);
 
-            cell.Add(entity);
+            cell.Add(new Entry(entity, position));
         }
     }
 
     public void GetInRadius(Vector3 pos, float radius, List<Entity> results)
     {
-        int startX = ToCell(pos.X - radius);
-        int endX = ToCell(pos.X + radius) + 1;
+        var radiusSquared = radius * radius;
 
-        int startY = ToCell(pos.Y - radius);
-        int endY = ToCell(pos.Y + radius) + 1;
+        // Fetch this thread's instance of the filter safely
+        var filter = _duplicateFilter.Value!;
+        filter.Clear();
 
-        int startZ = ToCell(pos.Z - radius);
-        int endZ = ToCell(pos.Z + radius) + 1;
+        var startX = ToCell(pos.X - radius);
+        var endX = ToCell(pos.X + radius) + 1;
 
-        for (int x = startX; x < endX; x++)
-        for (int y = startY; y < endY; y++)
-        for (int z = startZ; z < endZ; z++)
+        var startY = ToCell(pos.Y - radius);
+        var endY = ToCell(pos.Y + radius) + 1;
+
+        var startZ = ToCell(pos.Z - radius);
+        var endZ = ToCell(pos.Z + radius) + 1;
+
+        for (var x = startX; x < endX; x++)
+        for (var y = startY; y < endY; y++)
+        for (var z = startZ; z < endZ; z++)
         {
-            long hash = Hash(x, y, z);
+            var hash = Hash(x, y, z);
 
-            if (_grids.TryGetValue(hash, out var cell))
-                results.AddRange(cell);
+            if (!_grids.TryGetValue(hash, out var cell))
+                continue;
+
+            for (var i = 0; i < cell.Count; i++)
+            {
+                var entry = cell[i];
+
+                if (!filter.Add(entry.Entity))
+                    continue;
+
+                var delta = entry.Position - pos;
+                if (delta.LengthSquared() <= radiusSquared)
+                {
+                    results.Add(entry.Entity);
+                }
+            }
         }
     }
 
-    public void GetInBox(BoundingBox box, List<Entity> results)
+    public void GetInRadiusFast(Vector3 pos, float radius, List<Entity> results)
     {
-        int startX = ToCell(box.Min.X);
-        int endX = ToCell(box.Max.X) + 1;
+        var radiusSquared = radius * radius;
 
-        int startY = ToCell(box.Min.Y);
-        int endY = ToCell(box.Max.Y) + 1;
+        // Fetch this thread's instance of the filter safely
+        var filter = _duplicateFilter.Value!;
+        filter.Clear();
 
-        int startZ = ToCell(box.Min.Z);
-        int endZ = ToCell(box.Max.Z) + 1;
+        var cx = ToCell(pos.X);
+        var cy = ToCell(pos.Y);
+        var cz = ToCell(pos.Z);
 
-        for (int x = startX; x < endX; x++)
-        for (int y = startY; y < endY; y++)
-        for (int z = startZ; z < endZ; z++)
+        int cellSpan = (int)float.Ceiling(radius * _inverseCellSize);
+
+        for (var x = cx - cellSpan; x <= cx + cellSpan; x++)
+        for (var y = cy - cellSpan; y <= cy + cellSpan; y++)
+        for (var z = cz - cellSpan; z <= cz + cellSpan; z++)
         {
-            long hash = Hash(x, y, z);
+            var hash = Hash(x, y, z);
 
-            if (_grids.TryGetValue(hash, out var cell))
-                results.AddRange(cell);
+            if (!_grids.TryGetValue(hash, out var cell))
+                continue;
+
+            for (var i = 0; i < cell.Count; i++)
+            {
+                var entry = cell[i];
+
+                if (!filter.Add(entry.Entity))
+                    continue;
+
+                var delta = entry.Position - pos;
+                if (delta.LengthSquared() <= radiusSquared)
+                {
+                    results.Add(entry.Entity);
+                }
+            }
         }
+    }
+
+    public void Dispose()
+    {
+        // Clean up thread allocations when the grid is torn down
+        _duplicateFilter.Dispose();
     }
 }

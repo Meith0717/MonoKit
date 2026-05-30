@@ -22,15 +22,15 @@ public sealed class UiVariableSelector<T> : UiElement
     {
         _items = [.. items];
 
-        _arrowL = new UiButton.Sprite(leftButton) { Allign = Allign.W };
+        _arrowL = new UiButton.Sprite(leftButton) { Align = Align.W };
         _arrowL.OnClickAction += DecreaseIndex;
 
-        _arrowR = new UiButton.Sprite(rightButton) { Allign = Allign.E };
+        _arrowR = new UiButton.Sprite(rightButton) { Align = Align.E };
         _arrowR.OnClickAction += IncreaseIndex;
 
         _text = new UiText(spriteFont)
         {
-            Allign = Allign.Center,
+            Align = Align.Center,
             Text = _items[_selectedIndex].ToString(),
         };
     }

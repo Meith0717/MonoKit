@@ -3,7 +3,6 @@
 // All rights reserved.
 // Portions generated or assisted by AI.
 
-using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoKit.Ecs;
@@ -20,13 +19,7 @@ public class GameRuntime3D
     private readonly Camera3D _camera;
     public readonly RuntimeContainer Services = new();
 
-    [Obsolete("Use ECS systems instead")]
-    private readonly GameObjManager _gameObjManager;
-
-    [Obsolete("Use ECS systems instead")]
-    private readonly SpatialHashing _spatialHashing;
-
-    public GameRuntime3D(GraphicsDevice graphicsDevice, int spatialHashingCellSize)
+    public GameRuntime3D(GraphicsDevice graphicsDevice, float spatialHashingCellSize)
     {
         _world = new World();
         _camera = new Camera3D(Vector3.Zero, graphicsDevice);
@@ -38,18 +31,11 @@ public class GameRuntime3D
 
         _world.Systems.Add(new SpatialHashSystem3D(ecsSpatialHash));
         _world.Systems.Add(new LifetimeSystem());
-
-        _spatialHashing = new SpatialHashing(spatialHashingCellSize);
-        _gameObjManager = new GameObjManager(_spatialHashing, Services);
-        Services.AddService(_spatialHashing);
-        Services.AddService(_gameObjManager);
     }
 
     public void Update(double elapsedMilliseconds, InputHandler inputHandler)
     {
         _world.Update(elapsedMilliseconds);
-        _gameObjManager.Update(elapsedMilliseconds);
-        _spatialHashing.Rearrange();
         _camera.Update(elapsedMilliseconds, inputHandler);
     }
 }

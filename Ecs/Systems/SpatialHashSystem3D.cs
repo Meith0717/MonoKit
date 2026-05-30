@@ -4,17 +4,16 @@
 // Portions generated or assisted by AI.
 
 using MonoKit.Ecs.Components;
-using MonoKit.Ecs.Entities;
 using MonoKit.Ecs.Querying;
 using MonoKit.Spatial;
 
 namespace MonoKit.Ecs.Systems;
 
-public class SpatialHashSystem3D(EcsSpatialHash3D grid) : ISystem
+public class SpatialHashSystem3D(ISpatialGrid3D grid) : ISystem
 {
     public int Priority => 1;
-    public EcsSpatialHash3D Grid { get; } = grid;
-    private readonly EcsSpatialHash3D _grid = grid;
+    public ISpatialGrid3D Grid { get; } = grid;
+    private readonly ISpatialGrid3D _grid = grid;
 
     private EntityTypeTracker _tracker;
     private ComponentPool<Transform3D> _transformPool;

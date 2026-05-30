@@ -40,7 +40,7 @@ public abstract class Screen : IDisposable
             RelWidth = 1,
             RelHeight = 1,
             FillScale = FillScale.FillIn,
-            Allign = Allign.Center,
+            Align = Align.Center,
         };
     }
 

@@ -20,6 +20,8 @@ public sealed class World
     public EntityTypeTracker TypeTracker { get; }
     public SystemManager Systems { get; }
 
+    public Entity WorldEntity { get; private set; }
+
     public int EntityCount => _entityManager.Count;
 
     public World()
@@ -28,9 +30,9 @@ public sealed class World
         Components.OnComponentAdded += TypeTracker.OnComponentAdded;
         Components.OnComponentRemoved += TypeTracker.OnComponentRemoved;
 
-        var worldEntity = _entityManager.Create();
-        TypeTracker.TrackEntity(worldEntity);
-        Components.Add(worldEntity, new WorldTag());
+        WorldEntity = _entityManager.Create();
+        TypeTracker.TrackEntity(WorldEntity);
+        Components.Add(WorldEntity, new WorldTag());
         Systems = new SystemManager(this);
     }
 

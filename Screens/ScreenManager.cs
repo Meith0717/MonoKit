@@ -126,7 +126,8 @@ public class ScreenManager(Game game)
 
     public void Draw(SpriteBatch spriteBatch)
     {
-        foreach (var screen in _screens.Reverse())
+        var screens = _screens.Reverse();
+        foreach (var screen in screens)
         {
             screen.Draw(spriteBatch);
             if (screen.DrawBelow)
