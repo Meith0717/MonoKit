@@ -1,42 +1,33 @@
-// SpatialHashSystem3D.cs
-// Copyright (c) 2023-2026 Thierry Meiers
-// All rights reserved.
-// Portions generated or assisted by AI.
-
 using MonoKit.Ecs.Components;
-using MonoKit.Ecs.Querying;
+using MonoKit.Ecs.Entities;
+using MonoKit.Gameplay;
+using MonoKit.Input;
 using MonoKit.Spatial;
 
 namespace MonoKit.Ecs.Systems;
 
-public class SpatialHashSystem3D(ISpatialGrid3D grid) : ISystem
+public class SpatialHashSystem3D : System<Transform3D, Collider3D>
 {
+    private readonly ISpatialGrid3D _grid;
+
+    public SpatialHashSystem3D(ISpatialGrid3D grid) => _grid = grid;
+
     public int Priority => 1;
-    public ISpatialGrid3D Grid { get; } = grid;
-    private readonly ISpatialGrid3D _grid = grid;
 
-    private EntityTypeTracker _tracker;
-    private ComponentPool<Transform3D> _transformPool;
-    private ComponentPool<Collider3D> _colliderPool;
+    public ISpatialGrid3D Grid => _grid;
 
-    public void Initialize(World world)
+    protected override void OnInitialize(World world) => _grid.Clear();
+
+    protected override void ProcessEntity(
+        Entity e,
+        ref Transform3D transform,
+        ref Collider3D collider,
+        double elapsedMs,
+        World world,
+        RuntimeContainer runtimeContainer,
+        InputHandler inputHandler
+    )
     {
-        _tracker = world.TypeTracker;
-        _transformPool = world.Components.GetOrCreatePool<Transform3D>();
-        _colliderPool = world.Components.GetOrCreatePool<Collider3D>();
-    }
-
-    public void Update(double elapsedMs, World world)
-    {
-        var entities = _tracker.GetEntitiesWith<Transform3D, Collider3D>();
-
-        _grid.Clear();
-        foreach (var e in entities)
-        {
-            ref var transform = ref _transformPool.Get(e.Id);
-            ref var collider = ref _colliderPool.Get(e.Id);
-
-            _grid.Add(e, transform.Position, collider.Size);
-        }
+        _grid.Add(e, transform.Position, collider.Size);
     }
 }

@@ -45,7 +45,7 @@ public class GameRuntime2D
 
     public void Update(double elapsedMilliseconds, InputHandler inputHandler)
     {
-        _world.Update(elapsedMilliseconds);
+        _world.Update(elapsedMilliseconds, Services, inputHandler);
         _gameObjManager.Update(elapsedMilliseconds);
         _spatialHashing.Rearrange();
         _camera.Update(elapsedMilliseconds, inputHandler);

@@ -35,7 +35,7 @@ public class GameRuntime3D
 
     public void Update(double elapsedMilliseconds, InputHandler inputHandler)
     {
-        _world.Update(elapsedMilliseconds);
+        _world.Update(elapsedMilliseconds, Services, inputHandler);
         _camera.Update(elapsedMilliseconds, inputHandler);
     }
 }

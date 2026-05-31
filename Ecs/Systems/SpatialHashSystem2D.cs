@@ -1,44 +1,33 @@
-// SpatialHashSystem2D.cs
-// Copyright (c) 2023-2026 Thierry Meiers
-// All rights reserved.
-// Portions generated or assisted by AI.
-
 using MonoKit.Ecs.Components;
 using MonoKit.Ecs.Entities;
-using MonoKit.Ecs.Querying;
+using MonoKit.Gameplay;
+using MonoKit.Input;
 using MonoKit.Spatial;
 
 namespace MonoKit.Ecs.Systems;
 
-public class SpatialHashSystem2D(EcsSpatialHash2D grid) : ISystem, IOnEntityDestroyed
+public class SpatialHashSystem2D : System<Transform2D, Collider2D>, IOnEntityDestroyed
 {
+    private readonly EcsSpatialHash2D _grid;
+
+    public SpatialHashSystem2D(EcsSpatialHash2D grid) => _grid = grid;
+
     public int Priority => 1;
-    private EntityTypeTracker _tracker;
-    private ComponentPool<Transform2D> _transformPool;
-    private ComponentPool<Collider2D> _colliderPool;
 
-    public void Initialize(World world)
+    protected override void OnInitialize(World world) => _grid.Clear();
+
+    protected override void ProcessEntity(
+        Entity e,
+        ref Transform2D transform,
+        ref Collider2D collider,
+        double elapsedMs,
+        World world,
+        RuntimeContainer runtimeContainer,
+        InputHandler inputHandler
+    )
     {
-        _tracker = world.TypeTracker;
-        _transformPool = world.Components.GetOrCreatePool<Transform2D>();
-        _colliderPool = world.Components.GetOrCreatePool<Collider2D>();
+        _grid.UpdateEntity(e, transform.Position, collider.Width, collider.Height);
     }
 
-    public void Update(double elapsedMs, World world)
-    {
-        var entities = _tracker.GetEntitiesWith<Transform2D, Collider2D>();
-
-        foreach (var e in entities)
-        {
-            ref var transform = ref _transformPool.Get(e.Id);
-            ref var collider = ref _colliderPool.Get(e.Id);
-
-            grid.UpdateEntity(e, transform.Position, collider.Width, collider.Height);
-        }
-    }
-
-    public void OnEntityDestroyed(Entity entity)
-    {
-        grid.RemoveEntity(entity);
-    }
+    public void OnEntityDestroyed(Entity entity) => _grid.RemoveEntity(entity);
 }

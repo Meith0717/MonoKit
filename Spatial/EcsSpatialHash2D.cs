@@ -1,8 +1,3 @@
-// EcsSpatialHash2D.cs
-// Copyright (c) 2023-2026 Thierry Meiers
-// All rights reserved.
-// Portions generated or assisted by AI.
-
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -16,6 +11,12 @@ public class EcsSpatialHash2D(int cellSize)
     private readonly Dictionary<(int, int), List<Entity>> _grids = new();
     private readonly Dictionary<Entity, List<(int, int)>> _entityHashes = new();
     public readonly int CellSize = cellSize;
+
+    public void Clear()
+    {
+        _grids.Clear();
+        _entityHashes.Clear();
+    }
 
     public void UpdateEntity(Entity entity, Vector2 position, int width, int height)
     {

@@ -1,42 +1,28 @@
-// MovementsSystem2D.cs
-// Copyright (c) 2023-2026 Thierry Meiers
-// All rights reserved.
-// Portions generated or assisted by AI.
-
-using System.Threading.Tasks;
 using MonoKit.Ecs.Components;
-using MonoKit.Ecs.Querying;
+using MonoKit.Ecs.Entities;
+using MonoKit.Gameplay;
+using MonoKit.Input;
 
 namespace MonoKit.Ecs.Systems;
 
-public class MovementsSystem2D : ISystem
+public class MovementsSystem2D : System<Transform2D, Velocity2D>
 {
-    public int Priority { get; } = 0;
-    private EntityTypeTracker _tracker;
-    private ComponentPool<Transform2D> _transformPool;
-    private ComponentPool<Velocity2D> _velocityPool;
+    public MovementsSystem2D() => Priority = 0;
 
-    public void Initialize(World world)
+    protected override void OnInitialize(World world) { }
+
+    protected override void ProcessEntity(
+        Entity e,
+        ref Transform2D transform,
+        ref Velocity2D velocity,
+        double elapsedMs,
+        World world,
+        RuntimeContainer runtimeContainer,
+        InputHandler inputHandler
+    )
     {
-        _tracker = world.TypeTracker;
-        _transformPool = world.Components.GetOrCreatePool<Transform2D>();
-        _velocityPool = world.Components.GetOrCreatePool<Velocity2D>();
-    }
-
-    public void Update(double elapsedMs, World world)
-    {
-        var entities = _tracker.GetEntitiesWith<Transform2D, Velocity2D>();
-
-        Parallel.ForEach(
-            entities,
-            e =>
-            {
-                ref var transform = ref _transformPool.Get(e.Id);
-                ref var velocity = ref _velocityPool.Get(e.Id);
-
-                transform.Position += velocity.LinearVelocity * (float)elapsedMs;
-                transform.Rotation += velocity.AngularVelocity * (float)elapsedMs;
-            }
-        );
+        transform.Position +=
+            velocity.Velocity * velocity.NormalizedMovingDirection * (float)elapsedMs;
+        transform.Rotation += velocity.AngularVelocity * (float)elapsedMs;
     }
 }

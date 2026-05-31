@@ -3,6 +3,7 @@
 // All rights reserved.
 // Portions generated or assisted by AI.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
@@ -12,6 +13,7 @@ using MonoKit.Content;
 
 namespace MonoKit.Spatial;
 
+[Obsolete]
 internal class SpatialGrid((int, int) hash, int size)
 {
     private static readonly SpriteFont Font = ContentProvider

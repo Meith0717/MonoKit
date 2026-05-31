@@ -9,6 +9,7 @@ namespace MonoKit.Ecs.Components;
 
 public struct Velocity2D
 {
-    public Vector2 LinearVelocity;
+    public float Velocity;
+    public Vector2 NormalizedMovingDirection;
     public float AngularVelocity;
 }

@@ -5,6 +5,8 @@
 
 using System.Collections.Generic;
 using MonoKit.Ecs.Entities;
+using MonoKit.Gameplay;
+using MonoKit.Input;
 
 namespace MonoKit.Ecs.Systems;
 
@@ -26,7 +28,12 @@ public class SystemManager(World world)
         _isDirty = true;
     }
 
-    public void Update(double elapsedMs, World world)
+    public void Update(
+        double elapsedMs,
+        World world,
+        RuntimeContainer runtimeServices,
+        InputHandler inputHandler
+    )
     {
         if (_isDirty)
         {
@@ -35,7 +42,7 @@ public class SystemManager(World world)
         }
 
         foreach (var system in _systems)
-            system.Update(elapsedMs, world);
+            system.Update(elapsedMs, world, runtimeServices, inputHandler);
     }
 
     public void NotifyEntityDestroyed(Entity entity)

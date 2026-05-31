@@ -10,6 +10,8 @@ using MonoKit.Ecs.Entities;
 using MonoKit.Ecs.Querying;
 using MonoKit.Ecs.Systems;
 using MonoKit.Ecs.Tags;
+using MonoKit.Gameplay;
+using MonoKit.Input;
 
 namespace MonoKit.Ecs;
 
@@ -36,9 +38,13 @@ public sealed class World
         Systems = new SystemManager(this);
     }
 
-    public void Update(double elapsedMs)
+    public void Update(
+        double elapsedMs,
+        RuntimeContainer runtimeServices,
+        InputHandler inputHandler
+    )
     {
-        Systems.Update(elapsedMs, this);
+        Systems.Update(elapsedMs, this, runtimeServices, inputHandler);
     }
 
     public Entity CreateEntity()

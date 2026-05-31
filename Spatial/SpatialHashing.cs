@@ -14,6 +14,7 @@ using MonoKit.Core.Extensions;
 
 namespace MonoKit.Spatial;
 
+[Obsolete("Use new ECS")]
 public class SpatialHashing(int cellSize)
 {
     private readonly ConcurrentDictionary<(int, int), SpatialGrid> _grids = new();

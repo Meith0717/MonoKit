@@ -1,40 +1,31 @@
-// LifetimeSystem.cs
-// Copyright (c) 2023-2026 Thierry Meiers
-// All rights reserved.
-// Portions generated or assisted by AI.
-
 using MonoKit.Ecs.Components;
-using MonoKit.Ecs.Querying;
+using MonoKit.Ecs.Entities;
+using MonoKit.Gameplay;
+using MonoKit.Input;
 
 namespace MonoKit.Ecs.Systems;
 
-public class LifetimeSystem : ISystem
+public class LifetimeSystem : System<Lifetime>
 {
-    public int Priority { get; } = -100;
-    private EntityTypeTracker _tracker;
-    private ComponentPool<Lifetime> _lifetimePool;
+    public LifetimeSystem() => Priority = -100;
 
-    public void Initialize(World world)
+    protected override void OnInitialize(World world) { }
+
+    protected override void ProcessEntity(
+        Entity e,
+        ref Lifetime lifetime,
+        double elapsedMs,
+        World world,
+        RuntimeContainer runtimeContainer,
+        InputHandler inputHandler
+    )
     {
-        _tracker = world.TypeTracker;
-        _lifetimePool = world.Components.GetOrCreatePool<Lifetime>();
-    }
-
-    public void Update(double elapsedMs, World world)
-    {
-        var entities = _tracker.GetEntitiesWith<Lifetime>();
-
-        foreach (var e in entities)
+        if (lifetime.DestroyNow || lifetime.CoolDown <= 0)
         {
-            ref var lifetime = ref _lifetimePool.Get(e.Id);
-
-            if (lifetime.DestroyNow || lifetime.CoolDown <= 0)
-            {
-                world.DestroyEntity(e);
-                continue;
-            }
-
-            lifetime.CoolDown -= (float)elapsedMs;
+            world.DestroyEntity(e);
+            return;
         }
+
+        lifetime.CoolDown -= (float)elapsedMs;
     }
 }

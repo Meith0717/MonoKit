@@ -7,6 +7,6 @@ namespace MonoKit.Ecs.Components;
 
 public struct Lifetime
 {
-    public float CoolDown;
+    public double CoolDown;
     public bool DestroyNow;
 }
