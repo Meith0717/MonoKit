@@ -14,9 +14,12 @@ public class SpatialHashSystem3D : System<Transform3D, Collider3D>
 
     public int Priority => 1;
 
-    public ISpatialGrid3D Grid => _grid;
-
     protected override void OnInitialize(World world) => _grid.Clear();
+
+    protected override void OnUpdateStart(double elapsedMs, World world)
+    {
+        _grid.Clear();
+    }
 
     protected override void ProcessEntity(
         Entity e,

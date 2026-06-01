@@ -5,11 +5,10 @@
 
 using MonoKit.Content;
 
-namespace MonoKit.Gameplay
+namespace MonoKit.Gameplay;
+
+public abstract class GameObjectFactory<T>(ContentContainer<object> contentProvider)
+    where T : class
 {
-    public abstract class GameObjectFactory<T>(ContentContainer<object> contentProvider)
-        where T : class
-    {
-        public readonly ContentContainer<T> ContentProvider = contentProvider.Cast<T>();
-    }
+    public readonly ContentContainer<T> ContentProvider = contentProvider.Cast<T>();
 }

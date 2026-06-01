@@ -1,21 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Threading; // Required for ThreadLocal
 using Microsoft.Xna.Framework;
 using MonoKit.Ecs.Entities;
 
 namespace MonoKit.Spatial;
 
-public sealed class EcsSpatialHash3D : ISpatialGrid3D, IDisposable
+public sealed class EcsSpatialHash3D : ISpatialGrid3D
 {
     private readonly Dictionary<long, List<Entry>> _grids;
     private readonly List<List<Entry>> _activeCells;
     private readonly float _cellSize;
     private readonly float _inverseCellSize;
-
-    // FIX: ThreadLocal gives each CPU core its own independent filter workspace
-    private readonly ThreadLocal<HashSet<Entity>> _duplicateFilter;
 
     private struct Entry(Entity entity, Vector3 position)
     {
@@ -30,12 +26,6 @@ public sealed class EcsSpatialHash3D : ISpatialGrid3D, IDisposable
 
         _grids = new Dictionary<long, List<Entry>>(capacity);
         _activeCells = new List<List<Entry>>(capacity);
-
-        // Lazily allocates a unique HashSet per active execution thread
-        _duplicateFilter = new ThreadLocal<HashSet<Entity>>(
-            () => new HashSet<Entity>(),
-            trackAllValues: false
-        );
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -109,10 +99,6 @@ public sealed class EcsSpatialHash3D : ISpatialGrid3D, IDisposable
     {
         var radiusSquared = radius * radius;
 
-        // Fetch this thread's instance of the filter safely
-        var filter = _duplicateFilter.Value!;
-        filter.Clear();
-
         var startX = ToCell(pos.X - radius);
         var endX = ToCell(pos.X + radius) + 1;
 
@@ -134,10 +120,6 @@ public sealed class EcsSpatialHash3D : ISpatialGrid3D, IDisposable
             for (var i = 0; i < cell.Count; i++)
             {
                 var entry = cell[i];
-
-                if (!filter.Add(entry.Entity))
-                    continue;
-
                 var delta = entry.Position - pos;
                 if (delta.LengthSquared() <= radiusSquared)
                 {
@@ -150,10 +132,6 @@ public sealed class EcsSpatialHash3D : ISpatialGrid3D, IDisposable
     public void GetInRadiusFast(Vector3 pos, float radius, List<Entity> results)
     {
         var radiusSquared = radius * radius;
-
-        // Fetch this thread's instance of the filter safely
-        var filter = _duplicateFilter.Value!;
-        filter.Clear();
 
         var cx = ToCell(pos.X);
         var cy = ToCell(pos.Y);
@@ -173,10 +151,6 @@ public sealed class EcsSpatialHash3D : ISpatialGrid3D, IDisposable
             for (var i = 0; i < cell.Count; i++)
             {
                 var entry = cell[i];
-
-                if (!filter.Add(entry.Entity))
-                    continue;
-
                 var delta = entry.Position - pos;
                 if (delta.LengthSquared() <= radiusSquared)
                 {
@@ -184,11 +158,5 @@ public sealed class EcsSpatialHash3D : ISpatialGrid3D, IDisposable
                 }
             }
         }
-    }
-
-    public void Dispose()
-    {
-        // Clean up thread allocations when the grid is torn down
-        _duplicateFilter.Dispose();
     }
 }
