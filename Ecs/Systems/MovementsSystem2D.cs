@@ -1,3 +1,8 @@
+// MovementsSystem2D.cs
+// Copyright (c) 2023-2026 Thierry Meiers
+// All rights reserved.
+// Portions generated or assisted by AI.
+
 using MonoKit.Ecs.Components;
 using MonoKit.Ecs.Entities;
 using MonoKit.Gameplay;
@@ -5,10 +10,8 @@ using MonoKit.Input;
 
 namespace MonoKit.Ecs.Systems;
 
-public class MovementsSystem2D : System<Transform2D, Velocity2D>
+public class MovementsSystem2D() : System<Transform2D, Velocity2D>(-99)
 {
-    public MovementsSystem2D() => Priority = 0;
-
     protected override void OnInitialize(World world) { }
 
     protected override void ProcessEntity(

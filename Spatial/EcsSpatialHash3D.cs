@@ -1,4 +1,8 @@
-using System;
+// EcsSpatialHash3D.cs
+// Copyright (c) 2023-2026 Thierry Meiers
+// All rights reserved.
+// Portions generated or assisted by AI.
+
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Microsoft.Xna.Framework;
@@ -6,26 +10,16 @@ using MonoKit.Ecs.Entities;
 
 namespace MonoKit.Spatial;
 
-public sealed class EcsSpatialHash3D : ISpatialGrid3D
+public sealed class EcsSpatialHash3D(float cellSize, int capacity = 1024) : ISpatialGrid3D
 {
-    private readonly Dictionary<long, List<Entry>> _grids;
-    private readonly List<List<Entry>> _activeCells;
-    private readonly float _cellSize;
-    private readonly float _inverseCellSize;
+    private readonly Dictionary<long, List<Entry>> _grids = new(capacity);
+    private readonly List<List<Entry>> _activeCells = new(capacity);
+    private readonly float _inverseCellSize = 1f / cellSize;
 
     private struct Entry(Entity entity, Vector3 position)
     {
         public readonly Entity Entity = entity;
         public readonly Vector3 Position = position;
-    }
-
-    public EcsSpatialHash3D(float cellSize, int capacity = 1024)
-    {
-        _cellSize = cellSize;
-        _inverseCellSize = 1f / cellSize;
-
-        _grids = new Dictionary<long, List<Entry>>(capacity);
-        _activeCells = new List<List<Entry>>(capacity);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

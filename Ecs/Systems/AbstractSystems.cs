@@ -1,3 +1,8 @@
+// AbstractSystems.cs
+// Copyright (c) 2023-2026 Thierry Meiers
+// All rights reserved.
+// Portions generated or assisted by AI.
+
 using System;
 using MonoKit.Ecs.Components;
 using MonoKit.Ecs.Entities;
@@ -9,14 +14,14 @@ using MonoKit.Input;
 
 namespace MonoKit.Ecs.Systems;
 
-public abstract class System<T1> : ISystem
+public abstract class System<T1>(int priority) : ISystem
     where T1 : struct
 {
     protected ComponentPool<T1> Pool1 { get; private set; }
     private EntityTypeTracker _tracker;
     private Entity[] _buffer = new Entity[128];
 
-    public int Priority { get; protected set; }
+    public int Priority => priority;
 
     public void Initialize(World world)
     {
@@ -62,7 +67,7 @@ public abstract class System<T1> : ISystem
     );
 }
 
-public abstract class System<T1, T2> : ISystem
+public abstract class System<T1, T2>(int priority) : ISystem
     where T1 : struct
     where T2 : struct
 {
@@ -71,7 +76,7 @@ public abstract class System<T1, T2> : ISystem
     private EntityTypeTracker _tracker;
     private Entity[] _buffer = new Entity[128];
 
-    public int Priority { get; protected set; }
+    public int Priority => priority;
 
     public void Initialize(World world)
     {
@@ -127,7 +132,7 @@ public abstract class System<T1, T2> : ISystem
     );
 }
 
-public abstract class System<T1, T2, T3> : ISystem
+public abstract class System<T1, T2, T3>(int priority) : ISystem
     where T1 : struct
     where T2 : struct
     where T3 : struct
@@ -138,7 +143,7 @@ public abstract class System<T1, T2, T3> : ISystem
     private EntityTypeTracker _tracker;
     private Entity[] _buffer = new Entity[128];
 
-    public int Priority { get; protected set; }
+    public int Priority => priority;
 
     public void Initialize(World world)
     {
@@ -197,7 +202,7 @@ public abstract class System<T1, T2, T3> : ISystem
     );
 }
 
-public abstract class System<T1, T2, T3, T4> : ISystem
+public abstract class System<T1, T2, T3, T4>(int priority) : ISystem
     where T1 : struct
     where T2 : struct
     where T3 : struct
@@ -210,7 +215,7 @@ public abstract class System<T1, T2, T3, T4> : ISystem
     private EntityTypeTracker _tracker;
     private Entity[] _buffer = new Entity[128];
 
-    public int Priority { get; protected set; }
+    public int Priority => priority;
 
     public void Initialize(World world)
     {

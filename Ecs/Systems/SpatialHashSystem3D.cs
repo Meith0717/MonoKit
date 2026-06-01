@@ -1,3 +1,8 @@
+// SpatialHashSystem3D.cs
+// Copyright (c) 2023-2026 Thierry Meiers
+// All rights reserved.
+// Portions generated or assisted by AI.
+
 using MonoKit.Ecs.Components;
 using MonoKit.Ecs.Entities;
 using MonoKit.Gameplay;
@@ -6,19 +11,13 @@ using MonoKit.Spatial;
 
 namespace MonoKit.Ecs.Systems;
 
-public class SpatialHashSystem3D : System<Transform3D, Collider3D>
+public class SpatialHashSystem3D(ISpatialGrid3D grid) : System<Transform3D, Collider3D>(-98)
 {
-    private readonly ISpatialGrid3D _grid;
-
-    public SpatialHashSystem3D(ISpatialGrid3D grid) => _grid = grid;
-
-    public int Priority => 1;
-
-    protected override void OnInitialize(World world) => _grid.Clear();
+    protected override void OnInitialize(World world) => grid.Clear();
 
     protected override void OnUpdateStart(double elapsedMs, World world)
     {
-        _grid.Clear();
+        grid.Clear();
     }
 
     protected override void ProcessEntity(
@@ -31,6 +30,6 @@ public class SpatialHashSystem3D : System<Transform3D, Collider3D>
         InputHandler inputHandler
     )
     {
-        _grid.Add(e, transform.Position, collider.Size);
+        grid.Add(e, transform.Position, collider.Size);
     }
 }

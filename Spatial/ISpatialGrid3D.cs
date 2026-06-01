@@ -1,10 +1,11 @@
 // ISpatialGrid3D.cs
 // Copyright (c) 2023-2026 Thierry Meiers
 // All rights reserved.
+// Portions generated or assisted by AI.
 
-using MonoKit.Ecs.Entities;
-using Microsoft.Xna.Framework;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework;
+using MonoKit.Ecs.Entities;
 
 namespace MonoKit.Spatial;
 
