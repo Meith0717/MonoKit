@@ -295,20 +295,20 @@ public class EntityTypeTracker
     // These require caller to provide a buffer of sufficient size.
     // Useful when entity count is known and buffer can be pooled.
 
-    public ReadOnlySpan<Entity> GetEntitiesWith<T>(Span<Entity> buffer) where T : struct
+    public ReadOnlySpan<Entity> GetEntitiesWith<T>(Span<Entity> buffer)
+        where T : struct
     {
         if (!_typeToEntities.TryGetValue(typeof(T), out var set) || set.Count == 0)
             return ReadOnlySpan<Entity>.Empty;
-        
-        if (set.Count > buffer.Length)
-            throw new ArgumentException("Buffer too small", nameof(buffer));
-        
-        var i = 0;
+
+        int count = 0;
         foreach (var entity in set)
         {
-            buffer[i++] = entity;
+            if (count >= buffer.Length)
+                break;
+            buffer[count++] = entity;
         }
-        return buffer.Slice(0, set.Count);
+        return buffer.Slice(0, count);
     }
 
     public ReadOnlySpan<Entity> GetEntitiesWith<T1, T2>(Span<Entity> buffer)

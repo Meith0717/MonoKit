@@ -27,6 +27,8 @@ public abstract class System<T1> : ISystem
 
     protected abstract void OnInitialize(World world);
 
+    protected virtual void OnUpdateStart(double elapsedMs, World world) { }
+
     public void Update(
         double elapsedMs,
         World world,
@@ -34,6 +36,7 @@ public abstract class System<T1> : ISystem
         InputHandler inputHandler
     )
     {
+        OnUpdateStart(elapsedMs, world);
         var span = _tracker.GetEntitiesWith<T1>(_buffer);
 
         if (span.Length == _buffer.Length)
@@ -80,6 +83,8 @@ public abstract class System<T1, T2> : ISystem
 
     protected abstract void OnInitialize(World world);
 
+    protected virtual void OnUpdateStart(double elapsedMs, World world) { }
+
     public void Update(
         double elapsedMs,
         World world,
@@ -87,6 +92,7 @@ public abstract class System<T1, T2> : ISystem
         InputHandler inputHandler
     )
     {
+        OnUpdateStart(elapsedMs, world);
         var span = _tracker.GetEntitiesWith<T1, T2>(_buffer);
 
         if (span.Length == _buffer.Length)
@@ -145,6 +151,8 @@ public abstract class System<T1, T2, T3> : ISystem
 
     protected abstract void OnInitialize(World world);
 
+    protected virtual void OnUpdateStart(double elapsedMs, World world) { }
+
     public void Update(
         double elapsedMs,
         World world,
@@ -152,6 +160,7 @@ public abstract class System<T1, T2, T3> : ISystem
         InputHandler inputHandler
     )
     {
+        OnUpdateStart(elapsedMs, world);
         var span = _tracker.GetEntitiesWith<T1, T2, T3>(_buffer);
 
         if (span.Length == _buffer.Length)
@@ -215,6 +224,8 @@ public abstract class System<T1, T2, T3, T4> : ISystem
 
     protected abstract void OnInitialize(World world);
 
+    protected virtual void OnUpdateStart(double elapsedMs, World world) { }
+
     public void Update(
         double elapsedMs,
         World world,
@@ -222,6 +233,7 @@ public abstract class System<T1, T2, T3, T4> : ISystem
         InputHandler inputHandler
     )
     {
+        OnUpdateStart(elapsedMs, world);
         var span = _tracker.GetEntitiesWith<T1, T2, T3, T4>(_buffer);
 
         if (span.Length == _buffer.Length)
