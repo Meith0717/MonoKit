@@ -23,28 +23,28 @@ public sealed class EcsSpatialHash3D(float cellSize, int capacity = 1024) : ISpa
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static long Hash(int x, int y, int z)
+    private static long MortonEncode(int x, int y, int z)
     {
         unchecked
         {
-            return ((long)x * 73856093L) ^ ((long)y * 19349663L) ^ ((long)z * 83492791L);
+            long result = 0;
+            for (int i = 0; i < 21; i++)
+            {
+                result |= ((long)(x >> i) & 1) << (3 * i);
+                result |= ((long)(y >> i) & 1) << (3 * i + 1);
+                result |= ((long)(z >> i) & 1) << (3 * i + 2);
+            }
+            return result;
         }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int ToCell(float value)
-    {
-        return (int)float.Floor(value * _inverseCellSize);
-    }
+    private int ToCell(float value) => (int)float.Floor(value * _inverseCellSize);
 
     public void Clear()
     {
-        for (int i = 0; i < _activeCells.Count; i++)
-        {
-            _activeCells[i].Clear();
-        }
-
         _activeCells.Clear();
+        _grids.Clear();
     }
 
     public void Add(Entity entity, Vector3 position, Vector3 size)
@@ -74,17 +74,11 @@ public sealed class EcsSpatialHash3D(float cellSize, int capacity = 1024) : ISpa
         for (var y = startY; y < endY; y++)
         for (var z = startZ; z < endZ; z++)
         {
-            var hash = Hash(x, y, z);
-
-            if (!_grids.TryGetValue(hash, out var cell))
-            {
-                cell = new List<Entry>();
-                _grids.Add(hash, cell);
-            }
-
+            var key = MortonEncode(x, y, z);
+            if (!_grids.TryGetValue(key, out var cell))
+                _grids[key] = cell = new List<Entry>();
             if (cell.Count == 0)
                 _activeCells.Add(cell);
-
             cell.Add(new Entry(entity, position));
         }
     }
@@ -106,19 +100,17 @@ public sealed class EcsSpatialHash3D(float cellSize, int capacity = 1024) : ISpa
         for (var y = startY; y < endY; y++)
         for (var z = startZ; z < endZ; z++)
         {
-            var hash = Hash(x, y, z);
-
-            if (!_grids.TryGetValue(hash, out var cell))
+            var key = MortonEncode(x, y, z);
+            if (!_grids.TryGetValue(key, out var cell))
                 continue;
-
             for (var i = 0; i < cell.Count; i++)
             {
                 var entry = cell[i];
-                var delta = entry.Position - pos;
-                if (delta.LengthSquared() <= radiusSquared)
-                {
+                var dx = entry.Position.X - pos.X;
+                var dy = entry.Position.Y - pos.Y;
+                var dz = entry.Position.Z - pos.Z;
+                if (dx * dx + dy * dy + dz * dz <= radiusSquared)
                     results.Add(entry.Entity);
-                }
             }
         }
     }
@@ -137,19 +129,17 @@ public sealed class EcsSpatialHash3D(float cellSize, int capacity = 1024) : ISpa
         for (var y = cy - cellSpan; y <= cy + cellSpan; y++)
         for (var z = cz - cellSpan; z <= cz + cellSpan; z++)
         {
-            var hash = Hash(x, y, z);
-
-            if (!_grids.TryGetValue(hash, out var cell))
+            var key = MortonEncode(x, y, z);
+            if (!_grids.TryGetValue(key, out var cell))
                 continue;
-
             for (var i = 0; i < cell.Count; i++)
             {
                 var entry = cell[i];
-                var delta = entry.Position - pos;
-                if (delta.LengthSquared() <= radiusSquared)
-                {
+                var dx = entry.Position.X - pos.X;
+                var dy = entry.Position.Y - pos.Y;
+                var dz = entry.Position.Z - pos.Z;
+                if (dx * dx + dy * dy + dz * dz <= radiusSquared)
                     results.Add(entry.Entity);
-                }
             }
         }
     }

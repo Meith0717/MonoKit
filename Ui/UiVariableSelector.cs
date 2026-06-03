@@ -3,6 +3,7 @@
 // All rights reserved.
 // Portions generated or assisted by AI.
 
+using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -31,9 +32,11 @@ public sealed class UiVariableSelector<T> : UiElement
         _text = new UiText(spriteFont)
         {
             Align = Align.Center,
-            Text = _items[_selectedIndex].ToString(),
+            Text = _items.Count == 0 ? string.Empty : _items[_selectedIndex].ToString(),
         };
     }
+
+    public Action<T> OnClickAction { get; set; }
 
     public float TextScale
     {
@@ -66,7 +69,6 @@ public sealed class UiVariableSelector<T> : UiElement
         _arrowL.Update(inputHandler, Bounds, UiScale);
         _arrowR.Update(inputHandler, Bounds, UiScale);
         _text.Update(inputHandler, Bounds, UiScale);
-        _text.Text = _items[_selectedIndex].ToString();
         Height = (int)
             float.Floor(
                 int.Max(_text.Bounds.Height, int.Max(_arrowL.Bounds.Height, _arrowR.Bounds.Height))
@@ -99,18 +101,24 @@ public sealed class UiVariableSelector<T> : UiElement
 
     private void IncreaseIndex()
     {
+        if (_items.Count <= 0)
+            return;
         _selectedIndex++;
         if (_selectedIndex >= _items.Count)
             _selectedIndex = 0;
         _text.Text = _items[_selectedIndex].ToString();
+        OnClickAction.Invoke(_items[_selectedIndex]);
     }
 
     private void DecreaseIndex()
     {
+        if (_items.Count <= 0)
+            return;
         _selectedIndex--;
         if (_selectedIndex < 0)
             _selectedIndex = _items.Count - 1;
         _text.Text = _items[_selectedIndex].ToString();
+        OnClickAction.Invoke(_items[_selectedIndex]);
     }
 
     private int GetIndex(T value)
