@@ -15,8 +15,8 @@ public sealed class UiVariableSelector<T> : UiElement
 {
     private readonly UiButton.Sprite _arrowL;
     private readonly UiButton.Sprite _arrowR;
-    private readonly List<T> _items;
     private readonly UiText _text;
+    private List<T> _items;
     private int _selectedIndex;
 
     public UiVariableSelector(string leftButton, string rightButton, string spriteFont, T[] items)
@@ -37,6 +37,15 @@ public sealed class UiVariableSelector<T> : UiElement
     }
 
     public Action<T> OnClickAction { get; set; }
+
+    public T[] Items
+    {
+        set
+        {
+            _items = [.. value];
+            _text.Text = _items.Count == 0 ? string.Empty : _items[_selectedIndex].ToString();
+        }
+    }
 
     public float TextScale
     {

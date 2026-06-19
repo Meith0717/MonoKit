@@ -19,6 +19,7 @@ public sealed class UiText(string spriteFont, string text = default) : UiElement
 
     public string Text
     {
+        get => _text;
         set
         {
             _text = value;
@@ -28,6 +29,7 @@ public sealed class UiText(string spriteFont, string text = default) : UiElement
 
     public float Scale
     {
+        get => _scale;
         set
         {
             _scale = value;
@@ -35,7 +37,7 @@ public sealed class UiText(string spriteFont, string text = default) : UiElement
         }
     }
 
-    public Color Color { private get; set; } = Color.Black;
+    public Color Color { get; set; } = Color.Black;
     public Func<string> TextProvider { get; set; }
 
     public override void ApplyScale(Rectangle root, float uiScale = 1)

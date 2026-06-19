@@ -124,15 +124,20 @@ public class ScreenManager(Game game)
         spriteBatch.End();
     }
 
+    private readonly List<Screen> _filteredScreens = [];
+
     public void Draw(SpriteBatch spriteBatch)
     {
-        var screens = _screens.Reverse();
-        foreach (var screen in screens)
+        _filteredScreens.Clear();
+        foreach (var screen in _screens)
         {
-            screen.Draw(spriteBatch);
-            if (screen.DrawBelow)
+            _filteredScreens.Add(screen);
+            if (!screen.DrawBelow)
                 break;
         }
+
+        for (var i = _filteredScreens.Count - 1; i >= 0; i--)
+            _filteredScreens[i].Draw(spriteBatch);
     }
 
     public void Exit()
@@ -141,7 +146,7 @@ public class ScreenManager(Game game)
             _screens.ElementAt(i).Dispose();
 
         _postProcessingRunner.Dispose();
-        _lowerRenderTarget.Dispose();
+        _lowerRenderTarget?.Dispose();
         _game.Exit();
     }
 

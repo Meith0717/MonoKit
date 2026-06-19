@@ -42,12 +42,21 @@ public class UiSprite : UiElement
 
     protected override void Updater(InputHandler inputHandler)
     {
+        if (_texture == null)
+        {
+            Width = 1;
+            Height = 1;
+            return;
+        }
+
         Width = (int)float.Floor(_texture.Width * Scale);
         Height = (int)float.Floor(_texture.Height * Scale);
     }
 
     protected override void Drawer(SpriteBatch spriteBatch)
     {
+        if (_texture == null)
+            return;
         spriteBatch.Draw(_texture, Bounds, Color);
     }
 }
