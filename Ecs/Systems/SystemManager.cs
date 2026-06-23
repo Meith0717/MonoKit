@@ -13,12 +13,14 @@ namespace MonoKit.Ecs.Systems;
 public class SystemManager(World world)
 {
     private readonly List<ISystem> _systems = [];
+    private readonly HashSet<ISystem> _addedSystems = [];
     private bool _isDirty = false;
 
     public void Add(ISystem system)
     {
         system.Initialize(world);
         _systems.Add(system);
+        _addedSystems.Add(system);
         _isDirty = true;
     }
 
@@ -42,7 +44,12 @@ public class SystemManager(World world)
         }
 
         foreach (var system in _systems)
+        {
+            if (_addedSystems.Contains(system))
+                system.Initialize(world);
             system.Update(elapsedMs, world, runtimeServices, inputHandler);
+        }
+        _addedSystems.Clear();
     }
 
     public void NotifyEntityDestroyed(Entity entity)

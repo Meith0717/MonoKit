@@ -114,33 +114,4 @@ public sealed class EcsSpatialHash3D(float cellSize, int capacity = 1024) : ISpa
             }
         }
     }
-
-    public void GetInRadiusFast(Vector3 pos, float radius, List<Entity> results)
-    {
-        var radiusSquared = radius * radius;
-
-        var cx = ToCell(pos.X);
-        var cy = ToCell(pos.Y);
-        var cz = ToCell(pos.Z);
-
-        int cellSpan = (int)float.Ceiling(radius * _inverseCellSize);
-
-        for (var x = cx - cellSpan; x <= cx + cellSpan; x++)
-        for (var y = cy - cellSpan; y <= cy + cellSpan; y++)
-        for (var z = cz - cellSpan; z <= cz + cellSpan; z++)
-        {
-            var key = MortonEncode(x, y, z);
-            if (!_grids.TryGetValue(key, out var cell))
-                continue;
-            for (var i = 0; i < cell.Count; i++)
-            {
-                var entry = cell[i];
-                var dx = entry.Position.X - pos.X;
-                var dy = entry.Position.Y - pos.Y;
-                var dz = entry.Position.Z - pos.Z;
-                if (dx * dx + dy * dy + dz * dz <= radiusSquared)
-                    results.Add(entry.Entity);
-            }
-        }
-    }
 }

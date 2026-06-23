@@ -13,6 +13,5 @@ public interface ISpatialGrid3D
 {
     void Add(Entity entity, Vector3 position, Vector3 size);
     void GetInRadius(Vector3 position, float radius, List<Entity> results);
-    void GetInRadiusFast(Vector3 position, float radius, List<Entity> results);
     void Clear();
 }

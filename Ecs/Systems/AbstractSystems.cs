@@ -44,7 +44,7 @@ public abstract class System<T1>(int priority) : ISystem
         OnUpdateStart(elapsedMs, world);
         var span = _tracker.GetEntitiesWith<T1>(_buffer);
 
-        if (span.Length == _buffer.Length)
+        while (span.Length == _buffer.Length)
         {
             Array.Resize(ref _buffer, _buffer.Length * 2);
             span = _tracker.GetEntitiesWith<T1>(_buffer);
@@ -100,7 +100,7 @@ public abstract class System<T1, T2>(int priority) : ISystem
         OnUpdateStart(elapsedMs, world);
         var span = _tracker.GetEntitiesWith<T1, T2>(_buffer);
 
-        if (span.Length == _buffer.Length)
+        while (span.Length == _buffer.Length)
         {
             Array.Resize(ref _buffer, _buffer.Length * 2);
             span = _tracker.GetEntitiesWith<T1, T2>(_buffer);
@@ -168,7 +168,7 @@ public abstract class System<T1, T2, T3>(int priority) : ISystem
         OnUpdateStart(elapsedMs, world);
         var span = _tracker.GetEntitiesWith<T1, T2, T3>(_buffer);
 
-        if (span.Length == _buffer.Length)
+        while (span.Length == _buffer.Length)
         {
             Array.Resize(ref _buffer, _buffer.Length * 2);
             span = _tracker.GetEntitiesWith<T1, T2, T3>(_buffer);
@@ -241,7 +241,7 @@ public abstract class System<T1, T2, T3, T4>(int priority) : ISystem
         OnUpdateStart(elapsedMs, world);
         var span = _tracker.GetEntitiesWith<T1, T2, T3, T4>(_buffer);
 
-        if (span.Length == _buffer.Length)
+        while (span.Length == _buffer.Length)
         {
             Array.Resize(ref _buffer, _buffer.Length * 2);
             span = _tracker.GetEntitiesWith<T1, T2, T3, T4>(_buffer);
