@@ -4,12 +4,13 @@
 // Portions generated or assisted by AI.
 
 using Microsoft.Xna.Framework;
+using Vector3 = Microsoft.Xna.Framework.Vector3;
 
 namespace MonoKit.Ecs.Components;
 
-public struct Transform3D(Vector3 position, Quaternion rotation, Vector3 scale)
+public struct Transform3D(Vector3 position, Matrix orientation, Vector3 scale)
 {
     public Vector3 Position = position;
-    public Quaternion Rotation = rotation;
+    public Matrix Orientation = orientation;
     public Vector3 Scale = scale;
 }

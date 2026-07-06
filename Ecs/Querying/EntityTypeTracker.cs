@@ -18,7 +18,7 @@ namespace MonoKit.Ecs.Querying;
 /// - Multi-component queries iterate smallest set, check membership in others
 /// - Avoids creating intermediate HashSet copies
 /// </summary>
-public class EntityTypeTracker
+public class EntityTypeTracker : IDisposable
 {
     private readonly Dictionary<Type, HashSet<Entity>> _typeToEntities = new();
     private readonly Dictionary<Entity, HashSet<Type>> _entityToTypes = new();
@@ -383,5 +383,20 @@ public class EntityTypeTracker
                 buffer[count++] = entity;
         }
         return buffer.Slice(0, count);
+    }
+
+    public void Dispose()
+    {
+        foreach (var entities in _typeToEntities.Values)
+        {
+            entities.Clear();
+        }
+        _typeToEntities.Clear();
+
+        foreach (var types in _entityToTypes.Values)
+        {
+            types.Clear();
+        }
+        _entityToTypes.Clear();
     }
 }

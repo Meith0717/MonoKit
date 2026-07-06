@@ -11,7 +11,7 @@ using MonoKit.Spatial;
 
 namespace MonoKit.Ecs.Systems;
 
-public class SpatialHashSystem3D(EcsSpatialHash3D grid) : System<Transform3D>(-98)
+public class SpatialHashSystem3D(EcsSpatialHash3D grid) : System<Transform3D, Collider3D>(-98)
 {
     protected override void OnInitialize(World world) => grid.Clear();
 
@@ -23,12 +23,13 @@ public class SpatialHashSystem3D(EcsSpatialHash3D grid) : System<Transform3D>(-9
     protected override void ProcessEntity(
         Entity e,
         ref Transform3D transform,
+        ref Collider3D collider3D,
         double elapsedMs,
         World world,
         RuntimeContainer runtimeContainer,
         InputHandler inputHandler
     )
     {
-        grid.Add(e, transform.Position);
+        grid.Add(e, transform.Position, collider3D.Size);
     }
 }

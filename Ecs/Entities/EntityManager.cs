@@ -3,6 +3,7 @@
 // All rights reserved.
 // Portions generated or assisted by AI.
 
+using System;
 using System.Collections.Generic;
 
 namespace MonoKit.Ecs.Entities;
@@ -12,7 +13,7 @@ public readonly record struct Entity(int Id)
     public readonly int Id = Id;
 }
 
-public sealed class EntityManager
+public sealed class EntityManager : IDisposable
 {
     private int _nextId = 0;
     private readonly Stack<int> _freeIds = new();
@@ -54,5 +55,13 @@ public sealed class EntityManager
     public bool IsAlive(Entity entity)
     {
         return entity.Id >= 0 && entity.Id < _alive.Count && _alive[entity.Id];
+    }
+
+    public void Dispose()
+    {
+        _nextId = 0;
+        _alive.Clear();
+        _freeIds.Clear();
+        Count = 0;
     }
 }

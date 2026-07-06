@@ -5,6 +5,7 @@
 
 // ReSharper disable MemberCanBePrivate.Global
 
+using System;
 using MonoKit.Ecs.Components;
 using MonoKit.Ecs.Entities;
 using MonoKit.Ecs.Querying;
@@ -15,16 +16,16 @@ using MonoKit.Input;
 
 namespace MonoKit.Ecs;
 
-public sealed class World
+public sealed class World : IDisposable
 {
-    private readonly EntityManager _entityManager = new();
+    public EntityManager EntityManager { get; } = new();
     public ComponentManager Components { get; } = new();
     public EntityTypeTracker TypeTracker { get; }
     public SystemManager Systems { get; }
 
     public Entity WorldEntity { get; private set; }
 
-    public int EntityCount => _entityManager.Count;
+    public int EntityCount => EntityManager.Count;
 
     public World()
     {
@@ -32,7 +33,7 @@ public sealed class World
         Components.OnComponentAdded += TypeTracker.OnComponentAdded;
         Components.OnComponentRemoved += TypeTracker.OnComponentRemoved;
 
-        WorldEntity = _entityManager.Create();
+        WorldEntity = EntityManager.Create();
         TypeTracker.TrackEntity(WorldEntity);
         Components.Add(WorldEntity, new WorldTag());
         Systems = new SystemManager(this);
@@ -49,7 +50,7 @@ public sealed class World
 
     public Entity CreateEntity()
     {
-        var entity = _entityManager.Create();
+        var entity = EntityManager.Create();
         TypeTracker.TrackEntity(entity);
         return entity;
     }
@@ -59,7 +60,7 @@ public sealed class World
         Systems.NotifyEntityDestroyed(entity);
         TypeTracker.OnEntityDestroyed(entity);
         Components.RemoveAllComponents(entity);
-        _entityManager.Destroy(entity);
+        EntityManager.Destroy(entity);
     }
 
     public override string ToString()
@@ -70,5 +71,17 @@ public sealed class World
         sb.AppendLine(Systems.ToString());
         sb.AppendLine("=============================================");
         return sb.ToString();
+    }
+
+    public void Dispose()
+    {
+        // Dispose all managers in the correct order
+        Systems.Dispose();
+        Components.Dispose();
+        TypeTracker.Dispose();
+        EntityManager.Dispose();
+        
+        // Clean up the world entity reference
+        WorldEntity = default;
     }
 }

@@ -19,7 +19,6 @@ public interface ICamera3dBehavior
 public class Camera3D(Vector3 positon, GraphicsDevice graphicsDevice)
 {
     private readonly List<ICamera3dBehavior> _behaviours = new();
-    public float AspectRatio = graphicsDevice.Viewport.AspectRatio;
     public float FarPlane = 1000f;
     public Vector3 Forward = new(1, 0, 0);
 
@@ -53,7 +52,12 @@ public class Camera3D(Vector3 positon, GraphicsDevice graphicsDevice)
     public void Update(double elapsedGameTime, InputHandler inputHandler)
     {
         View = Matrix.CreateLookAt(Position, Target, Up);
-        Projection = Matrix.CreatePerspectiveFieldOfView(Fov, AspectRatio, NearPlane, FarPlane);
+        Projection = Matrix.CreatePerspectiveFieldOfView(
+            Fov,
+            graphicsDevice.Viewport.AspectRatio,
+            NearPlane,
+            FarPlane
+        );
         _behaviours.ForEach(behaviour => behaviour.Update(this, inputHandler, elapsedGameTime));
     }
 }

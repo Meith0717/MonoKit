@@ -3,6 +3,7 @@
 // All rights reserved.
 // Portions generated or assisted by AI.
 
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoKit.Ecs;
@@ -13,7 +14,7 @@ using MonoKit.Spatial;
 
 namespace MonoKit.Gameplay;
 
-public class GameRuntime3D
+public class GameRuntime3D : IDisposable
 {
     private readonly World _world;
     private readonly Camera3D _camera;
@@ -37,5 +38,11 @@ public class GameRuntime3D
     {
         _world.Update(elapsedMilliseconds, Services, inputHandler);
         _camera.Update(elapsedMilliseconds, inputHandler);
+    }
+
+    public void Dispose()
+    {
+        _world.Dispose();
+        GC.SuppressFinalize(this);
     }
 }

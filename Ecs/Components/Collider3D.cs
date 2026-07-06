@@ -7,12 +7,7 @@ using Microsoft.Xna.Framework;
 
 namespace MonoKit.Ecs.Components;
 
-public struct Collider3D
+public struct Collider3D(Vector3 size)
 {
-    public Vector3 Size;
-
-    public Collider3D(Vector3 size)
-    {
-        Size = size;
-    }
+    public Vector3 Size = size;
 }

@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace MonoKit.Ecs.Components;
 
-public class ComponentPool<T> : IComponentPool
+public class ComponentPool<T> : IComponentPool, IDisposable
     where T : struct
 {
     public int Count { get; private set; } = 0;
@@ -109,5 +109,13 @@ public class ComponentPool<T> : IComponentPool
         var newSize = _dense.Length * 2;
         Array.Resize(ref _dense, newSize);
         Array.Resize(ref _denseEntities, newSize);
+    }
+
+    public void Dispose()
+    {
+        Array.Fill(_sparse, -1);
+        Array.Clear(_dense, 0, _dense.Length);
+        Array.Clear(_denseEntities, 0, _denseEntities.Length);
+        Count = 0;
     }
 }

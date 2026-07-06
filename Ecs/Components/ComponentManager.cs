@@ -9,7 +9,7 @@ using MonoKit.Ecs.Entities;
 
 namespace MonoKit.Ecs.Components;
 
-public class ComponentManager
+public class ComponentManager : IDisposable
 {
     private readonly Dictionary<Type, object> _pools = [];
 
@@ -94,5 +94,19 @@ public class ComponentManager
                 sb.AppendLine($"  Entity {entityId:D3} -> DenseIndex {denseIndex:D3} (#{hash})");
         }
         return sb.ToString();
+    }
+
+    public void Dispose()
+    {
+        foreach (var kvp in _pools)
+        {
+            if (kvp.Value is IDisposable disposablePool)
+            {
+                disposablePool.Dispose();
+            }
+        }
+        _pools.Clear();
+        OnComponentAdded = null;
+        OnComponentRemoved = null;
     }
 }

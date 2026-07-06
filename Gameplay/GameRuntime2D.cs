@@ -3,6 +3,7 @@
 // All rights reserved.
 // Portions generated or assisted by AI.
 
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -14,7 +15,7 @@ using MonoKit.Spatial;
 
 namespace MonoKit.Gameplay;
 
-public class GameRuntime2D
+public class GameRuntime2D : IDisposable
 {
     private readonly World _world;
     private readonly Camera2D _camera;
@@ -53,5 +54,11 @@ public class GameRuntime2D
             Mouse.GetState().Position.ToVector2(),
             _camera.ViewInvert
         );
+    }
+
+    public void Dispose()
+    {
+        _world.Dispose();
+        GC.SuppressFinalize(this);
     }
 }

@@ -3,6 +3,7 @@
 // All rights reserved.
 // Portions generated or assisted by AI.
 
+using System;
 using System.Collections.Generic;
 using MonoKit.Ecs.Entities;
 using MonoKit.Gameplay;
@@ -10,7 +11,7 @@ using MonoKit.Input;
 
 namespace MonoKit.Ecs.Systems;
 
-public class SystemManager(World world)
+public class SystemManager(World world) : IDisposable
 {
     private readonly List<ISystem> _systems = [];
     private readonly HashSet<ISystem> _addedSystems = [];
@@ -72,5 +73,19 @@ public class SystemManager(World world)
             sb.AppendLine($"[{system.Priority}] {system.GetType().Name}");
 
         return sb.ToString();
+    }
+
+    public void Dispose()
+    {
+        foreach (var system in _systems)
+        {
+            if (system is IDisposable disposableSystem)
+            {
+                disposableSystem.Dispose();
+            }
+        }
+        _systems.Clear();
+        _addedSystems.Clear();
+        _isDirty = false;
     }
 }
