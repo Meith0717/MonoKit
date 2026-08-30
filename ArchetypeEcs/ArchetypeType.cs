@@ -8,13 +8,13 @@ using System.Linq;
 
 namespace MonoKit.ArchetypeEcs;
 
-public readonly struct ArchetypeType : IEquatable<ArchetypeType>
+internal readonly struct ArchetypeType : IEquatable<ArchetypeType>
 {
-    public readonly Type[] ComponentTypes;
+    internal readonly Type[] ComponentTypes;
 
-    public ArchetypeType(params Type[] componentTypes)
+    internal ArchetypeType(params Type[] componentTypes)
     {
-        ComponentTypes = [.. componentTypes.OrderBy(t => t.FullName)];
+        ComponentTypes = [.. componentTypes.OrderBy(t => t.FullName, StringComparer.Ordinal)];
     }
 
     public bool Equals(ArchetypeType other) => ComponentTypes.SequenceEqual(other.ComponentTypes);
@@ -29,7 +29,7 @@ public readonly struct ArchetypeType : IEquatable<ArchetypeType>
         return hash.ToHashCode();
     }
 
-    public bool Contains(Type componentType)
+    internal bool Contains(Type componentType)
     {
         var key = componentType.FullName;
         var left = 0;
@@ -60,9 +60,7 @@ public readonly struct ArchetypeType : IEquatable<ArchetypeType>
         return false;
     }
 
-    public int Count => ComponentTypes.Length;
-
-    public static ArchetypeType Empty => new();
+    internal static ArchetypeType Empty => new();
 
     public static bool operator ==(ArchetypeType left, ArchetypeType right) => left.Equals(right);
 

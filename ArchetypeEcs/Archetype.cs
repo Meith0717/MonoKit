@@ -8,41 +8,36 @@ using System.Collections.Generic;
 
 namespace MonoKit.ArchetypeEcs;
 
-/// <summary>
-/// Stores entities with identical component compositions.
-/// Uses Structure of Arrays (SOA) for maximum cache efficiency.
-/// Column indices are resolved via the global ComponentRecord.
-/// </summary>
-public sealed class Archetype : IDisposable
+internal sealed class Archetype : IDisposable
 {
     private const int InitialCapacity = 16;
 
-    public ArchetypeType Type { get; }
-    public int RowCount { get; private set; }
+    internal ArchetypeType Type { get; }
+    internal int RowCount { get; private set; }
 
-    // Component data storage - Structure of Arrays (SOA)
     private object[] _columns;
     private int[] _columnCapacities;
     private int[] _entityIds;
     private int _entityIdCapacity;
+    private readonly ArchetypeManager _archetypeManager;
+    private readonly Dictionary<Type, int> _typeToColumnIndex;
 
-    // Reference to global ComponentRecord (no local _typeToColumn anymore)
-    private readonly ComponentRecord _componentRecord;
-
-    public Archetype(ArchetypeType type, ComponentRecord componentRecord)
+    internal Archetype(ArchetypeType type, ArchetypeManager archetypeManager)
     {
         Type = type;
-        _componentRecord = componentRecord;
+        _archetypeManager = archetypeManager;
 
         var componentTypes = type.ComponentTypes;
         _columns = new object[componentTypes.Length];
         _columnCapacities = new int[componentTypes.Length];
+        _typeToColumnIndex = new Dictionary<Type, int>(componentTypes.Length);
 
         for (var i = 0; i < componentTypes.Length; i++)
         {
             var componentType = componentTypes[i];
             _columns[i] = Array.CreateInstance(componentType, InitialCapacity);
             _columnCapacities[i] = InitialCapacity;
+            _typeToColumnIndex[componentType] = i;
         }
 
         _entityIds = new int[InitialCapacity];
@@ -51,96 +46,84 @@ public sealed class Archetype : IDisposable
 
     private void EnsureCapacity(int targetRow)
     {
-        if (targetRow < RowCount)
+        if (targetRow < _entityIdCapacity)
             return;
 
-        var newCapacity = Math.Max(_columnCapacities[0] * 2, targetRow + 1);
+        var newCapacity = _entityIdCapacity == 0 ? InitialCapacity : _entityIdCapacity * 2;
+        newCapacity = Math.Max(newCapacity, targetRow + 1);
 
         for (var i = 0; i < _columns.Length; i++)
         {
-            if (_columnCapacities[i] < newCapacity)
-            {
-                var oldArray = (Array)_columns[i];
-                var elementType = oldArray.GetType().GetElementType()!;
-                var newArray = Array.CreateInstance(elementType, newCapacity);
-                Array.Copy(oldArray, newArray, oldArray.Length);
-                _columns[i] = newArray;
-                _columnCapacities[i] = newCapacity;
-            }
+            if (_columnCapacities[i] >= newCapacity)
+                continue;
+
+            var oldArray = (Array)_columns[i];
+            var elementType = oldArray.GetType().GetElementType()!;
+            var newArray = Array.CreateInstance(elementType, newCapacity);
+            Array.Copy(oldArray, newArray, oldArray.Length);
+            _columns[i] = newArray;
+            _columnCapacities[i] = newCapacity;
         }
 
-        if (targetRow >= _entityIdCapacity)
-        {
-            Array.Resize(ref _entityIds, _entityIdCapacity * 2);
-            _entityIdCapacity = _entityIdCapacity * 2;
-        }
+        Array.Resize(ref _entityIds, newCapacity);
+        _entityIdCapacity = newCapacity;
     }
 
-    /// <summary>
-    /// Adds a new row (entity) to this archetype with the given components.
-    /// </summary>
-    public void AddRow(Entity entity, object[] components)
+    internal void AddRow(Entity entity, object[] components)
     {
-        EnsureCapacity(RowCount);
+        if (components.Length != _columns.Length)
+            throw new ArgumentException(
+                $"Expected {_columns.Length} components, got {components.Length}."
+            );
 
-        _entityIds[RowCount] = entity.Id;
-
+        Span<int> columnIndices = stackalloc int[components.Length];
         for (var i = 0; i < components.Length; i++)
         {
-            ((Array)_columns[i]).SetValue(components[i], RowCount);
+            var component =
+                components[i]
+                ?? throw new ArgumentNullException(
+                    nameof(components),
+                    $"Component at index {i} is null."
+                );
+
+            if (!_typeToColumnIndex.TryGetValue(component.GetType(), out columnIndices[i]))
+                throw new ArgumentException(
+                    $"Component of type {component.GetType().Name} does not belong to this archetype."
+                );
         }
 
+        EnsureCapacity(RowCount);
+        _entityIds[RowCount] = entity.Id;
+        for (var i = 0; i < components.Length; i++)
+            ((Array)_columns[columnIndices[i]]).SetValue(components[i], RowCount);
         RowCount++;
     }
 
-    /// <summary>
-    /// Removes a row from this archetype. The last entity moves to fill the gap.
-    /// Returns the entity that was moved (if any).
-    /// </summary>
-    public Entity? RemoveRow(int row)
+    internal Entity? RemoveRow(int row)
     {
-        Entity? movedEntity = null;
-
+        Entity? lastEntity = null;
         if (row < RowCount - 1)
         {
             var lastEntityId = _entityIds[RowCount - 1];
-            movedEntity = new Entity(lastEntityId);
-
+            if (lastEntityId >= 0)
+                lastEntity = new Entity(lastEntityId);
             _entityIds[row] = lastEntityId;
-
-            for (var i = 0; i < _columns.Length; i++)
+            foreach (var t in _columns)
             {
-                var column = (Array)_columns[i];
+                var column = (Array)t;
                 var lastValue = column.GetValue(RowCount - 1);
                 column.SetValue(lastValue, row);
             }
         }
-
         RowCount--;
-        return movedEntity;
+        return lastEntity;
     }
 
-    /// <summary>
-    /// Gets the entity at the specified row.
-    /// </summary>
-    public Entity GetEntityAt(int row) => new Entity(_entityIds[row]);
+    internal Entity GetEntityAt(int row) => new(_entityIds[row]);
 
-    /// <summary>
-    /// Gets the component column array for a component type.
-    /// Uses the global ComponentRecord for O(1) column index lookup.
-    /// </summary>
-    public Array GetColumn(Type componentType)
+    internal bool TryGetColumn(Type componentType, out Array column)
     {
-        var columnIndex = _componentRecord.GetColumnIndex(componentType, Type);
-        return (Array)_columns[columnIndex];
-    }
-
-    /// <summary>
-    /// Tries to get the component column array for a component type.
-    /// </summary>
-    public bool TryGetColumn(Type componentType, out Array column)
-    {
-        if (_componentRecord.TryGetColumnIndex(componentType, Type, out var columnIndex))
+        if (_archetypeManager.TryGetColumnIndex(componentType, Type, out var columnIndex))
         {
             column = (Array)_columns[columnIndex];
             return true;
@@ -149,44 +132,25 @@ public sealed class Archetype : IDisposable
         return false;
     }
 
-    /// <summary>
-    /// Gets a reference to a component in a specific row.
-    /// Uses the global ComponentRecord for column index resolution.
-    /// </summary>
-    public ref T Get<T>(int row) where T : struct
+    internal ref T Get<T>(int row)
+        where T : struct
     {
-        var columnIndex = _componentRecord.GetColumnIndex<T>(Type);
+        var columnIndex = _archetypeManager.GetColumnIndex<T>(Type);
         return ref ((T[])_columns[columnIndex])[row];
     }
 
-    /// <summary>
-    /// Gets all components for a specific row as an object array.
-    /// </summary>
-    public object[] GetRowComponents(int row)
+    internal object[] GetRowComponents(int row)
     {
         var components = new object[Type.ComponentTypes.Length];
         for (var i = 0; i < components.Length; i++)
-        {
             components[i] = ((Array)_columns[i]).GetValue(row)!;
-        }
         return components;
-    }
-
-    /// <summary>
-    /// Gets all entities in this archetype.
-    /// </summary>
-    public IReadOnlyList<Entity> GetEntities()
-    {
-        var entities = new Entity[RowCount];
-        for (var i = 0; i < RowCount; i++)
-        {
-            entities[i] = new Entity(_entityIds[i]);
-        }
-        return entities;
     }
 
     public void Dispose()
     {
+        for (var i = 0; i < _columns.Length; i++)
+            Array.Clear((Array)_columns[i], 0, _columnCapacities[i]);
         _columns = null!;
         _columnCapacities = null!;
         _entityIds = null!;

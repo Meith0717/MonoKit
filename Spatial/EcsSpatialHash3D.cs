@@ -4,7 +4,6 @@
 // Portions generated or assisted by AI.
 
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using Microsoft.Xna.Framework;
 using MonoKit.Ecs.Entities;

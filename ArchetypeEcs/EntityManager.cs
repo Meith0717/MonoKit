@@ -7,21 +7,24 @@ using System.Collections.Generic;
 
 namespace MonoKit.ArchetypeEcs;
 
-public class EntityManager
+internal class EntityManager
 {
     private int _nextId = 0;
     private readonly Stack<int> _freeIds = new();
     private readonly List<bool> _alive = new();
 
-    public int Count { get; private set; }
+    internal int Count { get; private set; }
 
-    public Entity Create()
+    internal Entity Create()
     {
         int id;
         if (_freeIds.Count > 0)
         {
             id = _freeIds.Pop();
-            _alive[id] = true;
+            if (id >= _alive.Count)
+                _alive.Add(true);
+            else
+                _alive[id] = true;
         }
         else
         {
@@ -32,7 +35,7 @@ public class EntityManager
         return new Entity(id);
     }
 
-    public bool Destroy(Entity entity)
+    internal bool Destroy(Entity entity)
     {
         if (entity.Id < 0 || entity.Id >= _alive.Count)
             return false;
@@ -46,7 +49,7 @@ public class EntityManager
         return true;
     }
 
-    public bool IsAlive(Entity entity)
+    internal bool IsAlive(Entity entity)
     {
         return entity.Id >= 0 && entity.Id < _alive.Count && _alive[entity.Id];
     }
