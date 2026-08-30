@@ -13,13 +13,14 @@ public class ComponentPool<T> : IComponentPool, IDisposable
 {
     public int Count { get; private set; } = 0;
 
-    public ReadOnlySpan<T> AsSpan() => _dense.AsSpan(0, Count);
+    public ReadOnlySpan<T> ComponentsAsSpan() => _denseComponents.AsSpan(0, Count);
 
     public ReadOnlySpan<int> EntitiesAsSpan() => _denseEntities.AsSpan(0, Count);
 
-    private int[] _sparse = new int[128]; // The index = entityId contains the index of the component
-    private T[] _dense = new T[128]; // Contains the Components
-    private int[] _denseEntities = new int[128];
+    private const int InitialSize = 128;
+    private int[] _sparse = new int[InitialSize]; // Index = entityId - contains the index of the component
+    private T[] _denseComponents = new T[InitialSize]; // Dense list containing the Components
+    private int[] _denseEntities = new int[InitialSize];
 
     internal ComponentPool() => Array.Fill(_sparse, -1);
 
@@ -27,19 +28,18 @@ public class ComponentPool<T> : IComponentPool, IDisposable
     {
         EnsureSparse(entityId);
 
-        // Update the component
         if (_sparse[entityId] != -1)
         {
             var componentIndex = _sparse[entityId];
-            _dense[componentIndex] = component;
+            _denseComponents[componentIndex] = component;
             return;
         }
 
         EnsureDense();
-        // Add new component
+
         var denseIndex = Count++;
         _sparse[entityId] = denseIndex;
-        _dense[denseIndex] = component;
+        _denseComponents[denseIndex] = component;
         _denseEntities[denseIndex] = entityId;
     }
 
@@ -54,7 +54,7 @@ public class ComponentPool<T> : IComponentPool, IDisposable
 
         var lastIndex = Count - 1;
 
-        _dense[denseIndex] = _dense[lastIndex];
+        _denseComponents[denseIndex] = _denseComponents[lastIndex];
         var movedEntity = _denseEntities[lastIndex];
         _denseEntities[denseIndex] = movedEntity;
 
@@ -69,22 +69,41 @@ public class ComponentPool<T> : IComponentPool, IDisposable
         return entityId < _sparse.Length && _sparse[entityId] != -1;
     }
 
-    public ref T Get(int entityId)
+    public int GetDenseIndex(int entityId)
     {
         if (!Has(entityId))
             throw new ArgumentException($"Entity {entityId} has no component {typeof(T).Name}.");
 
-        var componentIndex = _sparse[entityId];
-        ref var component = ref _dense[componentIndex];
-        return ref component;
+        return _sparse[entityId];
     }
 
-    public int GetEntityAt(int index) => _denseEntities[index];
+    public ref T GetByDenseComponentIndex(int denseIndex)
+    {
+        if (denseIndex < 0 || denseIndex >= _denseComponents.Length)
+            throw new ArgumentOutOfRangeException(nameof(denseIndex));
+
+        return ref _denseComponents[denseIndex];
+    }
+
+    public ref T Get(int entityId)
+    {
+        var componentIndex = GetDenseIndex(entityId);
+        return ref GetByDenseComponentIndex(componentIndex);
+    }
 
     public IEnumerable<(int entityId, int denseIndex, int hash)> GetMappings()
     {
         for (var i = 0; i < Count; i++)
-            yield return (_denseEntities[i], i, _dense[i].GetHashCode());
+            yield return (_denseEntities[i], i, _denseComponents[i].GetHashCode());
+    }
+
+    public void Dispose()
+    {
+        Array.Fill(_sparse, -1);
+        Array.Clear(_denseComponents, 0, _denseComponents.Length);
+        Array.Clear(_denseEntities, 0, _denseEntities.Length);
+        Count = 0;
+        GC.SuppressFinalize(this);
     }
 
     private void EnsureSparse(int entityId)
@@ -103,19 +122,11 @@ public class ComponentPool<T> : IComponentPool, IDisposable
 
     private void EnsureDense()
     {
-        if (Count < _dense.Length)
+        if (Count < _denseComponents.Length)
             return;
 
-        var newSize = _dense.Length * 2;
-        Array.Resize(ref _dense, newSize);
+        var newSize = _denseComponents.Length * 2;
+        Array.Resize(ref _denseComponents, newSize);
         Array.Resize(ref _denseEntities, newSize);
-    }
-
-    public void Dispose()
-    {
-        Array.Fill(_sparse, -1);
-        Array.Clear(_dense, 0, _dense.Length);
-        Array.Clear(_denseEntities, 0, _denseEntities.Length);
-        Count = 0;
     }
 }

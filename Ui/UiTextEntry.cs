@@ -84,7 +84,7 @@ public sealed class UiTextEntry : UiElement
 
         // Handle focus on click
         var wasMousePressed = mouseState.LeftButton == ButtonState.Pressed;
-        
+
         if (Bounds.Contains(mousePos) && wasMousePressed)
         {
             _isFocused = true;
@@ -128,7 +128,9 @@ public sealed class UiTextEntry : UiElement
             // Check for Left arrow
             if (IsKeyPressed(Keys.Left, keyboardState, _previousKeyboardState))
             {
-                bool shiftPressed = keyboardState.IsKeyDown(Keys.LeftShift) || keyboardState.IsKeyDown(Keys.RightShift);
+                var shiftPressed =
+                    keyboardState.IsKeyDown(Keys.LeftShift)
+                    || keyboardState.IsKeyDown(Keys.RightShift);
                 if (shiftPressed)
                 {
                     if (_selectionStart == -1)
@@ -147,7 +149,9 @@ public sealed class UiTextEntry : UiElement
             // Check for Right arrow
             if (IsKeyPressed(Keys.Right, keyboardState, _previousKeyboardState))
             {
-                bool shiftPressed = keyboardState.IsKeyDown(Keys.LeftShift) || keyboardState.IsKeyDown(Keys.RightShift);
+                var shiftPressed =
+                    keyboardState.IsKeyDown(Keys.LeftShift)
+                    || keyboardState.IsKeyDown(Keys.RightShift);
                 if (shiftPressed)
                 {
                     if (_selectionStart == -1)
@@ -166,7 +170,9 @@ public sealed class UiTextEntry : UiElement
             // Check for Home
             if (IsKeyPressed(Keys.Home, keyboardState, _previousKeyboardState))
             {
-                bool shiftPressed = keyboardState.IsKeyDown(Keys.LeftShift) || keyboardState.IsKeyDown(Keys.RightShift);
+                var shiftPressed =
+                    keyboardState.IsKeyDown(Keys.LeftShift)
+                    || keyboardState.IsKeyDown(Keys.RightShift);
                 if (shiftPressed)
                 {
                     if (_selectionStart == -1)
@@ -185,7 +191,9 @@ public sealed class UiTextEntry : UiElement
             // Check for End
             if (IsKeyPressed(Keys.End, keyboardState, _previousKeyboardState))
             {
-                bool shiftPressed = keyboardState.IsKeyDown(Keys.LeftShift) || keyboardState.IsKeyDown(Keys.RightShift);
+                var shiftPressed =
+                    keyboardState.IsKeyDown(Keys.LeftShift)
+                    || keyboardState.IsKeyDown(Keys.RightShift);
                 if (shiftPressed)
                 {
                     if (_selectionStart == -1)
@@ -296,27 +304,40 @@ public sealed class UiTextEntry : UiElement
     {
         return key switch
         {
-            Keys.LeftShift or Keys.RightShift or
-            Keys.LeftControl or Keys.RightControl or
-            Keys.LeftAlt or Keys.RightAlt or
-            Keys.LeftWindows or Keys.RightWindows or
-            Keys.CapsLock or Keys.NumLock or
-            Keys.PrintScreen or
-            Keys.Left or Keys.Right or Keys.Up or Keys.Down or
-            Keys.Home or Keys.End or
-            Keys.PageUp or Keys.PageDown or
-            Keys.Back or Keys.Delete or
-            Keys.Tab or Keys.Enter or
-            Keys.Escape => true,
+            Keys.LeftShift
+            or Keys.RightShift
+            or Keys.LeftControl
+            or Keys.RightControl
+            or Keys.LeftAlt
+            or Keys.RightAlt
+            or Keys.LeftWindows
+            or Keys.RightWindows
+            or Keys.CapsLock
+            or Keys.NumLock
+            or Keys.PrintScreen
+            or Keys.Left
+            or Keys.Right
+            or Keys.Up
+            or Keys.Down
+            or Keys.Home
+            or Keys.End
+            or Keys.PageUp
+            or Keys.PageDown
+            or Keys.Back
+            or Keys.Delete
+            or Keys.Tab
+            or Keys.Enter
+            or Keys.Escape => true,
             _ => false,
         };
     }
 
     private char GetCharFromKey(Keys key, KeyboardState keyboardState)
     {
-        bool shiftPressed = keyboardState.IsKeyDown(Keys.LeftShift) || keyboardState.IsKeyDown(Keys.RightShift);
-        bool capsLock = keyboardState.CapsLock;
-        bool effectiveShift = shiftPressed ^ capsLock;
+        var shiftPressed =
+            keyboardState.IsKeyDown(Keys.LeftShift) || keyboardState.IsKeyDown(Keys.RightShift);
+        var capsLock = keyboardState.CapsLock;
+        var effectiveShift = shiftPressed ^ capsLock;
 
         return key switch
         {
@@ -420,12 +441,19 @@ public sealed class UiTextEntry : UiElement
             var length = _selectionLength;
             var selectionText = displayText.Substring(start, length);
             var selectionWidth = _font.MeasureString(selectionText).X * UiScale * Scale;
-            var selectionX = position.X + _font.MeasureString(displayText.Substring(0, start)).X * UiScale * Scale;
+            var selectionX =
+                position.X
+                + _font.MeasureString(displayText.Substring(0, start)).X * UiScale * Scale;
             var selectionY = position.Y;
             var selectionHeight = _font.MeasureString("A").Y * UiScale * Scale;
 
             spriteBatch.FillRectangle(
-                new Rectangle((int)selectionX, (int)selectionY, (int)selectionWidth, (int)selectionHeight),
+                new Rectangle(
+                    (int)selectionX,
+                    (int)selectionY,
+                    (int)selectionWidth,
+                    (int)selectionHeight
+                ),
                 new Color(100, 100, 200, 150)
             );
         }
@@ -433,7 +461,11 @@ public sealed class UiTextEntry : UiElement
         // Draw cursor if focused
         if (_isFocused && _showCursor)
         {
-            var cursorX = position.X + _font.MeasureString(displayText.Substring(0, _cursorPosition)).X * UiScale * Scale;
+            var cursorX =
+                position.X
+                + _font.MeasureString(displayText.Substring(0, _cursorPosition)).X
+                    * UiScale
+                    * Scale;
             var cursorY = position.Y;
             var cursorHeight = _font.MeasureString("A").Y * UiScale * Scale;
 
@@ -465,7 +497,7 @@ public sealed class UiTextEntry : UiElement
             return 0;
 
         var displayText = IsPassword ? new string(PasswordChar, _text.Length) : _text;
-        for (int i = 0; i <= displayText.Length; i++)
+        for (var i = 0; i <= displayText.Length; i++)
         {
             var substring = displayText.Substring(0, i);
             var width = _font.MeasureString(substring).X * UiScale * Scale;

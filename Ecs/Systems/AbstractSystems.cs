@@ -50,7 +50,7 @@ public abstract class System<T1>(int priority) : ISystem
             span = _tracker.GetEntitiesWith<T1>(_buffer);
         }
 
-        for (int i = 0; i < span.Length; i++)
+        for (var i = 0; i < span.Length; i++)
         {
             var e = span[i];
             ProcessEntity(e, ref Pool1.Get(e.Id), elapsedMs, world, runtimeServices, inputHandler);
@@ -106,7 +106,7 @@ public abstract class System<T1, T2>(int priority) : ISystem
             span = _tracker.GetEntitiesWith<T1, T2>(_buffer);
         }
 
-        for (int i = 0; i < span.Length; i++)
+        for (var i = 0; i < span.Length; i++)
         {
             var e = span[i];
             ProcessEntity(
@@ -174,7 +174,7 @@ public abstract class System<T1, T2, T3>(int priority) : ISystem
             span = _tracker.GetEntitiesWith<T1, T2, T3>(_buffer);
         }
 
-        for (int i = 0; i < span.Length; i++)
+        for (var i = 0; i < span.Length; i++)
         {
             var e = span[i];
             ProcessEntity(
@@ -247,7 +247,7 @@ public abstract class System<T1, T2, T3, T4>(int priority) : ISystem
             span = _tracker.GetEntitiesWith<T1, T2, T3, T4>(_buffer);
         }
 
-        for (int i = 0; i < span.Length; i++)
+        for (var i = 0; i < span.Length; i++)
         {
             var e = span[i];
             ProcessEntity(

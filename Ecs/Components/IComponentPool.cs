@@ -12,6 +12,5 @@ public interface IComponentPool
     int Count { get; }
     bool Has(int entityId);
     void Remove(int entityId);
-    int GetEntityAt(int index);
     IEnumerable<(int entityId, int denseIndex, int hash)> GetMappings();
 }

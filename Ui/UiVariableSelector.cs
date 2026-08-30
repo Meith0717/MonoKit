@@ -116,7 +116,7 @@ public sealed class UiVariableSelector<T> : UiElement
         if (_selectedIndex >= _items.Count)
             _selectedIndex = 0;
         _text.Text = _items[_selectedIndex].ToString();
-        OnClickAction.Invoke(_items[_selectedIndex]);
+        OnClickAction?.Invoke(_items[_selectedIndex]);
     }
 
     private void DecreaseIndex()
@@ -127,7 +127,7 @@ public sealed class UiVariableSelector<T> : UiElement
         if (_selectedIndex < 0)
             _selectedIndex = _items.Count - 1;
         _text.Text = _items[_selectedIndex].ToString();
-        OnClickAction.Invoke(_items[_selectedIndex]);
+        OnClickAction?.Invoke(_items[_selectedIndex]);
     }
 
     private int GetIndex(T value)

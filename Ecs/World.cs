@@ -36,6 +36,7 @@ public sealed class World : IDisposable
         WorldEntity = EntityManager.Create();
         TypeTracker.TrackEntity(WorldEntity);
         Components.Add(WorldEntity, new WorldTag());
+
         Systems = new SystemManager(this);
     }
 
@@ -45,7 +46,7 @@ public sealed class World : IDisposable
         InputHandler inputHandler
     )
     {
-        Systems.Update(elapsedMs, this, runtimeServices, inputHandler);
+        Systems.Update(elapsedMs, runtimeServices, inputHandler);
     }
 
     public Entity CreateEntity()
@@ -80,7 +81,7 @@ public sealed class World : IDisposable
         Components.Dispose();
         TypeTracker.Dispose();
         EntityManager.Dispose();
-        
+
         // Clean up the world entity reference
         WorldEntity = default;
     }

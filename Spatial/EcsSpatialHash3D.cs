@@ -57,26 +57,13 @@ public sealed class EcsSpatialHash3D(float cellSize, int capacity = 1024)
 
     public void Add(Entity entity, Vector3 position, Vector3 size)
     {
-        var startX = ToCell(position.X);
-        var startY = ToCell(position.Y);
-        var startZ = ToCell(position.Z);
-
-        int endX,
-            endY,
-            endZ;
-
-        if (size == Vector3.Zero)
-        {
-            endX = startX + 1;
-            endY = startY + 1;
-            endZ = startZ + 1;
-        }
-        else
-        {
-            endX = (int)float.Ceiling((position.X + size.X) * _inverseCellSize);
-            endY = (int)float.Ceiling((position.Y + size.Y) * _inverseCellSize);
-            endZ = (int)float.Ceiling((position.Z + size.Z) * _inverseCellSize);
-        }
+        var halfSize = size * 0.5f;
+        var startX = ToCell(position.X - halfSize.X);
+        var startY = ToCell(position.Y - halfSize.Y);
+        var startZ = ToCell(position.Z - halfSize.Z);
+        var endX = size == Vector3.Zero ? startX + 1 : ToCell(position.X + halfSize.X) + 1;
+        var endY = size == Vector3.Zero ? startY + 1 : ToCell(position.Y + halfSize.Y) + 1;
+        var endZ = size == Vector3.Zero ? startZ + 1 : ToCell(position.Z + halfSize.Z) + 1;
 
         for (var x = startX; x < endX; x++)
         for (var y = startY; y < endY; y++)

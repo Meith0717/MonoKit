@@ -33,7 +33,6 @@ public class SystemManager(World world) : IDisposable
 
     public void Update(
         double elapsedMs,
-        World world,
         RuntimeContainer runtimeServices,
         InputHandler inputHandler
     )
@@ -78,12 +77,9 @@ public class SystemManager(World world) : IDisposable
     public void Dispose()
     {
         foreach (var system in _systems)
-        {
             if (system is IDisposable disposableSystem)
-            {
                 disposableSystem.Dispose();
-            }
-        }
+
         _systems.Clear();
         _addedSystems.Clear();
         _isDirty = false;
