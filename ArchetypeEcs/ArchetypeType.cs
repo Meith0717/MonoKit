@@ -10,6 +10,7 @@ namespace MonoKit.ArchetypeEcs;
 
 internal readonly struct ArchetypeType : IEquatable<ArchetypeType>
 {
+    internal static ArchetypeType Empty = new();
     internal readonly Type[] ComponentTypes;
 
     internal ArchetypeType(params Type[] componentTypes)
@@ -28,8 +29,6 @@ internal readonly struct ArchetypeType : IEquatable<ArchetypeType>
             hash.Add(type);
         return hash.ToHashCode();
     }
-
-    internal static ArchetypeType Empty => new();
 
     public static bool operator ==(ArchetypeType left, ArchetypeType right) => left.Equals(right);
 
