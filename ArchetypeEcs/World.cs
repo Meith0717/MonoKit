@@ -6,6 +6,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Xna.Framework;
+using MonoKit.ArchetypeEcs.Systems;
+using MonoKit.Gameplay;
+using MonoKit.Input;
 
 namespace MonoKit.ArchetypeEcs;
 
@@ -30,9 +34,24 @@ public sealed class World : IDisposable
     private readonly EntityManager _entityManager = new();
     private readonly EntityRecords _entityRecords = new();
     private readonly ArchetypeManager _archetypeManager = new();
+    internal readonly SystemManager SystemManager;
 
     public int EntityCount => _entityManager.Count;
     public int ArchetypeCount => _archetypeManager.ArchetypeCount;
+
+    internal World()
+    {
+        SystemManager = new SystemManager(this);
+    }
+
+    public void Update(
+        double elapsedMs,
+        RuntimeContainer runtimeContainer,
+        InputHandler inputHandler
+    )
+    {
+        SystemManager.Update(elapsedMs, runtimeContainer, inputHandler);
+    }
 
     public Entity CreateEntity()
     {
@@ -70,19 +89,19 @@ public sealed class World : IDisposable
         return entity;
     }
 
-    public Entity CreateEntity<T1>(T1 c1)
+    public Entity CreateEntityWith<T1>(T1 c1)
         where T1 : struct => CreateEntityWithComponents(c1);
 
-    public Entity CreateEntity<T1, T2>(T1 c1, T2 c2)
+    public Entity CreateEntityWith<T1, T2>(T1 c1, T2 c2)
         where T1 : struct
         where T2 : struct => CreateEntityWithComponents(c1, c2);
 
-    public Entity CreateEntity<T1, T2, T3>(T1 c1, T2 c2, T3 c3)
+    public Entity CreateEntityWith<T1, T2, T3>(T1 c1, T2 c2, T3 c3)
         where T1 : struct
         where T2 : struct
         where T3 : struct => CreateEntityWithComponents(c1, c2, c3);
 
-    public Entity CreateEntity<T1, T2, T3, T4>(T1 c1, T2 c2, T3 c3, T4 c4)
+    public Entity CreateEntityWith<T1, T2, T3, T4>(T1 c1, T2 c2, T3 c3, T4 c4)
         where T1 : struct
         where T2 : struct
         where T3 : struct
@@ -209,14 +228,9 @@ public sealed class World : IDisposable
     public bool HasComponent<T>(Entity entity)
         where T : struct
     {
-        if (!_entityRecords.TryGetLocation(entity, out var archetype, out _))
-            return false;
-        return archetype.Contains(typeof(T));
+        return _entityRecords.TryGetLocation(entity, out var archetype, out _)
+            && archetype.Contains(typeof(T));
     }
-
-    // ========================================================================
-    // CACHE-EFFICIENT ITERATION
-    // ========================================================================
 
     public void ForEach<T1>(RefAction<T1> action)
         where T1 : struct
@@ -339,20 +353,12 @@ public sealed class World : IDisposable
         }
     }
 
-    // ========================================================================
-    // DISPOSAL
-    // ========================================================================
-
     public void Dispose()
     {
         _archetypeManager.Dispose();
         _entityRecords.Dispose();
         _entityManager.Dispose();
     }
-
-    // ========================================================================
-    // DEBUG
-    // ========================================================================
 
     public override string ToString()
     {
