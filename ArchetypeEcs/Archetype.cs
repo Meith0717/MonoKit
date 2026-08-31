@@ -16,9 +16,8 @@ internal sealed class Archetype : IDisposable
     internal int RowCount { get; private set; }
 
     private object[] _columns;
-    private int[] _columnCapacities;
     private int[] _entityIds;
-    private int _entityIdCapacity;
+    private int _capacity;
     private readonly ArchetypeManager _archetypeManager;
     private readonly Dictionary<Type, int> _typeToColumnIndex;
 
@@ -29,44 +28,36 @@ internal sealed class Archetype : IDisposable
 
         var componentTypes = type.ComponentTypes;
         _columns = new object[componentTypes.Length];
-        _columnCapacities = new int[componentTypes.Length];
+        _entityIds = new int[InitialCapacity];
+        _capacity = InitialCapacity;
         _typeToColumnIndex = new Dictionary<Type, int>(componentTypes.Length);
 
         for (var i = 0; i < componentTypes.Length; i++)
         {
             var componentType = componentTypes[i];
             _columns[i] = Array.CreateInstance(componentType, InitialCapacity);
-            _columnCapacities[i] = InitialCapacity;
             _typeToColumnIndex[componentType] = i;
         }
-
-        _entityIds = new int[InitialCapacity];
-        _entityIdCapacity = InitialCapacity;
     }
 
     private void EnsureCapacity(int targetRow)
     {
-        if (targetRow < _entityIdCapacity)
+        if (targetRow < _capacity)
             return;
 
-        var newCapacity = _entityIdCapacity == 0 ? InitialCapacity : _entityIdCapacity * 2;
-        newCapacity = Math.Max(newCapacity, targetRow + 1);
+        var newCapacity = int.Max(_capacity * 2, targetRow + 1);
 
         for (var i = 0; i < _columns.Length; i++)
         {
-            if (_columnCapacities[i] >= newCapacity)
-                continue;
-
             var oldArray = (Array)_columns[i];
             var elementType = oldArray.GetType().GetElementType()!;
             var newArray = Array.CreateInstance(elementType, newCapacity);
             Array.Copy(oldArray, newArray, oldArray.Length);
             _columns[i] = newArray;
-            _columnCapacities[i] = newCapacity;
         }
 
         Array.Resize(ref _entityIds, newCapacity);
-        _entityIdCapacity = newCapacity;
+        _capacity = newCapacity;
     }
 
     internal void AddRow(Entity entity, object[] components)
@@ -149,12 +140,11 @@ internal sealed class Archetype : IDisposable
 
     public void Dispose()
     {
-        for (var i = 0; i < _columns.Length; i++)
-            Array.Clear((Array)_columns[i], 0, _columnCapacities[i]);
+        foreach (var t in _columns)
+            Array.Clear((Array)t, 0, _capacity);
         _columns = null!;
-        _columnCapacities = null!;
         _entityIds = null!;
         RowCount = 0;
-        _entityIdCapacity = 0;
+        _capacity = 0;
     }
 }
