@@ -29,37 +29,6 @@ internal readonly struct ArchetypeType : IEquatable<ArchetypeType>
         return hash.ToHashCode();
     }
 
-    internal bool Contains(Type componentType)
-    {
-        var key = componentType.FullName;
-        var left = 0;
-        var right = ComponentTypes.Length - 1;
-
-        while (left <= right)
-        {
-            var mid = left + (right - left) / 2;
-            var comparison = string.Compare(
-                ComponentTypes[mid].FullName,
-                key,
-                StringComparison.Ordinal
-            );
-
-            switch (comparison)
-            {
-                case 0:
-                    return true;
-                case < 0:
-                    left = mid + 1;
-                    break;
-                default:
-                    right = mid - 1;
-                    break;
-            }
-        }
-
-        return false;
-    }
-
     internal static ArchetypeType Empty => new();
 
     public static bool operator ==(ArchetypeType left, ArchetypeType right) => left.Equals(right);

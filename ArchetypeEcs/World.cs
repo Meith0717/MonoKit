@@ -113,7 +113,7 @@ public sealed class World : IDisposable
         var oldArchetypeType = oldArchetype.Type;
         var componentType = typeof(T);
 
-        if (oldArchetypeType.Contains(componentType))
+        if (oldArchetype.Contains(componentType))
         {
             oldArchetype.Get<T>(oldRow) = component;
             return;
@@ -160,12 +160,12 @@ public sealed class World : IDisposable
         var oldType = oldArchetype.Type;
         var componentType = typeof(T);
 
-        if (!oldType.Contains(componentType))
+        if (!oldArchetype.Contains(componentType))
             throw new InvalidOperationException($"Entity does not have component {typeof(T).Name}");
 
         // Create new archetype type without the component
         var newComponentTypes = oldType.ComponentTypes.Where(t => t != componentType).ToArray();
-        Archetype newArchetype =
+        var newArchetype =
             newComponentTypes.Length == 0
                 ? _archetypeManager.EmptyArchetype
                 : _archetypeManager.GetOrCreateArchetype(new ArchetypeType(newComponentTypes));
@@ -211,7 +211,7 @@ public sealed class World : IDisposable
     {
         if (!_entityRecords.TryGetLocation(entity, out var archetype, out _))
             return false;
-        return archetype.Type.Contains(typeof(T));
+        return archetype.Contains(typeof(T));
     }
 
     // ========================================================================
@@ -251,7 +251,7 @@ public sealed class World : IDisposable
 
         foreach (var archetype in archetypesCollection)
         {
-            if (!archetype.Type.Contains(type2))
+            if (!archetype.Contains(type2))
                 continue;
 
             if (
@@ -284,7 +284,7 @@ public sealed class World : IDisposable
 
         foreach (var archetype in archetypesCollection)
         {
-            if (!archetype.Type.Contains(type2) || !archetype.Type.Contains(type3))
+            if (!archetype.Contains(type2) || !archetype.Contains(type3))
                 continue;
             if (
                 !archetype.TryGetColumn(type1, out var column1)
@@ -320,9 +320,9 @@ public sealed class World : IDisposable
         foreach (var archetype in archetypesCollection)
         {
             if (
-                !archetype.Type.Contains(type2)
-                || !archetype.Type.Contains(type3)
-                || !archetype.Type.Contains(type4)
+                !archetype.Contains(type2)
+                || !archetype.Contains(type3)
+                || !archetype.Contains(type4)
             )
                 continue;
             if (

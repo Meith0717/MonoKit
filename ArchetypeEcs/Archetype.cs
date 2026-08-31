@@ -11,20 +11,17 @@ namespace MonoKit.ArchetypeEcs;
 internal sealed class Archetype : IDisposable
 {
     private const int InitialCapacity = 16;
+    private int _capacity;
+    private object[] _columns;
+    private int[] _entityIds;
+    private readonly Dictionary<Type, int> _typeToColumnIndex;
 
     internal ArchetypeType Type { get; }
     internal int RowCount { get; private set; }
 
-    private object[] _columns;
-    private int[] _entityIds;
-    private int _capacity;
-    private readonly ArchetypeManager _archetypeManager;
-    private readonly Dictionary<Type, int> _typeToColumnIndex;
-
-    internal Archetype(ArchetypeType type, ArchetypeManager archetypeManager)
+    internal Archetype(ArchetypeType type)
     {
         Type = type;
-        _archetypeManager = archetypeManager;
 
         var componentTypes = type.ComponentTypes;
         _columns = new object[componentTypes.Length];
@@ -67,7 +64,9 @@ internal sealed class Archetype : IDisposable
                 $"Expected {_columns.Length} components, got {components.Length}."
             );
 
-        Span<int> columnIndices = stackalloc int[components.Length];
+        EnsureCapacity(RowCount);
+        _entityIds[RowCount] = entity.Id;
+
         for (var i = 0; i < components.Length; i++)
         {
             var component =
@@ -76,17 +75,12 @@ internal sealed class Archetype : IDisposable
                     nameof(components),
                     $"Component at index {i} is null."
                 );
-
-            if (!_typeToColumnIndex.TryGetValue(component.GetType(), out columnIndices[i]))
+            if (!_typeToColumnIndex.TryGetValue(component.GetType(), out var columnIndex))
                 throw new ArgumentException(
                     $"Component of type {component.GetType().Name} does not belong to this archetype."
                 );
+            ((Array)_columns[columnIndex]).SetValue(components[i], RowCount);
         }
-
-        EnsureCapacity(RowCount);
-        _entityIds[RowCount] = entity.Id;
-        for (var i = 0; i < components.Length; i++)
-            ((Array)_columns[columnIndices[i]]).SetValue(components[i], RowCount);
         RowCount++;
     }
 
@@ -114,7 +108,7 @@ internal sealed class Archetype : IDisposable
 
     internal bool TryGetColumn(Type componentType, out Array column)
     {
-        if (_archetypeManager.TryGetColumnIndex(componentType, Type, out var columnIndex))
+        if (_typeToColumnIndex.TryGetValue(componentType, out var columnIndex))
         {
             column = (Array)_columns[columnIndex];
             return true;
@@ -126,8 +120,17 @@ internal sealed class Archetype : IDisposable
     internal ref T Get<T>(int row)
         where T : struct
     {
-        var columnIndex = _archetypeManager.GetColumnIndex<T>(Type);
+        var type = typeof(T);
+        if (!_typeToColumnIndex.TryGetValue(type, out var columnIndex))
+            throw new InvalidOperationException(
+                $"Component {type.Name} not found in this archetype."
+            );
         return ref ((T[])_columns[columnIndex])[row];
+    }
+
+    internal bool Contains(Type componentType)
+    {
+        return _typeToColumnIndex.ContainsKey(componentType);
     }
 
     internal object[] GetRowComponents(int row)
