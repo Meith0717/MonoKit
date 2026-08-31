@@ -251,9 +251,6 @@ public sealed class World : IDisposable
 
         foreach (var archetype in archetypesCollection)
         {
-            if (!archetype.Contains(type2))
-                continue;
-
             if (
                 !archetype.TryGetColumn(type1, out var column1)
                 || !archetype.TryGetColumn(type2, out var column2)
@@ -284,8 +281,6 @@ public sealed class World : IDisposable
 
         foreach (var archetype in archetypesCollection)
         {
-            if (!archetype.Contains(type2) || !archetype.Contains(type3))
-                continue;
             if (
                 !archetype.TryGetColumn(type1, out var column1)
                 || !archetype.TryGetColumn(type2, out var column2)
@@ -319,12 +314,6 @@ public sealed class World : IDisposable
 
         foreach (var archetype in archetypesCollection)
         {
-            if (
-                !archetype.Contains(type2)
-                || !archetype.Contains(type3)
-                || !archetype.Contains(type4)
-            )
-                continue;
             if (
                 !archetype.TryGetColumn(type1, out var column1)
                 || !archetype.TryGetColumn(type2, out var column2)
