@@ -15,7 +15,6 @@ namespace MonoKit.Content;
 
 public sealed class SoundManager(int maxInstances)
 {
-    private readonly int _maxInstances = maxInstances;
     private readonly Dictionary<string, SoundEffectInstance[]> _soundEffectInstances = new();
     private float _volume;
 
@@ -46,7 +45,7 @@ public sealed class SoundManager(int maxInstances)
             var contentPath = Path.Combine(relativePath, soundId);
             var sound = contentManager.Load<SoundEffect>(contentPath);
             var soundInstances = Enumerable
-                .Range(0, _maxInstances)
+                .Range(0, maxInstances)
                 .Select(_ => sound.CreateInstance())
                 .ToArray();
             _soundEffectInstances[soundId] = soundInstances;
