@@ -3,15 +3,17 @@
 // All rights reserved.
 // Portions generated or assisted by AI.
 
+using Microsoft.Xna.Framework.Graphics;
+
 namespace MonoKit.Ui;
 
 public sealed class UiCheckBox : UiButton.Sprite
 {
-    private readonly string _falseButton;
-    private readonly string _trueButton;
+    private readonly Texture2D _falseButton;
+    private readonly Texture2D _trueButton;
     private bool _state;
 
-    public UiCheckBox(string trueButton, string falseButton)
+    public UiCheckBox(Texture2D trueButton, Texture2D falseButton)
         : base(trueButton)
     {
         OnClickAction += () => State = !State;
@@ -22,6 +24,6 @@ public sealed class UiCheckBox : UiButton.Sprite
     public bool State
     {
         get => _state;
-        set => Texture = (_state = value) ? _trueButton : _falseButton;
+        set => Texture2D = _state == value ? _trueButton : _falseButton;
     }
 }

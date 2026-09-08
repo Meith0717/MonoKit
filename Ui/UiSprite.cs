@@ -10,53 +10,30 @@ using MonoKit.Input;
 
 namespace MonoKit.Ui;
 
-public class UiSprite : UiElement
+public class UiSprite(Texture2D texture2D, float scale = 1, Color color = default) : UiElement
 {
-    private Texture2D _texture;
-    public Color Color;
-    public float Scale;
+    public Color Color = color;
+    public float Scale = scale;
 
-    public UiSprite(string texture, float scale = 1, Color color = default)
-    {
-        _texture = ContentProvider.Container<Texture2D>().Get(texture);
-        Color = color;
-        Scale = scale;
-    }
-
-    public UiSprite(Texture2D texture, float scale = 1, Color color = default)
-    {
-        _texture = texture;
-        Color = color;
-        Scale = scale;
-    }
-
-    protected string Texture
-    {
-        set => _texture = ContentProvider.Container<Texture2D>().Get(value);
-    }
-
-    public Texture2D SpriteTexture
-    {
-        set => _texture = value;
-    }
+    protected Texture2D Texture2D { get; set; } = texture2D;
 
     protected override void Updater(InputHandler inputHandler)
     {
-        if (_texture == null)
+        if (Texture2D == null)
         {
             Width = 1;
             Height = 1;
             return;
         }
 
-        Width = (int)float.Floor(_texture.Width * Scale);
-        Height = (int)float.Floor(_texture.Height * Scale);
+        Width = (int)float.Floor(Texture2D.Width * Scale);
+        Height = (int)float.Floor(Texture2D.Height * Scale);
     }
 
     protected override void Drawer(SpriteBatch spriteBatch)
     {
-        if (_texture == null)
+        if (Texture2D == null)
             return;
-        spriteBatch.Draw(_texture, Bounds, Color);
+        spriteBatch.Draw(Texture2D, Bounds, Color);
     }
 }

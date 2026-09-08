@@ -67,9 +67,9 @@ public class UiFrame : UiElement
         _children.Add(child);
     }
 
-    public UiFrame AttachTexture(string texture, float scale = 1)
+    public UiFrame AttachTexture(Texture2D texture, float scale = 1)
     {
-        _texture = ContentProvider.Container<Texture2D>().Get(texture);
+        _texture = texture;
         _textureScale = scale;
         return this;
     }

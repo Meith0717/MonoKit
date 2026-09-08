@@ -11,9 +11,8 @@ using MonoKit.Input;
 
 namespace MonoKit.Ui;
 
-public sealed class UiText(string spriteFont, string text = default) : UiElement
+public sealed class UiText(SpriteFont spriteFont, string text = null) : UiElement
 {
-    private readonly SpriteFont _font = ContentProvider.Container<SpriteFont>().Get(spriteFont);
     private float _scale = 1;
     private string _text = text;
 
@@ -40,7 +39,7 @@ public sealed class UiText(string spriteFont, string text = default) : UiElement
     public Color Color { get; set; } = Color.Black;
     public Func<string> TextProvider { get; set; }
 
-    public override void ApplyScale(Rectangle root, float uiScale = 1)
+    public override void ApplyScale(Rectangle root, float uiScale)
     {
         UpdateSize();
         base.ApplyScale(root, uiScale);
@@ -51,7 +50,7 @@ public sealed class UiText(string spriteFont, string text = default) : UiElement
         var position = Bounds.Location.ToVector2();
 
         spriteBatch.DrawString(
-            _font,
+            spriteFont,
             _text,
             position,
             Color,
@@ -71,7 +70,7 @@ public sealed class UiText(string spriteFont, string text = default) : UiElement
 
     private void UpdateSize()
     {
-        var textDimension = _text == null ? Vector2.Zero : _font.MeasureString(_text);
+        var textDimension = _text == null ? Vector2.Zero : spriteFont.MeasureString(_text);
         Width = (int)(textDimension.X * _scale);
         Height = (int)float.Floor(textDimension.Y * _scale);
     }

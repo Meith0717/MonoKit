@@ -13,42 +13,63 @@ using MonoKit.Input;
 
 namespace MonoKit.Ui;
 
-public struct ButtonStyle()
-{
-    public Color TextIdleColor = Color.White;
-    public Color TextHoverColor = Color.MonoGameOrange;
-    public Color TextDisableColor = Color.DarkGray;
-    public Color TextureIdleColor = Color.White;
-    public Color TextureHoverColor = Color.MonoGameOrange;
-    public Color TextureDisableColor = Color.DarkGray;
-}
+public struct ButtonStyle() { }
 
 public interface IButton
 {
+    bool Disable { get; set; }
     Action OnClickAction { get; set; }
     void OverrideColor(params Color[] color);
 }
 
 public static class UiButton
 {
-    public class Sprite(string texture, ButtonStyle? style = null) : UiSprite(texture), IButton
+    private class ButtonBehaviour()
+    {
+        private bool _isPressed;
+        private bool _wasHovered;
+        public bool IsHovered;
+
+        public void Update(
+            InputHandler inputHandler,
+            Rectangle bounds,
+            Action onClickAction,
+            Action onHoverAction,
+            bool isDisabled
+        )
+        {
+            IsHovered = !isDisabled && bounds.Contains(Mouse.GetState().Position);
+            _isPressed = IsHovered && inputHandler.HasAction(EngineInputActions.ButtonPressed);
+            _wasHovered = IsHovered;
+
+            if (IsHovered && !_wasHovered)
+                onHoverAction?.Invoke();
+
+            if (!_isPressed)
+                return;
+            onClickAction?.Invoke();
+        }
+    }
+
+    public class Sprite(Texture2D texture2D) : UiSprite(texture2D), IButton
     {
         private readonly ButtonBehaviour _buttonBehaviour = new();
-        private readonly ButtonStyle _style = style == null ? new ButtonStyle() : style.Value;
-        private UiText _uiText;
-        public bool Disable;
 
-        public UiText UiText
-        {
-            set => _uiText = value;
-        }
-
+        public Color TextIdleColor { get; set; } = Color.White;
+        public Color TextHoverColor { get; set; } = Color.MonoGameOrange;
+        public Color TextDisableColor { get; set; } = Color.DarkGray;
+        public Color TextureIdleColor { get; set; } = Color.White;
+        public Color TextureHoverColor { get; set; } = Color.MonoGameOrange;
+        public Color TextureDisableColor { get; set; } = Color.DarkGray;
+        public UiText UiText { get; init; }
+        public bool Disable { get; set; }
         public Action OnClickAction { get; set; }
+        public Action OnHoverAction { get; set; }
 
         public void OverrideColor(params Color[] color)
         {
             if (color.Length > 0)
-                _uiText.Color = color.First();
+                UiText.Color = color.First();
             if (color.Length > 1)
                 Color = color[1];
         }
@@ -56,115 +77,84 @@ public static class UiButton
         protected override void Updater(InputHandler inputHandler)
         {
             base.Updater(inputHandler);
-            _uiText?.Update(inputHandler, Bounds, UiScale);
-            _buttonBehaviour.Update(inputHandler, Bounds, OnClickAction, Disable);
+            UiText?.Update(inputHandler, Bounds, UiScale);
+            _buttonBehaviour.Update(inputHandler, Bounds, OnClickAction, OnHoverAction, Disable);
             Color =
-                Disable ? _style.TextureDisableColor
-                : _buttonBehaviour.IsHovered ? _style.TextureHoverColor
-                : _style.TextureIdleColor;
-            if (_uiText is not null)
-                _uiText.Color =
-                    Disable ? _style.TextDisableColor
-                    : _buttonBehaviour.IsHovered ? _style.TextHoverColor
-                    : _style.TextIdleColor;
+                Disable ? TextureDisableColor
+                : _buttonBehaviour.IsHovered ? TextureHoverColor
+                : TextureIdleColor;
+            if (UiText is not null)
+                UiText.Color =
+                    Disable ? TextDisableColor
+                    : _buttonBehaviour.IsHovered ? TextHoverColor
+                    : TextIdleColor;
         }
 
         protected override void Drawer(SpriteBatch spriteBatch)
         {
             base.Drawer(spriteBatch);
-            _uiText?.Draw(spriteBatch);
+            UiText?.Draw(spriteBatch);
         }
 
         public override void ApplyScale(Rectangle root, float uiScale)
         {
             base.ApplyScale(root, uiScale);
-            _uiText?.ApplyScale(Bounds, uiScale);
+            UiText?.ApplyScale(Bounds, uiScale);
         }
 
         public override void Dispose()
         {
             base.Dispose();
-            _uiText?.Dispose();
+            UiText?.Dispose();
         }
     }
 
     public class Text(ButtonStyle? style = null) : UiElement, IButton
     {
         private readonly ButtonBehaviour _buttonBehaviour = new();
-        private readonly ButtonStyle _style = style == null ? new ButtonStyle() : style.Value;
-        private UiText _uiText;
-        public bool Disable;
-
-        public UiText UiText
-        {
-            set => _uiText = value;
-        }
-
+        public Color TextIdleColor { get; set; } = Color.White;
+        public Color TextHoverColor { get; set; } = Color.MonoGameOrange;
+        public Color TextDisableColor { get; set; } = Color.DarkGray;
+        public UiText UiText { get; init; }
         public float Scale
         {
-            set => _uiText.Scale = value;
+            set => UiText.Scale = value;
         }
-
+        public bool Disable { get; set; }
         public Action OnClickAction { get; set; }
+        public Action OnHoverAction { get; set; }
 
         public void OverrideColor(params Color[] color)
         {
             if (color.Length > 0)
-                _uiText.Color = color.First();
+                UiText.Color = color.First();
         }
 
         protected override void Updater(InputHandler inputHandler)
         {
-            _uiText.Update(inputHandler, Bounds, UiScale);
-            _buttonBehaviour.Update(inputHandler, Bounds, OnClickAction, Disable);
-            _uiText.Color =
-                Disable ? _style.TextDisableColor
-                : _buttonBehaviour.IsHovered ? _style.TextHoverColor
-                : _style.TextIdleColor;
+            UiText.Update(inputHandler, Bounds, UiScale);
+            _buttonBehaviour.Update(inputHandler, Bounds, OnClickAction, OnHoverAction, Disable);
+            UiText.Color =
+                Disable ? TextDisableColor
+                : _buttonBehaviour.IsHovered ? TextHoverColor
+                : TextIdleColor;
         }
 
         protected override void Drawer(SpriteBatch spriteBatch)
         {
-            _uiText.Draw(spriteBatch);
+            UiText.Draw(spriteBatch);
         }
 
         public override void ApplyScale(Rectangle root, float uiScale)
         {
             base.ApplyScale(root, uiScale);
-            _uiText.ApplyScale(Bounds, uiScale);
+            UiText.ApplyScale(Bounds, uiScale);
         }
 
         public override void Dispose()
         {
             base.Dispose();
-            _uiText.Dispose();
+            UiText.Dispose();
         }
-    }
-}
-
-internal class ButtonBehaviour
-{
-    private bool _isPressed;
-    private bool _wasHovered;
-    public bool IsHovered;
-
-    public void Update(
-        InputHandler inputHandler,
-        Rectangle bounds,
-        Action onClickAction,
-        bool isDisabled
-    )
-    {
-        IsHovered = !isDisabled && bounds.Contains(Mouse.GetState().Position);
-        _isPressed = IsHovered && inputHandler.HasAction(EngineInputActions.ButtonPressed);
-        _wasHovered = IsHovered;
-
-        if (IsHovered && !_wasHovered)
-            AudioService.SoundEffects.PlaySound("hoverButton");
-
-        if (!_isPressed)
-            return;
-        AudioService.SoundEffects.PlaySound("clickButton");
-        onClickAction?.Invoke();
     }
 }

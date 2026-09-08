@@ -19,7 +19,12 @@ public sealed class UiVariableSelector<T> : UiElement
     private List<T> _items;
     private int _selectedIndex;
 
-    public UiVariableSelector(string leftButton, string rightButton, string spriteFont, T[] items)
+    public UiVariableSelector(
+        Texture2D leftButton,
+        Texture2D rightButton,
+        SpriteFont spriteFont,
+        T[] items
+    )
     {
         _items = [.. items];
 
