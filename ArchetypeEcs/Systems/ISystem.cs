@@ -3,24 +3,28 @@
 // All rights reserved.
 // Portions generated or assisted by AI.
 
+using System;
 using MonoKit.Gameplay;
 using MonoKit.Input;
 
 namespace MonoKit.ArchetypeEcs.Systems;
 
-public interface ISystem
+public interface ISystem : IDisposable
 {
-    void Initialize(World world);
-
-    void Update(
-        double elapsedMs,
-        World world,
-        RuntimeContainer runtimeServices,
-        InputHandler inputHandler
-    );
+	void Initialize(World world);
 }
 
-public interface IOnEntityDestroyed : ISystem
+public interface IUpdateSystem : ISystem
 {
-    void OnEntityDestroyed(Entity entity);
+	void Update(
+		double elapsedMs,
+		World world,
+		RuntimeContainer runtimeServices,
+		InputHandler inputHandler
+	);
+}
+
+public interface IDrawSystem : ISystem
+{
+	void Draw(double elapsedMs, World world);
 }

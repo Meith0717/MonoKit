@@ -8,17 +8,17 @@ using MonoKit.Input;
 
 namespace MonoKit.ArchetypeEcs.Systems;
 
-public abstract class EntityProcessSystem : IUpdateSystem
+public interface IEntityProcessSystem : ISystem
 {
-    public void Dispose()
-    {
-        // TODO release managed resources here
-    }
+    void OnEntityDestroyed(Entity entity);
+}
 
-    public void Initialize(World world)
-    {
-        throw new System.NotImplementedException();
-    }
+public abstract class EntityProcessSystem<T1> : IUpdateSystem, IEntityProcessSystem
+    where T1 : struct
+{
+    public abstract void Dispose();
+
+    public abstract void Initialize(World world);
 
     public void Update(
         double elapsedMs,
@@ -27,16 +27,235 @@ public abstract class EntityProcessSystem : IUpdateSystem
         InputHandler inputHandler
     )
     {
-        world.ForEach();
+        Begin();
+
+        var componentType = typeof(T1);
+        var archetypeCollection = world.ArchetypeManager.GetArchetypesWith(componentType);
+        if (archetypeCollection == null)
+            return;
+
+        foreach (var archetype in archetypeCollection)
+        {
+            if (!archetype.TryGetColumn(componentType, out var column))
+                continue;
+            var columnArray = (T1[])column;
+            for (var row = 0; row < archetype.RowCount; row++)
+                Process(elapsedMs, world, runtimeServices, inputHandler, ref columnArray[row]);
+        }
+
+        End();
     }
 
-    public abstract void Begin();
-    public abstract void Process(
-        float elapsedMs,
+    protected abstract void Begin();
+
+    protected abstract void Process(
+        double elapsedMs,
+        World world,
+        RuntimeContainer runtimeServices,
+        InputHandler inputHandler,
+        ref T1 c1
+    );
+
+    protected abstract void End();
+
+    public abstract void OnEntityDestroyed(Entity entity);
+}
+
+public abstract class EntityProcessSystem<T1, T2> : IUpdateSystem, IEntityProcessSystem
+    where T1 : struct
+{
+    public abstract void Dispose();
+
+    public abstract void Initialize(World world);
+
+    public void Update(
+        double elapsedMs,
         World world,
         RuntimeContainer runtimeServices,
         InputHandler inputHandler
+    )
+    {
+        Begin();
+
+        var type1 = typeof(T1);
+        var type2 = typeof(T2);
+        var archetypesCollection = world.ArchetypeManager.GetArchetypesWith(type1);
+        if (archetypesCollection == null)
+            return;
+
+        foreach (var archetype in archetypesCollection)
+        {
+            if (
+                !archetype.TryGetColumn(type1, out var column1)
+                || !archetype.TryGetColumn(type2, out var column2)
+            )
+                continue;
+
+            var col1Array = (T1[])column1;
+            var col2Array = (T2[])column2;
+            for (var row = 0; row < archetype.RowCount; row++)
+                Process(
+                    elapsedMs,
+                    world,
+                    runtimeServices,
+                    inputHandler,
+                    ref col1Array[row],
+                    ref col2Array[row]
+                );
+        }
+
+        End();
+    }
+
+    protected abstract void Begin();
+
+    protected abstract void Process(
+        double elapsedMs,
+        World world,
+        RuntimeContainer runtimeServices,
+        InputHandler inputHandler,
+        ref T1 c1,
+        ref T2 c2
     );
-    public abstract void End();
+
+    protected abstract void End();
+
+    public abstract void OnEntityDestroyed(Entity entity);
+}
+
+public abstract class EntityProcessSystem<T1, T2, T3> : IUpdateSystem, IEntityProcessSystem
+    where T1 : struct
+{
+    public abstract void Dispose();
+
+    public abstract void Initialize(World world);
+
+    public void Update(
+        double elapsedMs,
+        World world,
+        RuntimeContainer runtimeServices,
+        InputHandler inputHandler
+    )
+    {
+        Begin();
+
+        var type1 = typeof(T1);
+        var type2 = typeof(T2);
+        var type3 = typeof(T3);
+        var archetypesCollection = world.ArchetypeManager.GetArchetypesWith(type1);
+        if (archetypesCollection == null)
+            return;
+
+        foreach (var archetype in archetypesCollection)
+        {
+            if (
+                !archetype.TryGetColumn(type1, out var column1)
+                || !archetype.TryGetColumn(type2, out var column2)
+                || !archetype.TryGetColumn(type3, out var column3)
+            )
+                continue;
+            var col1Array = (T1[])column1;
+            var col2Array = (T2[])column2;
+            var col3Array = (T3[])column3;
+            for (var row = 0; row < archetype.RowCount; row++)
+                Process(
+                    elapsedMs,
+                    world,
+                    runtimeServices,
+                    inputHandler,
+                    ref col1Array[row],
+                    ref col2Array[row],
+                    ref col3Array[row]
+                );
+        }
+
+        End();
+    }
+
+    protected abstract void Begin();
+
+    protected abstract void Process(
+        double elapsedMs,
+        World world,
+        RuntimeContainer runtimeServices,
+        InputHandler inputHandler,
+        ref T1 c1,
+        ref T2 c2,
+        ref T3 c3
+    );
+
+    protected abstract void End();
+
+    public abstract void OnEntityDestroyed(Entity entity);
+}
+
+public abstract class EntityProcessSystem<T1, T2, T3, T4> : IUpdateSystem, IEntityProcessSystem
+    where T1 : struct
+{
+    public abstract void Dispose();
+
+    public abstract void Initialize(World world);
+
+    public void Update(
+        double elapsedMs,
+        World world,
+        RuntimeContainer runtimeServices,
+        InputHandler inputHandler
+    )
+    {
+        Begin();
+
+        var type1 = typeof(T1);
+        var type2 = typeof(T2);
+        var type3 = typeof(T3);
+        var type4 = typeof(T4);
+        var archetypesCollection = world.ArchetypeManager.GetArchetypesWith(type1);
+        if (archetypesCollection == null)
+            return;
+
+        foreach (var archetype in archetypesCollection)
+        {
+            if (
+                !archetype.TryGetColumn(type1, out var column1)
+                || !archetype.TryGetColumn(type2, out var column2)
+                || !archetype.TryGetColumn(type3, out var column3)
+                || !archetype.TryGetColumn(type4, out var column4)
+            )
+                continue;
+            var col1Array = (T1[])column1;
+            var col2Array = (T2[])column2;
+            var col3Array = (T3[])column3;
+            var col4Array = (T4[])column4;
+            for (var row = 0; row < archetype.RowCount; row++)
+                Process(
+                    elapsedMs,
+                    world,
+                    runtimeServices,
+                    inputHandler,
+                    ref col1Array[row],
+                    ref col2Array[row],
+                    ref col3Array[row],
+                    ref col4Array[row]
+                );
+        }
+
+        End();
+    }
+
+    protected abstract void Begin();
+
+    protected abstract void Process(
+        double elapsedMs,
+        World world,
+        RuntimeContainer runtimeServices,
+        InputHandler inputHandler,
+        ref T1 c1,
+        ref T2 c2,
+        ref T3 c3,
+        ref T4 c4
+    );
+
+    protected abstract void End();
+
     public abstract void OnEntityDestroyed(Entity entity);
 }

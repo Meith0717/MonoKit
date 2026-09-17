@@ -34,11 +34,10 @@ public abstract class GameObject : IDisposable, ISpatial
     [JsonProperty]
     public float Velocity;
 
-    protected GameObject(Vector2 position, string textureId, float scale)
+    protected GameObject(Vector2 position, Texture2D texture, float scale)
     {
         Position = position;
-        TextureId = textureId;
-        var texture = ContentProvider.Container<Texture2D>().Get(TextureId);
+        Texture = texture;
         _maxTextureSize = float.Max(texture.Width, texture.Height);
         Scale = scale;
     }
@@ -56,7 +55,7 @@ public abstract class GameObject : IDisposable, ISpatial
 
     // Texture Stuff
     [JsonProperty]
-    public string TextureId { get; private set; }
+    public Texture2D Texture { get; private set; }
 
     // Managing Stuff
     [JsonIgnore]

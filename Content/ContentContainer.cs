@@ -3,6 +3,7 @@
 // All rights reserved.
 // Portions generated or assisted by AI.
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -38,28 +39,6 @@ public class ContentContainer<T> : IEnumerable<(int, string, T)>
 
     public int GetId(string key) => _nameToId.GetValueOrDefault(key, -1);
 
-    public void LoadContent(
-        ContentManager contentManager,
-        string contentDirectory,
-        ContentLoadingState contentLoadingState = null,
-        SearchOption searchOption = SearchOption.AllDirectories
-    )
-    {
-        var fullContentDirectory = Path.Combine(contentManager.RootDirectory, contentDirectory);
-        var files = FileUtils.GetAllFilesInDirectory(fullContentDirectory, searchOption);
-
-        foreach (var file in files)
-        {
-            var directory = Path.GetDirectoryName(file);
-            var contentId = Path.GetFileNameWithoutExtension(file);
-            var relativePath = Path.GetRelativePath(contentManager.RootDirectory, directory!);
-            var contentPath = Path.Combine(relativePath, contentId);
-            var content = contentManager.Load<T>(contentPath);
-            Add(contentId, content);
-            contentLoadingState?.AddLoaded(file);
-        }
-    }
-
     public ContentContainer<T2> Cast<T2>()
         where T2 : class
     {
@@ -84,7 +63,7 @@ public class ContentContainer<T> : IEnumerable<(int, string, T)>
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-    private void Add(string name, T content)
+    public void Add(string name, T content)
     {
         if (_nameToId.ContainsKey(name))
             return;

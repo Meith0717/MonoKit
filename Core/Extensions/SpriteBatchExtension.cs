@@ -26,7 +26,7 @@ public static class SpriteBatchExtension
 
     public static void DrawGameObject(this SpriteBatch spriteBatch, GameObject gameObject)
     {
-        var texture = ContentProvider.Container<Texture2D>().Get(gameObject.TextureId);
+        var texture = gameObject.Texture;
         var position = gameObject.Position;
         var rotation = gameObject.MovingDirection.InclinationAngle();
         var scale = gameObject.Scale;
@@ -67,103 +67,5 @@ public static class SpriteBatchExtension
     )
     {
         spriteBatch.DrawRectangle(rectangle, color, 1 / thicknessScale, GetDepth(depth));
-    }
-
-    public static void DrawString(
-        this SpriteBatch spriteBatch,
-        string font,
-        string text,
-        Vector2 position,
-        Color color,
-        float scale
-    )
-    {
-        var spriteFont = ContentProvider.Container<SpriteFont>().Get(font);
-        spriteBatch.DrawString(
-            spriteFont,
-            text,
-            position,
-            color,
-            0,
-            Vector2.Zero,
-            scale,
-            SpriteEffects.None,
-            1
-        );
-    }
-
-    public static void Draw(
-        this SpriteBatch spriteBatch,
-        string id,
-        Vector2 position,
-        float scale,
-        float rotation,
-        int depth,
-        Color color
-    )
-    {
-        var texture = ContentProvider.Container<Texture2D>().Get(id);
-        Vector2 offset = new(texture.Width / 2, texture.Height / 2);
-        spriteBatch.Draw(
-            texture,
-            position,
-            null,
-            color,
-            rotation,
-            offset,
-            scale,
-            SpriteEffects.None,
-            GetDepth(depth)
-        );
-    }
-
-    public static void Draw(
-        this SpriteBatch spriteBatch,
-        string id,
-        Vector2 position,
-        float width,
-        float height,
-        Color color
-    )
-    {
-        var texture = ContentProvider.Container<Texture2D>().Get(id);
-        spriteBatch.Draw(
-            texture,
-            new RectangleF(position.X, position.Y, width, height).ToRectangle(),
-            null,
-            color,
-            0,
-            Vector2.Zero,
-            SpriteEffects.None,
-            0
-        );
-    }
-
-    public static void Draw(
-        this SpriteBatch spriteBatch,
-        string id,
-        Vector2 position,
-        float width,
-        float height,
-        Vector2 offset,
-        float rotation
-    )
-    {
-        var texture = ContentProvider.Container<Texture2D>().Get(id);
-        spriteBatch.Draw(
-            texture,
-            new RectangleF(
-                position.X + offset.X,
-                position.Y + offset.Y,
-                width,
-                height
-            ).ToRectangle(),
-            null,
-            Color.White,
-            rotation,
-            new Vector2(texture.Width / 2, texture.Height / 2),
-            SpriteEffects.None,
-            1
-        );
     }
 }

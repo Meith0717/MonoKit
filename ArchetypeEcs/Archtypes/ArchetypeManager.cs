@@ -18,7 +18,10 @@ internal sealed class ArchetypeManager : IDisposable
 
     internal int ArchetypeCount => _archetypes.Count;
 
-    internal ArchetypeManager() => EmptyArchetype = GetOrCreateArchetype(ArchetypeType.Empty);
+    internal ArchetypeManager()
+    {
+        EmptyArchetype = GetOrCreateArchetype(ArchetypeType.Empty);
+    }
 
     internal Archetype GetOrCreateArchetype(ArchetypeType archetypeType)
     {

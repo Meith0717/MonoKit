@@ -24,11 +24,7 @@ public sealed class SoundManager(int maxInstances)
         set => _volume = float.Clamp(value, 0, 1);
     }
 
-    public void LoadContent(
-        ContentManager contentManager,
-        string contentDirectory,
-        ContentLoadingState contentLoadingState = null
-    )
+    public void LoadContent(ContentManager contentManager, string contentDirectory)
     {
         var fullContentDirectory = Path.Combine(contentManager.RootDirectory, contentDirectory);
         var files = FileUtils.GetAllFilesInDirectory(
@@ -49,7 +45,6 @@ public sealed class SoundManager(int maxInstances)
                 .Select(_ => sound.CreateInstance())
                 .ToArray();
             _soundEffectInstances[soundId] = soundInstances;
-            contentLoadingState?.AddLoaded(filePath);
         }
     }
 

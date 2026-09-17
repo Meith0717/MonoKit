@@ -23,7 +23,7 @@ public class WorldBuilder
         var world = new World();
 
         foreach (var system in _systems)
-            world.SystemManager.Add(system);
+            world.AddSystem(system);
 
         return world;
     }

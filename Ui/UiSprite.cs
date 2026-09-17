@@ -15,7 +15,7 @@ public class UiSprite(Texture2D texture2D, float scale = 1, Color color = defaul
     public Color Color = color;
     public float Scale = scale;
 
-    protected Texture2D Texture2D { get; set; } = texture2D;
+    public Texture2D Texture2D { get; set; } = texture2D;
 
     protected override void Updater(InputHandler inputHandler)
     {

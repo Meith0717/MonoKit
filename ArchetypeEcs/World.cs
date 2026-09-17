@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Microsoft.Xna.Framework;
 using MonoKit.ArchetypeEcs.Systems;
 using MonoKit.Gameplay;
@@ -31,17 +32,18 @@ public delegate void RefAction<T1, T2, T3, T4>(
 
 public sealed class World : IDisposable
 {
+    private readonly List<ISystem> _systems = [];
     private readonly EntityManager _entityManager = new();
     private readonly EntityRecords _entityRecords = new();
-    private readonly ArchetypeManager _archetypeManager = new();
-    internal readonly SystemManager SystemManager;
+    internal readonly ArchetypeManager ArchetypeManager = new();
 
     public int EntityCount => _entityManager.Count;
-    public int ArchetypeCount => _archetypeManager.ArchetypeCount;
+    public int ArchetypeCount => ArchetypeManager.ArchetypeCount;
 
-    internal World()
+    public void AddSystem(ISystem system)
     {
-        SystemManager = new SystemManager(this);
+        _systems.Add(system);
+        system.Initialize(this);
     }
 
     public void Update(
@@ -50,15 +52,43 @@ public sealed class World : IDisposable
         InputHandler inputHandler
     )
     {
-        SystemManager.Update(elapsedMs, runtimeContainer, inputHandler);
+        foreach (var system in _systems)
+            if (system is IUpdateSystem updateSystem)
+                updateSystem.Update(elapsedMs, this, runtimeContainer, inputHandler);
+    }
+
+    public void Draw(double elapsedMs, World world)
+    {
+        foreach (var system in _systems)
+            if (system is IDrawSystem drawSystem)
+                drawSystem.Draw(elapsedMs, world);
+    }
+
+    public bool DestroyEntity(Entity entity)
+    {
+        if (!_entityRecords.TryGetLocation(entity, out var archetype, out var row))
+            return false;
+
+        var lastEntity = archetype.RemoveRow(row);
+        if (lastEntity.HasValue)
+            _entityRecords.SetEntityLocation(lastEntity.Value, archetype, row);
+
+        _entityRecords.Remove(entity);
+        _entityManager.Destroy(entity);
+
+        foreach (var system in _systems)
+            if (system is IEntityProcessSystem processSystem)
+                processSystem.OnEntityDestroyed(entity);
+
+        return true;
     }
 
     public Entity CreateEntity()
     {
         var entity = _entityManager.Create();
-        var row = _archetypeManager.EmptyArchetype.RowCount;
-        _archetypeManager.EmptyArchetype.AddRow(entity, []);
-        _entityRecords.SetEntityLocation(entity, _archetypeManager.EmptyArchetype, row);
+        var row = ArchetypeManager.EmptyArchetype.RowCount;
+        ArchetypeManager.EmptyArchetype.AddRow(entity, []);
+        _entityRecords.SetEntityLocation(entity, ArchetypeManager.EmptyArchetype, row);
         return entity;
     }
 
@@ -80,7 +110,7 @@ public sealed class World : IDisposable
         }
 
         var archetypeType = new ArchetypeType(componentTypes);
-        var archetype = _archetypeManager.GetOrCreateArchetype(archetypeType);
+        var archetype = ArchetypeManager.GetOrCreateArchetype(archetypeType);
 
         var entity = _entityManager.Create();
         var row = archetype.RowCount;
@@ -107,60 +137,60 @@ public sealed class World : IDisposable
         where T3 : struct
         where T4 : struct => CreateEntityWithComponents(c1, c2, c3, c4);
 
-    public bool DestroyEntity(Entity entity)
+    public bool IsAlive(Entity entity)
     {
-        if (!_entityRecords.TryGetLocation(entity, out var archetype, out var row))
-            return false;
-
-        var lastEntity = archetype.RemoveRow(row);
-        if (lastEntity.HasValue)
-            _entityRecords.SetEntityLocation(lastEntity.Value, archetype, row);
-
-        _entityRecords.Remove(entity);
-        _entityManager.Destroy(entity);
-        return true;
+        return _entityManager.IsAlive(entity);
     }
 
-    public bool IsAlive(Entity entity) => _entityManager.IsAlive(entity);
-
-    public void AddComponent<T>(Entity entity, T component)
-        where T : struct
+    public void AddComponent(Entity entity, params object[] components)
     {
         if (!_entityRecords.TryGetLocation(entity, out var oldArchetype, out var oldRow))
             throw new ArgumentException("Entity does not exist");
 
-        var oldArchetypeType = oldArchetype.Type;
-        var componentType = typeof(T);
+        if (components == null || components.Length == 0)
+            throw new ArgumentException("Components must not be null or empty");
 
-        if (oldArchetype.Contains(componentType))
+        var oldArchetypeType = oldArchetype.Type;
+
+        // Check for duplicates and existing components
+        var seen = new HashSet<Type>(components.Length);
+        foreach (var component in components)
         {
-            oldArchetype.Get<T>(oldRow) = component;
-            return;
+            var t = component.GetType();
+            if (!t.IsValueType)
+                throw new ArgumentException($"Component {t.Name} must be a struct");
+            if (!seen.Add(t))
+                throw new ArgumentException($"Duplicate component type: {t.Name}");
+            if (oldArchetype.Contains(t))
+                throw new ArgumentException($"Entity already has component {t.Name}");
         }
 
-        // Create new archetype type with the component added
-        var newComponentTypes = oldArchetypeType.ComponentTypes.Append(componentType).ToArray();
-        var newArchetypeType = new ArchetypeType(newComponentTypes);
-        var newArchetype = _archetypeManager.GetOrCreateArchetype(newArchetypeType);
+        // Build new component type array
+        var oldComponentTypes = oldArchetypeType.ComponentTypes;
+        var newComponentTypes = new Type[oldComponentTypes.Length + components.Length];
+        Array.Copy(oldComponentTypes, newComponentTypes, oldComponentTypes.Length);
+        for (var i = 0; i < components.Length; i++)
+            newComponentTypes[oldComponentTypes.Length + i] = components[i].GetType();
 
-        // Build column index mapping for the new archetype
+        // Create new archetype
+        var newArchetypeType = new ArchetypeType(newComponentTypes);
+        var newArchetype = ArchetypeManager.GetOrCreateArchetype(newArchetypeType);
+
+        // Build column index mapping
         var typeToNewIndex = new Dictionary<Type, int>(newComponentTypes.Length);
         for (var i = 0; i < newComponentTypes.Length; i++)
             typeToNewIndex[newComponentTypes[i]] = i;
 
-        // Copy existing components
+        // Copy existing components + add new ones
         var newComponents = new object[newComponentTypes.Length];
         var oldComponents = oldArchetype.GetRowComponents(oldRow);
         for (var i = 0; i < oldComponents.Length; i++)
-        {
-            var oldCompType = oldArchetypeType.ComponentTypes[i];
-            newComponents[typeToNewIndex[oldCompType]] = oldComponents[i];
-        }
+            newComponents[typeToNewIndex[oldComponentTypes[i]]] = oldComponents[i];
 
-        // Add new component
-        newComponents[typeToNewIndex[componentType]] = component!;
+        for (var i = 0; i < components.Length; i++)
+            newComponents[typeToNewIndex[components[i].GetType()]] = components[i]!;
 
-        // Move entity to new archetype
+        // Move entity
         var movedEntity = oldArchetype.RemoveRow(oldRow);
         if (movedEntity.HasValue)
             _entityRecords.SetEntityLocation(movedEntity.Value, oldArchetype, oldRow);
@@ -186,8 +216,8 @@ public sealed class World : IDisposable
         var newComponentTypes = oldType.ComponentTypes.Where(t => t != componentType).ToArray();
         var newArchetype =
             newComponentTypes.Length == 0
-                ? _archetypeManager.EmptyArchetype
-                : _archetypeManager.GetOrCreateArchetype(new ArchetypeType(newComponentTypes));
+                ? ArchetypeManager.EmptyArchetype
+                : ArchetypeManager.GetOrCreateArchetype(new ArchetypeType(newComponentTypes));
 
         // Build column index mapping for the new archetype
         var oldToNewIndex = new Dictionary<Type, int>(newComponentTypes.Length);
@@ -236,7 +266,7 @@ public sealed class World : IDisposable
         where T1 : struct
     {
         var componentType = typeof(T1);
-        var archetypes = _archetypeManager.GetArchetypesWith(componentType);
+        var archetypes = ArchetypeManager.GetArchetypesWith(componentType);
         if (archetypes == null)
             return;
 
@@ -259,7 +289,7 @@ public sealed class World : IDisposable
     {
         var type1 = typeof(T1);
         var type2 = typeof(T2);
-        var archetypesCollection = _archetypeManager.GetArchetypesWith(type1);
+        var archetypesCollection = ArchetypeManager.GetArchetypesWith(type1);
         if (archetypesCollection == null)
             return;
 
@@ -289,7 +319,7 @@ public sealed class World : IDisposable
         var type1 = typeof(T1);
         var type2 = typeof(T2);
         var type3 = typeof(T3);
-        var archetypesCollection = _archetypeManager.GetArchetypesWith(type1);
+        var archetypesCollection = ArchetypeManager.GetArchetypesWith(type1);
         if (archetypesCollection == null)
             return;
 
@@ -322,7 +352,7 @@ public sealed class World : IDisposable
         var type2 = typeof(T2);
         var type3 = typeof(T3);
         var type4 = typeof(T4);
-        var archetypesCollection = _archetypeManager.GetArchetypesWith(type1);
+        var archetypesCollection = ArchetypeManager.GetArchetypesWith(type1);
         if (archetypesCollection == null)
             return;
 
@@ -355,9 +385,10 @@ public sealed class World : IDisposable
 
     public void Dispose()
     {
-        _archetypeManager.Dispose();
+        ArchetypeManager.Dispose();
         _entityRecords.Dispose();
         _entityManager.Dispose();
+        _systems.Clear();
     }
 
     public override string ToString()
@@ -365,8 +396,8 @@ public sealed class World : IDisposable
         var sb = new System.Text.StringBuilder();
         sb.AppendLine("=== AECS WORLD ===");
         sb.AppendLine($"Entities: {_entityManager.Count}");
-        sb.AppendLine($"Archetypes: {_archetypeManager.ArchetypeCount}");
-        foreach (var archetype in _archetypeManager.Archetypes)
+        sb.AppendLine($"Archetypes: {ArchetypeManager.ArchetypeCount}");
+        foreach (var archetype in ArchetypeManager.Archetypes)
         {
             var type = archetype.Type;
             sb.Append("\n  Archetype(");

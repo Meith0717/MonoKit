@@ -63,9 +63,9 @@ public sealed class UiTextEntry : UiElement
     public bool IsPassword { get; set; }
     public char PasswordChar { get; set; } = '*';
 
-    public UiTextEntry(string spriteFont)
+    public UiTextEntry(SpriteFont spriteFont)
     {
-        _font = ContentProvider.Container<SpriteFont>().Get(spriteFont);
+        _font = spriteFont;
         _previousKeyboardState = Keyboard.GetState();
         UpdateSize();
     }

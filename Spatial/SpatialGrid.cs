@@ -16,9 +16,6 @@ namespace MonoKit.Spatial;
 [Obsolete]
 internal class SpatialGrid((int, int) hash, int size)
 {
-    private static readonly SpriteFont Font = ContentProvider
-        .Container<SpriteFont>()
-        .Get("default_font");
     private readonly string _id = $"ID: ({hash.Item1},{hash.Item2})";
 
     private readonly object _lock = new();
@@ -106,34 +103,6 @@ internal class SpatialGrid((int, int) hash, int size)
 
     public void Draw(SpriteBatch spriteBatch, Color color, float cameraZoom)
     {
-        var position = Bounds.Position + new Vector2(10, 10);
-        spriteBatch.DrawString(
-            Font,
-            _id,
-            position,
-            color,
-            0,
-            Vector2.Zero,
-            .2f,
-            SpriteEffects.None,
-            1
-        );
-
-        position.Y += 25;
-        spriteBatch.DrawString(
-            Font,
-            $"Amount: {_objects.Count}",
-            position,
-            color,
-            0,
-            Vector2.Zero,
-            .2f,
-            SpriteEffects.None,
-            1
-        );
-
-        var bounds = Bounds;
-        bounds.Inflate(.5f, .5f);
-        spriteBatch.DrawRectangle(bounds, color, 1 / cameraZoom);
+        ;
     }
 }

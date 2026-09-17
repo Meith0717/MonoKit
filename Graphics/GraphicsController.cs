@@ -34,7 +34,6 @@ public class GraphicsController
     {
         _game = game;
         _graphicsDeviceManager = graphicsManager;
-        _graphicsDeviceManager.GraphicsProfile = GraphicsProfile.HiDef;
         _graphicsDeviceManager.ApplyChanges();
         _window = window;
         _window.ClientSizeChanged += delegate

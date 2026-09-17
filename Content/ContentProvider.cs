@@ -8,42 +8,32 @@ using System.Collections.Generic;
 
 namespace MonoKit.Content;
 
-/// <summary>
-///     Provides access to all loaded content containers.
-/// </summary>
-public sealed class ContentProvider
+public class ContentProvider
 {
-    private static readonly Lazy<ContentProvider> Instance = new(() => new ContentProvider());
     private readonly Dictionary<Type, object> _containers = new();
 
-    /// <summary>
-    ///     Registers a new content type container if it doesn’t exist.
-    /// </summary>
-    public static void Register<T>()
+    public void Register<T>()
         where T : class
     {
-        Instance.Value.RegisterInternal<T>();
+        RegisterInternal<T>();
     }
 
-    /// <summary>
-    ///     Gets the container for a given content type. Automatically registers it if missing.
-    /// </summary>
-    public static ContentContainer<T> Container<T>()
+    public ContentContainer<T> Container<T>()
         where T : class
     {
-        return Instance.Value.GetContainerInternal<T>();
+        return GetContainerInternal<T>();
     }
 
-    public static T Get<T>(string id)
+    public T Get<T>(string id)
         where T : class
     {
-        return Instance.Value.GetContainerInternal<T>().Get(id);
+        return GetContainerInternal<T>().Get(id);
     }
 
-    public static T Get<T>(int id)
+    public T Get<T>(int id)
         where T : class
     {
-        return Instance.Value.GetContainerInternal<T>().Get(id);
+        return GetContainerInternal<T>().Get(id);
     }
 
     private void RegisterInternal<T>()
