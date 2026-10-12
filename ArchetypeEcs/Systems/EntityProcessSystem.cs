@@ -3,6 +3,7 @@
 // All rights reserved.
 // Portions generated or assisted by AI.
 
+using MonoKit.ArchetypeEcs.Entities;
 using MonoKit.Gameplay;
 using MonoKit.Input;
 

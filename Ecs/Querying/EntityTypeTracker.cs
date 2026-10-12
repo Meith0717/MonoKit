@@ -312,6 +312,7 @@ public class EntityTypeTracker : IDisposable
                 break;
             buffer[count++] = entity;
         }
+
         return buffer[..count];
     }
 

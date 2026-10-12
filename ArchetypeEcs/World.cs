@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 using Microsoft.Xna.Framework;
+using MonoKit.ArchetypeEcs.Archtypes;
+using MonoKit.ArchetypeEcs.Entities;
 using MonoKit.ArchetypeEcs.Systems;
 using MonoKit.Gameplay;
 using MonoKit.Input;

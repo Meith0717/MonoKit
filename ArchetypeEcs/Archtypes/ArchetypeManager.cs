@@ -5,9 +5,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
-namespace MonoKit.ArchetypeEcs;
+namespace MonoKit.ArchetypeEcs.Archtypes;
 
 internal sealed class ArchetypeManager : IDisposable
 {

@@ -5,7 +5,7 @@
 
 using System.Collections.Generic;
 
-namespace MonoKit.ArchetypeEcs;
+namespace MonoKit.ArchetypeEcs.Entities;
 
 internal class EntityManager
 {

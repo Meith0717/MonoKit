@@ -6,7 +6,7 @@
 using System;
 using System.Linq;
 
-namespace MonoKit.ArchetypeEcs;
+namespace MonoKit.ArchetypeEcs.Archtypes;
 
 internal readonly struct ArchetypeType : IEquatable<ArchetypeType>
 {

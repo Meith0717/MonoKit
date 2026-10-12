@@ -4,8 +4,9 @@
 // Portions generated or assisted by AI.
 
 using System;
+using MonoKit.ArchetypeEcs.Archtypes;
 
-namespace MonoKit.ArchetypeEcs;
+namespace MonoKit.ArchetypeEcs.Entities;
 
 internal sealed class EntityRecords : IDisposable
 {
