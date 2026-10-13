@@ -28,7 +28,7 @@ internal sealed class ArchetypeManager : IDisposable
         if (_archetypes.TryGetValue(archetypeType, out var archetype))
             return archetype;
 
-        archetype = new Archetype(archetypeType) { Index = _archetypes.Count };
+        archetype = new Archetype(archetypeType);
         _archetypes[archetypeType] = archetype;
 
         foreach (var componentType in archetypeType.ComponentTypes)

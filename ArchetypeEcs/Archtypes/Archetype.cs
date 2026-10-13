@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using MonoKit.ArchetypeEcs;
 using MonoKit.ArchetypeEcs.Entities;
 
 namespace MonoKit.ArchetypeEcs.Archtypes;
@@ -19,12 +20,6 @@ internal sealed class Archetype : IDisposable
 
     internal ArchetypeType Type { get; }
     internal int RowCount { get; private set; }
-
-    /// <summary>Dense index within the ArchetypeManager, used for O(1) accessor lookups.</summary>
-    internal int Index { get; set; } = -1;
-
-    /// <summary>Incremented whenever the column arrays are reallocated.</summary>
-    internal int ColumnsVersion { get; private set; } = 1;
 
     internal Archetype(ArchetypeType type)
     {
@@ -62,7 +57,6 @@ internal sealed class Archetype : IDisposable
 
         Array.Resize(ref _entityIds, newCapacity);
         _capacity = newCapacity;
-        ColumnsVersion++;
     }
 
     internal void AddRow(Entity entity, object[] components)
@@ -113,6 +107,9 @@ internal sealed class Archetype : IDisposable
     }
 
     internal Entity GetEntityAt(int row) => new(_entityIds[row]);
+
+    internal void ApplyEntityIdOrder(int[] order, int rowCount) =>
+        RowOrderUtility.PermuteColumn(_entityIds, order, rowCount);
 
     internal bool TryGetColumn(Type componentType, out Array column)
     {
