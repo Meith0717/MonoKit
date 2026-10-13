@@ -6,8 +6,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Xna.Framework;
 using MonoKit.ArchetypeEcs.Archtypes;
 using MonoKit.ArchetypeEcs.Entities;
+using MonoKit.ArchetypeEcs.SpatialQueries;
 using MonoKit.ArchetypeEcs.Systems;
 
 namespace MonoKit.ArchetypeEcs;
@@ -34,6 +36,9 @@ public sealed class World : IDisposable
     private readonly EntityManager _entityManager = new();
     private readonly EntityRecords _entityRecords = new();
     internal readonly ArchetypeManager ArchetypeManager = new();
+
+    // Spatial query context (lazy initialized)
+    private SpatialQueryContext? _spatialContext;
 
     public int EntityCount => _entityManager.Count;
     public int ArchetypeCount => ArchetypeManager.ArchetypeCount;
@@ -349,8 +354,18 @@ public sealed class World : IDisposable
         ArchetypeManager.Dispose();
         _entityRecords.Dispose();
         _entityManager.Dispose();
+        _spatialContext?.Dispose();
         _systems.Clear();
     }
+
+    // ========== SPATIAL QUERY ==========
+
+    /// <summary>
+    /// Gets or creates the spatial query context. Use this for neighbor queries.
+    /// </summary>
+    public SpatialQueryContext SpatialQueries => _spatialContext ??= new SpatialQueryContext();
+
+    // ========== END SPATIAL QUERY ==========
 
     public override string ToString()
     {

@@ -5,7 +5,7 @@
 
 using System;
 
-namespace MonoKit.ArchetypeEcs;
+namespace MonoKit.ArchetypeEcs.SpatialQueries;
 
 internal static class RowOrderUtility
 {

@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework;
 using MonoKit.ArchetypeEcs.Archtypes;
 using MonoKit.ArchetypeEcs.Entities;
 
-namespace MonoKit.ArchetypeEcs;
+namespace MonoKit.ArchetypeEcs.SpatialQueries;
 
 public sealed class SpatialSorter<TPos>(float cellSize, Func<TPos, Vector3> getPosition)
     where TPos : struct

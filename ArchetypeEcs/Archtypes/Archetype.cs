@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using MonoKit.ArchetypeEcs;
 using MonoKit.ArchetypeEcs.Entities;
+using MonoKit.ArchetypeEcs.SpatialQueries;
 
 namespace MonoKit.ArchetypeEcs.Archtypes;
 

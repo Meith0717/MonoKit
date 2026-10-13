@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Microsoft.Xna.Framework;
 
-namespace MonoKit.ArchetypeEcs;
+namespace MonoKit.ArchetypeEcs.SpatialQueries;
 
 internal sealed class RowGrid3D<TPos>
     where TPos : struct
