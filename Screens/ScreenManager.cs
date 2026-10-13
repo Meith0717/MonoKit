@@ -16,7 +16,6 @@ namespace MonoKit.Screens;
 
 public class ScreenManager(Game game)
 {
-    private readonly Game _game = game;
     private readonly GraphicsDevice _graphicsDevice = game.GraphicsDevice;
 
     private readonly LinkedList<RenderTarget2D> _lowerRenderTargets = new();
@@ -24,17 +23,17 @@ public class ScreenManager(Game game)
     private readonly PostProcessingRunner _postProcessingRunner = new(game.GraphicsDevice);
     private readonly Stack<Screen> _screens = new();
     private RenderTarget2D _lowerRenderTarget;
-    private bool _runnEffect;
+    private bool _runEffect;
     public IPostProcessingEffect PostProcessingEffect;
 
     public void AddScreen(Screen screen)
     {
         _pendingActions.Enqueue(
-            (gT, uI) =>
+            (elapsedMilliseconds, uiScale) =>
             {
                 _screens.Push(screen);
                 screen.Initialize();
-                screen.ApplyResolution(gT, uI);
+                screen.ApplyResolution(elapsedMilliseconds, uiScale);
             }
         );
     }
@@ -79,12 +78,12 @@ public class ScreenManager(Game game)
 
     public void EffectOn()
     {
-        _runnEffect = true;
+        _runEffect = true;
     }
 
     public void EffectOff()
     {
-        _runnEffect = false;
+        _runEffect = false;
     }
 
     public void DrawWithRenderTarget(SpriteBatch spriteBatch)
@@ -103,13 +102,13 @@ public class ScreenManager(Game game)
             _lowerRenderTargets.AddFirst(_screens.ElementAt(j).RenderTarget(spriteBatch));
 
         _graphicsDevice.SetRenderTarget(_lowerRenderTarget);
-        _game.GraphicsDevice.Clear(Color.Black);
+        game.GraphicsDevice.Clear(Color.Black);
         spriteBatch.Begin();
         foreach (var lowerTarget in _lowerRenderTargets)
             spriteBatch.Draw(lowerTarget, Vector2.Zero, Color.White);
         spriteBatch.End();
 
-        if (_runnEffect)
+        if (_runEffect)
             _lowerRenderTarget = PostProcessingEffect?.Apply(
                 spriteBatch,
                 _postProcessingRunner,
@@ -117,7 +116,7 @@ public class ScreenManager(Game game)
             );
 
         _graphicsDevice.SetRenderTarget(null);
-        _game.GraphicsDevice.Clear(Color.Black);
+        game.GraphicsDevice.Clear(Color.Black);
         spriteBatch.Begin();
         spriteBatch.Draw(_lowerRenderTarget, Vector2.Zero, Color.White);
         spriteBatch.Draw(topScreenTarget, Vector2.Zero, Color.White);
@@ -147,7 +146,7 @@ public class ScreenManager(Game game)
 
         _postProcessingRunner.Dispose();
         _lowerRenderTarget?.Dispose();
-        _game.Exit();
+        game.Exit();
     }
 
     public void OnResolutionChanged(double elapsedMilliseconds, float uiScale)

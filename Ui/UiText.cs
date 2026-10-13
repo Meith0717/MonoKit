@@ -6,7 +6,6 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using MonoKit.Content;
 using MonoKit.Input;
 
 namespace MonoKit.Ui;

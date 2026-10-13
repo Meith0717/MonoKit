@@ -11,13 +11,22 @@ using MonoKit.Core.IO;
 
 namespace MonoKit.Content;
 
-public class ContentLoader(ContentManager contentManager)
+public class ContentLoader
 {
     private readonly List<Func<ContentProvider, string>> _loadActions = [];
 
     private ContentProvider _contentProvider;
     private bool _isIncrementalMode = false;
     private int _loadedCount = 0;
+    private readonly ContentManager _contentManager;
+
+    private ContentLoader(ContentManager contentManager)
+    {
+        _contentManager = contentManager;
+    }
+
+    public static ContentLoader Create(ContentManager contentManager) =>
+        new ContentLoader(contentManager);
 
     public ContentLoader RegisterContentDirectory<T>(
         string contentDirectory,
@@ -25,7 +34,7 @@ public class ContentLoader(ContentManager contentManager)
     )
         where T : class
     {
-        var fullContentDirectory = Path.Combine(contentManager.RootDirectory, contentDirectory);
+        var fullContentDirectory = Path.Combine(_contentManager.RootDirectory, contentDirectory);
         if (!Directory.Exists(fullContentDirectory))
             throw new DirectoryNotFoundException(fullContentDirectory);
 
@@ -34,12 +43,12 @@ public class ContentLoader(ContentManager contentManager)
         {
             var directory = Path.GetDirectoryName(fileLocation);
             var contentId = Path.GetFileNameWithoutExtension(fileLocation);
-            var relativePath = Path.GetRelativePath(contentManager.RootDirectory, directory!);
+            var relativePath = Path.GetRelativePath(_contentManager.RootDirectory, directory!);
             var contentPath = Path.Combine(relativePath, contentId);
 
             _loadActions.Add(cp =>
             {
-                var content = contentManager.Load<T>(contentPath);
+                var content = _contentManager.Load<T>(contentPath);
                 var contentContainer = cp.Container<T>();
                 contentContainer.Add(contentId, content);
                 return contentPath;

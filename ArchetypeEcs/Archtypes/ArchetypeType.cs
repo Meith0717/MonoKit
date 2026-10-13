@@ -10,8 +10,8 @@ namespace MonoKit.ArchetypeEcs.Archtypes;
 
 internal readonly struct ArchetypeType : IEquatable<ArchetypeType>
 {
-    internal static ArchetypeType Empty = new();
-    internal readonly Type[] ComponentTypes;
+    internal static ArchetypeType Empty = new([]);
+    internal readonly Type[] ComponentTypes = [];
 
     internal ArchetypeType(params Type[] componentTypes)
     {

@@ -4,15 +4,17 @@
 // Portions generated or assisted by AI.
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace MonoKit.Ecs.Components;
 
-public struct SpriteRenderer()
+public struct SpriteRenderer(Texture2D texture)
 {
-    public int TextureId = 0;
-    public int TextureWidth = 0;
-    public int TextureHeight = 0;
+    public Texture2D Texture = texture;
     public float TextureScale = 1;
     public Color Color = default;
     public float LayerDepth = 0;
+
+    public int TextureWidth => Texture.Width;
+    public int TextureHeight => Texture.Height;
 }

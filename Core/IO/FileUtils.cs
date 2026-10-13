@@ -11,7 +11,7 @@ public class FileUtils
 {
     public static void CreateDirectory(string path)
     {
-        if (Directory.Exists(path))
+        if (Directory.Exists(path) || path == null)
             return;
         Directory.CreateDirectory(path);
     }

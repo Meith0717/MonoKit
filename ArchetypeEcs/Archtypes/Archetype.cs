@@ -12,19 +12,25 @@ namespace MonoKit.ArchetypeEcs.Archtypes;
 internal sealed class Archetype : IDisposable
 {
     private const int InitialCapacity = 16;
-    private int _capacity;
     private object[] _columns;
     private int[] _entityIds;
+    private int _capacity;
     private readonly Dictionary<Type, int> _typeToColumnIndex;
 
     internal ArchetypeType Type { get; }
     internal int RowCount { get; private set; }
 
+    /// <summary>Dense index within the ArchetypeManager, used for O(1) accessor lookups.</summary>
+    internal int Index { get; set; } = -1;
+
+    /// <summary>Incremented whenever the column arrays are reallocated.</summary>
+    internal int ColumnsVersion { get; private set; } = 1;
+
     internal Archetype(ArchetypeType type)
     {
-        Type = type;
-
         var componentTypes = type.ComponentTypes;
+
+        Type = type;
         _columns = new object[componentTypes.Length];
         _entityIds = new int[InitialCapacity];
         _capacity = InitialCapacity;
@@ -56,6 +62,7 @@ internal sealed class Archetype : IDisposable
 
         Array.Resize(ref _entityIds, newCapacity);
         _capacity = newCapacity;
+        ColumnsVersion++;
     }
 
     internal void AddRow(Entity entity, object[] components)

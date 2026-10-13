@@ -3,34 +3,13 @@
 // All rights reserved.
 // Portions generated or assisted by AI.
 
-using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoKit.Ecs;
 using MonoKit.Ecs.Entities;
-using MonoKit.Gameplay;
 
 namespace MonoKit.Graphics.Rendering;
-
-[Obsolete("Will be replaced by ECS system")]
-public interface IGameRendererProcess
-{
-    void UpdateEffects(double elapsedMilliseconds);
-
-    void DrawEffects(
-        SpriteBatch spriteBatch,
-        Matrix transformMatrix,
-        RuntimeContainer services,
-        IReadOnlyList<GameObject> gameObjects
-    );
-
-    void DrawTextures(
-        SpriteBatch spriteBatch,
-        RuntimeContainer services,
-        IReadOnlyList<GameObject> gameObjects
-    );
-}
 
 public interface IEcsGameRendererProcess
 {

@@ -19,7 +19,8 @@ internal sealed class ArchetypeManager : IDisposable
 
     internal ArchetypeManager()
     {
-        EmptyArchetype = GetOrCreateArchetype(ArchetypeType.Empty);
+        var archeTypeType = ArchetypeType.Empty;
+        EmptyArchetype = GetOrCreateArchetype(archeTypeType);
     }
 
     internal Archetype GetOrCreateArchetype(ArchetypeType archetypeType)
@@ -27,7 +28,7 @@ internal sealed class ArchetypeManager : IDisposable
         if (_archetypes.TryGetValue(archetypeType, out var archetype))
             return archetype;
 
-        archetype = new Archetype(archetypeType);
+        archetype = new Archetype(archetypeType) { Index = _archetypes.Count };
         _archetypes[archetypeType] = archetype;
 
         foreach (var componentType in archetypeType.ComponentTypes)

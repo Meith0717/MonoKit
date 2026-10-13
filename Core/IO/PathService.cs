@@ -29,11 +29,12 @@ public class PathService<TPathId>
 
     public string RootPath { get; }
 
-    public void RegisterPath(TPathId id, string relativePath)
+    public PathService<TPathId> RegisterPath(TPathId id, string relativePath)
     {
         var fullPath = Path.Combine(RootPath, relativePath);
         FileUtils.CreateDirectory(fullPath);
         _paths[id] = fullPath;
+        return this;
     }
 
     public string GetPath(TPathId id)

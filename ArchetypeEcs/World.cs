@@ -6,13 +6,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using JetBrains.Annotations;
-using Microsoft.Xna.Framework;
 using MonoKit.ArchetypeEcs.Archtypes;
 using MonoKit.ArchetypeEcs.Entities;
 using MonoKit.ArchetypeEcs.Systems;
-using MonoKit.Gameplay;
-using MonoKit.Input;
 
 namespace MonoKit.ArchetypeEcs;
 
@@ -36,46 +32,43 @@ public sealed class World : IDisposable
 {
     private readonly List<ISystem> _systems = [];
     private readonly EntityManager _entityManager = new();
-    private readonly EntityRecords _entityRecords = new();
+    internal readonly EntityRecords EntityRecords = new();
     internal readonly ArchetypeManager ArchetypeManager = new();
+    private readonly Dictionary<Type, object> _accessorCache = [];
 
     public int EntityCount => _entityManager.Count;
     public int ArchetypeCount => ArchetypeManager.ArchetypeCount;
 
-    public void AddSystem(ISystem system)
+    internal void AddSystem(ISystem system)
     {
         _systems.Add(system);
         system.Initialize(this);
     }
 
-    public void Update(
-        double elapsedMs,
-        RuntimeContainer runtimeContainer,
-        InputHandler inputHandler
-    )
+    public void Update(double elapsedMs)
     {
         foreach (var system in _systems)
             if (system is IUpdateSystem updateSystem)
-                updateSystem.Update(elapsedMs, this, runtimeContainer, inputHandler);
+                updateSystem.Update(elapsedMs, this);
     }
 
-    public void Draw(double elapsedMs, World world)
+    public void Draw(double elapsedMs)
     {
         foreach (var system in _systems)
             if (system is IDrawSystem drawSystem)
-                drawSystem.Draw(elapsedMs, world);
+                drawSystem.Draw(elapsedMs, this);
     }
 
     public bool DestroyEntity(Entity entity)
     {
-        if (!_entityRecords.TryGetLocation(entity, out var archetype, out var row))
+        if (!EntityRecords.TryGetLocation(entity, out var archetype, out var row))
             return false;
 
         var lastEntity = archetype.RemoveRow(row);
         if (lastEntity.HasValue)
-            _entityRecords.SetEntityLocation(lastEntity.Value, archetype, row);
+            EntityRecords.SetEntityLocation(lastEntity.Value, archetype, row);
 
-        _entityRecords.Remove(entity);
+        EntityRecords.Remove(entity);
         _entityManager.Destroy(entity);
 
         foreach (var system in _systems)
@@ -90,7 +83,7 @@ public sealed class World : IDisposable
         var entity = _entityManager.Create();
         var row = ArchetypeManager.EmptyArchetype.RowCount;
         ArchetypeManager.EmptyArchetype.AddRow(entity, []);
-        _entityRecords.SetEntityLocation(entity, ArchetypeManager.EmptyArchetype, row);
+        EntityRecords.SetEntityLocation(entity, ArchetypeManager.EmptyArchetype, row);
         return entity;
     }
 
@@ -117,7 +110,7 @@ public sealed class World : IDisposable
         var entity = _entityManager.Create();
         var row = archetype.RowCount;
         archetype.AddRow(entity, components);
-        _entityRecords.SetEntityLocation(entity, archetype, row);
+        EntityRecords.SetEntityLocation(entity, archetype, row);
         return entity;
     }
 
@@ -146,7 +139,7 @@ public sealed class World : IDisposable
 
     public void AddComponent(Entity entity, params object[] components)
     {
-        if (!_entityRecords.TryGetLocation(entity, out var oldArchetype, out var oldRow))
+        if (!EntityRecords.TryGetLocation(entity, out var oldArchetype, out var oldRow))
             throw new ArgumentException("Entity does not exist");
 
         if (components == null || components.Length == 0)
@@ -195,17 +188,17 @@ public sealed class World : IDisposable
         // Move entity
         var movedEntity = oldArchetype.RemoveRow(oldRow);
         if (movedEntity.HasValue)
-            _entityRecords.SetEntityLocation(movedEntity.Value, oldArchetype, oldRow);
+            EntityRecords.SetEntityLocation(movedEntity.Value, oldArchetype, oldRow);
 
         var newRow = newArchetype.RowCount;
         newArchetype.AddRow(entity, newComponents);
-        _entityRecords.SetEntityLocation(entity, newArchetype, newRow);
+        EntityRecords.SetEntityLocation(entity, newArchetype, newRow);
     }
 
     public void RemoveComponent<T>(Entity entity)
         where T : struct
     {
-        if (!_entityRecords.TryGetLocation(entity, out var oldArchetype, out var oldRow))
+        if (!EntityRecords.TryGetLocation(entity, out var oldArchetype, out var oldRow))
             throw new ArgumentException("Entity does not exist or has been destroyed");
 
         var oldType = oldArchetype.Type;
@@ -242,25 +235,42 @@ public sealed class World : IDisposable
         // Move entity to new archetype
         var movedEntity = oldArchetype.RemoveRow(oldRow);
         if (movedEntity.HasValue)
-            _entityRecords.SetEntityLocation(movedEntity.Value, oldArchetype, oldRow);
+            EntityRecords.SetEntityLocation(movedEntity.Value, oldArchetype, oldRow);
 
         var newRow = newArchetype.RowCount;
         newArchetype.AddRow(entity, newComponents);
-        _entityRecords.SetEntityLocation(entity, newArchetype, newRow);
+        EntityRecords.SetEntityLocation(entity, newArchetype, newRow);
     }
 
     public ref T GetComponent<T>(Entity entity)
         where T : struct
     {
-        if (!_entityRecords.TryGetLocation(entity, out var archetype, out var row))
+        if (!EntityRecords.TryGetLocation(entity, out var archetype, out var row))
             throw new ArgumentException("Entity does not exist or has been destroyed");
         return ref archetype.Get<T>(row);
+    }
+
+    /// <summary>
+    /// Returns a cached accessor for fast random access to all components of type T.
+    /// One instance per type per world, created on first call; reads are
+    /// dictionary-free array indexing. Safe to hold across frames and structural
+    /// changes (archetype growth and new archetypes are detected via version checks).
+    /// </summary>
+    public ComponentAccessor<T> CreateAccessor<T>()
+        where T : struct
+    {
+        if (_accessorCache.TryGetValue(typeof(T), out var cached))
+            return (ComponentAccessor<T>)cached;
+
+        var accessor = new ComponentAccessor<T>(this);
+        _accessorCache[typeof(T)] = accessor;
+        return accessor;
     }
 
     public bool HasComponent<T>(Entity entity)
         where T : struct
     {
-        return _entityRecords.TryGetLocation(entity, out var archetype, out _)
+        return EntityRecords.TryGetLocation(entity, out var archetype, out _)
             && archetype.Contains(typeof(T));
     }
 
@@ -388,8 +398,9 @@ public sealed class World : IDisposable
     public void Dispose()
     {
         ArchetypeManager.Dispose();
-        _entityRecords.Dispose();
+        EntityRecords.Dispose();
         _entityManager.Dispose();
+        _accessorCache.Clear();
         _systems.Clear();
     }
 
