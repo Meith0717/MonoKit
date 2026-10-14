@@ -86,10 +86,6 @@ internal sealed class Archetype : IDisposable
         RowCount++;
     }
 
-    /// <summary>
-    /// Removes the row with swap-remove. Returns the entity moved into
-    /// <paramref name="row"/> from the last row, or null when the removed row was the last one.
-    /// </summary>
     internal Entity? RemoveRow(int row)
     {
         Entity? movedEntity = null;

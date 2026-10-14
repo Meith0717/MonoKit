@@ -96,12 +96,6 @@ public sealed class SpatialSorter<TPos>(float cellSize, Func<TPos, Vector3> getP
     }
 }
 
-/// <summary>
-/// Frame counter shared between a <see cref="SpatialQueryContext{TPos}"/> and the
-/// <see cref="SpatialField{TPos}"/> / <see cref="ComponentCache{T}"/> views it hands out.
-/// Any access through a view from an older frame throws instead of silently
-/// reading reused buffers.
-/// </summary>
 public sealed class SpatialEpoch
 {
     internal int Current;
@@ -109,11 +103,6 @@ public sealed class SpatialEpoch
     internal void Next() => Current++;
 }
 
-/// <summary>
-/// A view over the spatial snapshot of one frame. Valid only until the next
-/// <see cref="SpatialQueryContext{TPos}.BeginFrame"/> call; check
-/// <see cref="SpatialQueryContext{TPos}.IsValid"/> before reusing a captured field.
-/// </summary>
 public readonly struct SpatialField<TPos>
     where TPos : struct
 {
@@ -151,34 +140,18 @@ public readonly struct SpatialField<TPos>
         _getPosition = getPosition;
     }
 
-    /// <summary>The Morton-sorted positions. Indices are valid for the whole field.</summary>
     public TPos[] Positions => _positions;
 
     public TPos GetPosition(int index) => _positions[index];
 
     public Entity GetEntity(int index) => _entityIds[index];
 
-    /// <summary>
-    /// Collects all indices within <paramref name="radius"/> of the entity at
-    /// <paramref name="index"/>. The result includes the querying entity itself.
-    /// </summary>
     public void GetNeighbors(int index, float radius, List<int> results) =>
         _grid.GetInRadius(_getPosition(_positions[index]), radius, results);
 
-    /// <summary>
-    /// Collects all indices within <paramref name="radius"/> of the position.
-    /// When querying an entity's own position, the result includes that entity.
-    /// </summary>
     public void GetNeighbors(Vector3 position, float radius, List<int> results) =>
         _grid.GetInRadius(position, radius, results);
 
-    /// <summary>
-    /// Resolves the <typeparamref name="T"/> column of every archetype in the
-    /// snapshot once, so per-access lookups are plain array reads. Archetypes
-    /// without the component keep a null column; check <see cref="ComponentCache{T}.Has"/>.
-    /// Call this once before iterating, not per entity. The cache is only valid
-    /// for the frame it was created in.
-    /// </summary>
     public ComponentCache<T> Cache<T>(SpatialEpoch epoch)
         where T : struct
     {
@@ -192,13 +165,6 @@ public readonly struct SpatialField<TPos>
     }
 }
 
-/// <summary>
-/// Per-frame random-access view on one component type over the spatial
-/// snapshot. One access costs two sequential int reads, one null check and
-/// one array read; there are no dictionary lookups, no boxing and no
-/// per-entity record lookups. Accesses from an older frame throw
-/// <see cref="InvalidOperationException"/>.
-/// </summary>
 public readonly struct ComponentCache<T>
     where T : struct
 {
@@ -250,7 +216,6 @@ public readonly struct ComponentCache<T>
         return true;
     }
 
-    /// <summary>Writable access. Check <see cref="Has"/> first when the component is optional.</summary>
     public ref T GetRef(int index)
     {
         ThrowIfStale();

@@ -24,8 +24,6 @@ internal sealed class RowGrid3D<TPos>
     private long[] _keys = [];
     private int[] _order = [];
 
-    // Morton-sorted positions captured by the last Prepare call; used for
-    // radius culling in GetInRadius as plain float math (no delegate calls).
     private Vector3[] _vecPositions = [];
 
     public float CellSize { get; }
@@ -117,12 +115,6 @@ internal sealed class RowGrid3D<TPos>
         _ranges[CellKey(cx, cy, cz)] = new CellRange(start, rowCount - start);
     }
 
-    /// <summary>
-    /// Collects the sorted indices of all entities within <paramref name="radius"/>
-    /// of <paramref name="center"/>. Candidates from overlapping cells are culled
-    /// by exact distance, so every returned index satisfies r² &lt; radius².
-    /// The result includes the querying entity itself when querying its own position.
-    /// </summary>
     public void GetInRadius(Vector3 center, float radius, List<int> results)
     {
         results.Clear();

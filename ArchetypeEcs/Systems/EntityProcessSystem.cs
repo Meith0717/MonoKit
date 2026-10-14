@@ -33,7 +33,7 @@ public abstract class EntityProcessSystem<T1> : IUpdateSystem, IEntityProcessSys
                 if (!archetype.TryGetColumn(componentType, out var column))
                     continue;
                 var columnArray = (T1[])column;
-                var rowCount = archetype.RowCount; // snapshot: rows added during iteration are skipped
+                var rowCount = archetype.RowCount;
                 for (var row = 0; row < rowCount; row++)
                     Process(elapsedMs, world, ref columnArray[row]);
             }
@@ -83,7 +83,7 @@ public abstract class EntityProcessSystem<T1, T2> : IUpdateSystem, IEntityProces
 
                 var col1Array = (T1[])column1;
                 var col2Array = (T2[])column2;
-                var rowCount = archetype.RowCount; // snapshot: rows added during iteration are skipped
+                var rowCount = archetype.RowCount;
                 for (var row = 0; row < rowCount; row++)
                     Process(elapsedMs, world, ref col1Array[row], ref col2Array[row]);
             }
@@ -136,7 +136,7 @@ public abstract class EntityProcessSystem<T1, T2, T3> : IUpdateSystem, IEntityPr
                 var col1Array = (T1[])column1;
                 var col2Array = (T2[])column2;
                 var col3Array = (T3[])column3;
-                var rowCount = archetype.RowCount; // snapshot: rows added during iteration are skipped
+                var rowCount = archetype.RowCount;
                 for (var row = 0; row < rowCount; row++)
                     Process(
                         elapsedMs,
@@ -199,7 +199,7 @@ public abstract class EntityProcessSystem<T1, T2, T3, T4> : IUpdateSystem, IEnti
                 var col2Array = (T2[])column2;
                 var col3Array = (T3[])column3;
                 var col4Array = (T4[])column4;
-                var rowCount = archetype.RowCount; // snapshot: rows added during iteration are skipped
+                var rowCount = archetype.RowCount;
                 for (var row = 0; row < rowCount; row++)
                     Process(
                         elapsedMs,

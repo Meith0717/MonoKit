@@ -40,7 +40,7 @@ internal class EntityManager
             return false;
 
         _alive[entity.Id] = false;
-        _generations[entity.Id]++; // invalidates all outstanding handles with the old generation
+        _generations[entity.Id]++;
         _freeIds.Push(entity.Id);
         Count--;
         return true;

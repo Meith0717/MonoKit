@@ -2,22 +2,6 @@
 // Copyright (c) 2023-2026 Thierry Meiers
 // All rights reserved.
 // Portions generated or assisted by AI.
-//
-// Performance tests for every public ArchetypeEcs API at 100k-entity scale.
-//
-// World layout: 90k entities with (Position, Velocity, Health, Density) and
-// 10k with (Position, Velocity, Health, Density, Extra), so iteration
-// benchmarks sweep 100k rows across two archetypes.
-//
-// Structural benchmarks (create/destroy, add/remove) run self-restoring
-// batches of 1000: every invocation leaves the world in its exact starting
-// state, so thousands of iterations cannot drift. Read benchmarks sweep all
-// 100k entities per invocation. World.Dispose is a one-shot teardown and is
-// not benchmarked. RemoveComponent(Entity, Type) shares the path with the
-// generic overload and is covered by it.
-//
-// Full BenchmarkDotNet run:  dotnet run --project Benchmarks -- --apis
-// Quick single-shot timings: dotnet run --project Benchmarks -- --apismoke
 
 using System;
 using System.Collections.Generic;
@@ -58,7 +42,6 @@ public struct Extra
     public int Value;
 }
 
-/// <summary>Minimal EntityProcessSystem used by the World.Update benchmark.</summary>
 public sealed class HealthTickSystem : EntityProcessSystem<Velocity, Health>
 {
     public override void Dispose() { }
@@ -75,10 +58,6 @@ public sealed class HealthTickSystem : EntityProcessSystem<Velocity, Health>
     public override void OnEntityDestroyed(Entity entity) { }
 }
 
-/// <summary>
-/// Shared 100k-entity world used by both benchmark classes. Built once per
-/// process; benchmarks keep it in a steady state.
-/// </summary>
 internal static class ApiWorld
 {
     public const int TotalEntities = 100_000;
@@ -101,7 +80,6 @@ internal static class ApiWorld
 
         World = new WorldBuilder().Build();
 
-        // Packed cube so spatial neighbor queries have realistic density.
         var side = (int)MathF.Ceiling(MathF.Cbrt(TotalEntities));
         var placed = 0;
         for (var y = 0; y < side && placed < TotalEntities; y++)
@@ -150,10 +128,6 @@ internal static class ApiWorld
     }
 }
 
-/// <summary>
-/// Entity lifecycle, structural changes (immediate and deferred) and read
-/// APIs of <see cref="World"/> at 100k-entity scale.
-/// </summary>
 [Config(typeof(BenchmarkConfig))]
 public class EcsWorldApiBenchmarks
 {
@@ -277,10 +251,6 @@ public class EcsWorldApiBenchmarks
     public void WorldToString() => _sink += ApiWorld.World.ToString().Length;
 }
 
-/// <summary>
-/// Spatial query APIs at 100k-entity scale. The frame is refreshed before
-/// every iteration so results never depend on benchmark execution order.
-/// </summary>
 [Config(typeof(BenchmarkConfig))]
 public class EcsSpatialApiBenchmarks
 {
@@ -362,6 +332,20 @@ public class EcsSpatialApiBenchmarks
         _sink += _pairs;
     }
 
+    [Benchmark(Description = "ForEachNeighborParallel all-pairs (100k entities, r=0.9)")]
+    public void ForEachNeighborParallelAllPairs()
+    {
+        ApiWorld.Spatial.ForEachNeighborParallel<Position>(
+            ApiWorld.QueryRadius,
+            (Entity entity, Entity neighbor, ref Position p) =>
+            {
+                if (p.Value.X > 1e30f)
+                    _pairs++;
+            }
+        );
+        _sink += _pairs;
+    }
+
     [Benchmark(Description = "ForEachNeighbor per-entity API (100k calls, r=0.9)")]
     public void ForEachNeighborPerEntity()
     {
@@ -377,12 +361,6 @@ public class EcsSpatialApiBenchmarks
         _sink += _pairs;
     }
 
-    /// <summary>
-    /// Neighbor query nested inside a neighbor action: 100k level-1 queries,
-    /// each of the ~13 neighbors queried again (~1.3M queries total). Measures
-    /// the scratch-buffer nesting path; expected cost is roughly
-    /// (neighbors+1) times the per-entity benchmark.
-    /// </summary>
     [Benchmark(Description = "ForEachNeighbor nested, level 2 (100k + 1.3M queries, r=0.9)")]
     public void ForEachNeighborNestedLevel2()
     {
@@ -407,11 +385,6 @@ public class EcsSpatialApiBenchmarks
     }
 }
 
-/// <summary>
-/// Runs every benchmark once (warmup + timed) with Stopwatch, without the
-/// BenchmarkDotNet harness. Also verifies that the structural benchmarks
-/// restored the world to 100k entities.
-/// </summary>
 public static class EcsApiSmoke
 {
     public static void Run()
@@ -434,7 +407,7 @@ public static class EcsApiSmoke
             foreach (var method in methods)
             {
                 refresh?.Invoke(instance, null);
-                method.Invoke(instance, null); // warmup (JIT + caches)
+                method.Invoke(instance, null);
                 refresh?.Invoke(instance, null);
 
                 var sw = Stopwatch.StartNew();

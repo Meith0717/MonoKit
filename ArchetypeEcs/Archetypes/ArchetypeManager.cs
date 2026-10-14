@@ -13,7 +13,6 @@ internal sealed class ArchetypeManager : IDisposable
     private readonly Dictionary<ArchetypeType, Archetype> _archetypes = new();
     private readonly Dictionary<Type, HashSet<Archetype>> _componentTypeToArchetypes = new();
 
-    // Snapshot arrays handed out to iteration; rebuilt lazily after a new archetype is created.
     private readonly Dictionary<Type, Archetype[]> _componentTypeToArchetypeSnapshots = new();
     private bool _snapshotsDirty;
 
@@ -45,10 +44,6 @@ internal sealed class ArchetypeManager : IDisposable
         return archetype;
     }
 
-    /// <summary>
-    /// Returns a stable snapshot of all archetypes holding <paramref name="componentType"/>.
-    /// The array stays valid across archetype creation during iteration.
-    /// </summary>
     internal Archetype[] GetArchetypesWith(Type componentType)
     {
         if (!_componentTypeToArchetypes.TryGetValue(componentType, out var set))

@@ -56,12 +56,9 @@ public sealed class World : IDisposable
     private readonly EntityRecords _entityRecords = new();
     internal readonly ArchetypeManager ArchetypeManager = new();
 
-    // Structural command buffer: while an iteration scope is active, structural
-    // changes are recorded and applied when the outermost scope ends.
     private readonly List<Command> _commands = [];
     private int _iterationDepth;
 
-    // Spatial query contexts per position component type (lazy initialized)
     private readonly Dictionary<Type, object> _spatialContexts = new();
 
     public int EntityCount => _entityManager.Count;
@@ -109,22 +106,11 @@ public sealed class World : IDisposable
         }
     }
 
-    /// <summary>
-    /// Begins an iteration scope. While at least one scope is active, structural
-    /// changes (<see cref="DestroyEntity"/>, <see cref="AddComponent"/>,
-    /// <see cref="RemoveComponent{T}"/>) are recorded instead of applied, so
-    /// iteration over archetype rows stays stable. Scopes nest.
-    /// </summary>
     public void BeginIteration()
     {
         _iterationDepth++;
     }
 
-    /// <summary>
-    /// Ends an iteration scope. When the outermost scope ends, all recorded
-    /// structural commands are applied in order. Invalid operations (e.g. adding
-    /// a component to a destroyed entity) throw at this point.
-    /// </summary>
     public void EndIteration()
     {
         if (_iterationDepth == 0)
@@ -160,10 +146,6 @@ public sealed class World : IDisposable
         }
     }
 
-    /// <summary>
-    /// Destroys the entity. Inside an iteration scope the destruction is
-    /// recorded and applied when the scope ends; the entity stays alive until then.
-    /// </summary>
     public bool DestroyEntity(Entity entity)
     {
         if (!IsAlive(entity))
@@ -232,11 +214,6 @@ public sealed class World : IDisposable
         return _entityManager.IsAlive(entity);
     }
 
-    /// <summary>
-    /// Adds components to the entity. Inside an iteration scope the change is
-    /// recorded and applied when the scope ends; the entity keeps its current
-    /// components until then.
-    /// </summary>
     public void AddComponent(Entity entity, params object[] components)
     {
         if (components == null || components.Length == 0)
@@ -289,12 +266,10 @@ public sealed class World : IDisposable
             new ArchetypeType(newComponentTypes)
         );
 
-        // Build column index mapping
         var typeToNewIndex = new Dictionary<Type, int>(newComponentTypes.Length);
         for (var i = 0; i < newComponentTypes.Length; i++)
             typeToNewIndex[newComponentTypes[i]] = i;
 
-        // Copy existing components + add new ones
         var newComponents = new object[newComponentTypes.Length];
         var oldComponents = oldArchetype.GetRowComponents(oldRow);
         for (var i = 0; i < oldComponents.Length; i++)
@@ -306,10 +281,6 @@ public sealed class World : IDisposable
         MoveEntity(entity, oldArchetype, oldRow, newArchetype, newComponents);
     }
 
-    /// <summary>
-    /// Removes a component from the entity. Inside an iteration scope the change
-    /// is recorded and applied when the scope ends.
-    /// </summary>
     public void RemoveComponent<T>(Entity entity)
         where T : struct
     {
@@ -340,7 +311,6 @@ public sealed class World : IDisposable
                 $"Entity does not have component {componentType.Name}"
             );
 
-        // Create new archetype type without the component
         var oldComponentTypes = oldArchetype.Type.ComponentTypes;
         var newComponentTypes = new Type[oldComponentTypes.Length - 1];
         var writeIndex = 0;
@@ -355,12 +325,10 @@ public sealed class World : IDisposable
                 ? ArchetypeManager.EmptyArchetype
                 : ArchetypeManager.GetOrCreateArchetype(new ArchetypeType(newComponentTypes));
 
-        // Build column index mapping for the new archetype
         var oldToNewIndex = new Dictionary<Type, int>(newComponentTypes.Length);
         for (var i = 0; i < newComponentTypes.Length; i++)
             oldToNewIndex[newComponentTypes[i]] = i;
 
-        // Copy existing components (excluding removed type)
         var newComponents = new object[newComponentTypes.Length];
         var oldComponents = oldArchetype.GetRowComponents(oldRow);
         for (var i = 0; i < oldComponents.Length; i++)
@@ -407,7 +375,7 @@ public sealed class World : IDisposable
                 if (!archetype.TryGetColumn(componentType, out var column))
                     continue;
                 var columnArray = (T1[])column;
-                var rowCount = archetype.RowCount; // snapshot: rows added during iteration are skipped
+                var rowCount = archetype.RowCount;
                 for (var row = 0; row < rowCount; row++)
                 {
                     var entity = archetype.GetEntityAt(row);
@@ -442,7 +410,7 @@ public sealed class World : IDisposable
 
                 var col1Array = (T1[])column1;
                 var col2Array = (T2[])column2;
-                var rowCount = archetype.RowCount; // snapshot: rows added during iteration are skipped
+                var rowCount = archetype.RowCount;
                 for (var row = 0; row < rowCount; row++)
                 {
                     var entity = archetype.GetEntityAt(row);
@@ -480,7 +448,7 @@ public sealed class World : IDisposable
                 var col1Array = (T1[])column1;
                 var col2Array = (T2[])column2;
                 var col3Array = (T3[])column3;
-                var rowCount = archetype.RowCount; // snapshot: rows added during iteration are skipped
+                var rowCount = archetype.RowCount;
                 for (var row = 0; row < rowCount; row++)
                 {
                     var entity = archetype.GetEntityAt(row);
@@ -522,7 +490,7 @@ public sealed class World : IDisposable
                 var col2Array = (T2[])column2;
                 var col3Array = (T3[])column3;
                 var col4Array = (T4[])column4;
-                var rowCount = archetype.RowCount; // snapshot: rows added during iteration are skipped
+                var rowCount = archetype.RowCount;
                 for (var row = 0; row < rowCount; row++)
                 {
                     var entity = archetype.GetEntityAt(row);
@@ -559,12 +527,6 @@ public sealed class World : IDisposable
         _iterationDepth = 0;
     }
 
-    // ========== SPATIAL QUERY ==========
-
-    /// <summary>
-    /// Gets or creates the spatial query context for the position component
-    /// <typeparamref name="TPos"/>. Use this for neighbor queries.
-    /// </summary>
     public SpatialQueryContext<TPos> SpatialQueries<TPos>()
         where TPos : struct
     {
@@ -575,8 +537,6 @@ public sealed class World : IDisposable
         _spatialContexts[typeof(TPos)] = context;
         return context;
     }
-
-    // ========== END SPATIAL QUERY ==========
 
     public override string ToString()
     {

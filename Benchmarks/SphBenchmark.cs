@@ -2,12 +2,10 @@
 // Copyright (c) 2023-2026 Thierry Meiers
 // All rights reserved.
 // Portions generated or assisted by AI.
-//
-// Benchmarks for an SPH fluid simulation (poly6 / spiky / viscosity kernels)
-// with 100k particles on top of the ArchetypeEcs spatial query pipeline.
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnosers;
@@ -33,13 +31,12 @@ public struct Density { public float Value; }
 public struct Pressure { public float Value; }
 public struct Accel { public Vector3 Value; }
 
-/// <summary>SPH constants and kernel coefficients (poly6, spiky, viscosity laplacian).</summary>
 public static class Sph
 {
-    public const float H = 1.2f;             // smoothing radius
-    public const float Spacing = 0.6f;       // initial particle spacing
-    public const float Mass = 0.2137f;       // particle mass (rest density ~1.0)
-    public const float Stiffness = 25f;      // pressure: P = k (rho - rho0)
+    public const float H = 1.2f;
+    public const float Spacing = 0.6f;
+    public const float Mass = 0.2137f;
+    public const float Stiffness = 25f;
     public const float Viscosity = 0.06f;
     public const float Dt = 1f / 120f;
 
@@ -47,24 +44,15 @@ public static class Sph
 
     public const float H2 = H * H;
 
-    // poly6: W(r) = 315/(64 pi h^9) (h^2 - r^2)^3
     public static readonly float Poly6 = 315f / (64f * MathF.PI * MathF.Pow(H, 9));
 
-    // spiky gradient magnitude (excluding direction): 45/(pi h^6) (h - r)^2
     public static readonly float SpikyGrad = 45f / (MathF.PI * MathF.Pow(H, 6));
 
-    // viscosity laplacian: 45/(pi h^6) (h - r)
     public static readonly float ViscLap = 45f / (MathF.PI * MathF.Pow(H, 6));
 }
 
 #endregion
 
-/// <summary>
-/// The SPH simulation on top of the ECS: spawns particles into a world,
-/// builds the spatial frame each step, and provides the individual passes.
-/// Positions are only mutated by <see cref="Step"/> and
-/// <see cref="IntegratePass"/>; the pure passes keep the neighbor topology stable.
-/// </summary>
 public sealed class SphWorld : IDisposable
 {
     public readonly MonoKit.ArchetypeEcs.World World = new WorldBuilder().Build();
@@ -73,6 +61,27 @@ public sealed class SphWorld : IDisposable
     public float RestDensity;
 
     private readonly List<int> _neighbors = new(4096);
+
+    private Vector3[][] _parallelAccelBuffers = [];
+    private List<int>[] _parallelNeighborLists = [];
+
+    private void EnsureParallelBuffers(int count)
+    {
+        var threads = Environment.ProcessorCount;
+        if (
+            _parallelAccelBuffers.Length == threads
+            && _parallelAccelBuffers[0].Length >= count
+        )
+            return;
+
+        _parallelAccelBuffers = new Vector3[threads][];
+        _parallelNeighborLists = new List<int>[threads];
+        for (var t = 0; t < threads; t++)
+        {
+            _parallelAccelBuffers[t] = new Vector3[count];
+            _parallelNeighborLists[t] = new List<int>(256);
+        }
+    }
 
     public SphWorld(int particleCount)
     {
@@ -127,15 +136,8 @@ public sealed class SphWorld : IDisposable
 
     public void Dispose() => World.Dispose();
 
-    // ========== passes ==========
-
-    /// <summary>Rebuilds the spatial frame: gather, Morton sort, cell ranges.</summary>
     public void BuildFrame() => Spatial.BeginFrame(World, Sph.H, p => p.Position);
 
-    /// <summary>
-    /// Density pass through the raw field API with a hoisted neighbor buffer.
-    /// This is the hot path a performance-focused SPH implementation should use.
-    /// </summary>
     public void DensityPass()
     {
         var field = Spatial.Field;
@@ -162,11 +164,6 @@ public sealed class SphWorld : IDisposable
         }
     }
 
-    /// <summary>
-    /// Density pass through the per-entity neighbor API
-    /// (World.ForEach + Spatial.ForEachNeighbor per entity).
-    /// Measures the convenience path, including its per-call allocation.
-    /// </summary>
     public void DensityPassPerEntityApi()
     {
         World.ForEach<Particle, Density>((Entity entity, ref Particle p, ref Density rho) =>
@@ -185,7 +182,6 @@ public sealed class SphWorld : IDisposable
         });
     }
 
-    /// <summary>Pressure from density: P = k (rho - rho0).</summary>
     public void UpdatePressure()
     {
         var rest = RestDensity;
@@ -194,10 +190,6 @@ public sealed class SphWorld : IDisposable
         );
     }
 
-    /// <summary>
-    /// Pressure (spiky) and viscosity (laplacian) forces over symmetric pairs
-    /// (i &lt; j), writing both sides through the component caches.
-    /// </summary>
     public void ForcesPass()
     {
         var field = Spatial.Field;
@@ -225,7 +217,7 @@ public sealed class SphWorld : IDisposable
             foreach (var n in neighbors)
             {
                 if (n <= i)
-                    continue; // symmetric pairs: each unordered pair once
+                    continue;
                 var d = positions[n].Position - pi;
                 var r2 = d.LengthSquared();
                 if (r2 >= h2)
@@ -237,7 +229,6 @@ public sealed class SphWorld : IDisposable
                 var rhoj = MathF.Max(density.GetRef(n).Value, 1e-6f);
                 var prj = pressure.GetRef(n).Value;
 
-                // pressure force (spiky gradient), repulsive for P > 0
                 var fCoef = Sph.Mass
                     * (pri + prj)
                     / (2f * rhoi * rhoj)
@@ -249,7 +240,6 @@ public sealed class SphWorld : IDisposable
                 acci -= f;
                 accel.GetRef(n).Value += f;
 
-                // viscosity force (laplacian), momentum-conserving pair form
                 var vCoef = Sph.Viscosity * Sph.Mass / rhoj * Sph.ViscLap * (Sph.H - r);
                 var dv = velocity.GetRef(n).Value - vi;
                 acci += dv * vCoef;
@@ -260,10 +250,135 @@ public sealed class SphWorld : IDisposable
         }
     }
 
-    /// <summary>
-    /// Semi-implicit Euler: v += (a + g) dt, then x += v dt with a damped ground
-    /// plane at y = 0. Pass movePositions = false to keep positions unchanged.
-    /// </summary>
+    public void DensityPassParallel()
+    {
+        var field = Spatial.Field;
+        var positions = field.Positions;
+        var density = Spatial.GetComponentCache<Density>();
+        var count = field.Count;
+        var h2 = Sph.H2;
+
+        EnsureParallelBuffers(count);
+        var threads = _parallelAccelBuffers.Length;
+
+        Parallel.For(
+            0,
+            threads,
+            t =>
+            {
+                var neighbors = _parallelNeighborLists[t];
+                var start = (int)((long)count * t / threads);
+                var end = (int)((long)count * (t + 1) / threads);
+
+                for (var i = start; i < end; i++)
+                {
+                    field.GetNeighbors(i, Sph.H, neighbors);
+                    var pi = positions[i].Position;
+                    float sum = 0f;
+                    foreach (var n in neighbors)
+                    {
+                        var r2 = Vector3.DistanceSquared(pi, positions[n].Position);
+                        if (r2 >= h2)
+                            continue;
+                        var tt = h2 - r2;
+                        sum += tt * tt * tt;
+                    }
+                    density.GetRef(i).Value = sum * Sph.Mass * Sph.Poly6;
+                }
+            }
+        );
+    }
+
+    public void ForcesPassParallel()
+    {
+        var field = Spatial.Field;
+        var positions = field.Positions;
+        var density = Spatial.GetComponentCache<Density>();
+        var pressure = Spatial.GetComponentCache<Pressure>();
+        var velocity = Spatial.GetComponentCache<Velocity>();
+        var accel = Spatial.GetComponentCache<Accel>();
+        var count = field.Count;
+        var h2 = Sph.H2;
+
+        EnsureParallelBuffers(count);
+        var buffers = _parallelAccelBuffers;
+        var threads = buffers.Length;
+
+        Parallel.For(
+            0,
+            threads,
+            t =>
+            {
+                var acc = buffers[t];
+                Array.Clear(acc, 0, count);
+                var neighbors = _parallelNeighborLists[t];
+                var start = (int)((long)count * t / threads);
+                var end = (int)((long)count * (t + 1) / threads);
+
+                for (var i = start; i < end; i++)
+                {
+                    var pi = positions[i].Position;
+                    var vi = velocity.GetRef(i).Value;
+                    var rhoi = MathF.Max(density.GetRef(i).Value, 1e-6f);
+                    var pri = pressure.GetRef(i).Value;
+                    var acci = Vector3.Zero;
+
+                    field.GetNeighbors(i, Sph.H, neighbors);
+                    foreach (var n in neighbors)
+                    {
+                        if (n <= i)
+                            continue;
+                        var d = positions[n].Position - pi;
+                        var r2 = d.LengthSquared();
+                        if (r2 >= h2)
+                            continue;
+                        var r = MathF.Sqrt(r2);
+                        if (r < 1e-6f)
+                            continue;
+
+                        var rhoj = MathF.Max(density.GetRef(n).Value, 1e-6f);
+                        var prj = pressure.GetRef(n).Value;
+
+                        var fCoef = Sph.Mass
+                            * (pri + prj)
+                            / (2f * rhoi * rhoj)
+                            * Sph.SpikyGrad
+                            * (Sph.H - r)
+                            * (Sph.H - r)
+                            / r;
+                        var f = d * fCoef;
+                        acci -= f;
+                        acc[n] += f;
+
+                        var vCoef = Sph.Viscosity * Sph.Mass / rhoj * Sph.ViscLap * (Sph.H - r);
+                        var dv = velocity.GetRef(n).Value - vi;
+                        acci += dv * vCoef;
+                        acc[n] -= dv * vCoef;
+                    }
+
+                    acc[i] += acci;
+                }
+            }
+        );
+
+        for (var i = 0; i < count; i++)
+        {
+            var sum = Vector3.Zero;
+            for (var t = 0; t < threads; t++)
+                sum += buffers[t][i];
+            accel.GetRef(i).Value = sum;
+        }
+    }
+
+    public void StepParallel()
+    {
+        BuildFrame();
+        DensityPassParallel();
+        UpdatePressure();
+        ForcesPassParallel();
+        IntegratePass(true);
+    }
+
     public void IntegratePass(bool movePositions)
     {
         World.ForEach<Velocity, Accel>((Entity entity, ref Velocity v, ref Accel a) =>
@@ -286,7 +401,6 @@ public sealed class SphWorld : IDisposable
         });
     }
 
-    /// <summary>One full SPH step: frame, density, pressure, forces, integration.</summary>
     public void Step()
     {
         BuildFrame();
@@ -296,7 +410,6 @@ public sealed class SphWorld : IDisposable
         IntegratePass(true);
     }
 
-    /// <summary>Runs a correctness smoke check and prints per-pass timings.</summary>
     public void RunSmoke(int steps)
     {
         Console.WriteLine($"Smoke: {ParticleCount} particles, rest density {RestDensity:F3}");
@@ -310,11 +423,25 @@ public sealed class SphWorld : IDisposable
             $"  first step: frame {frame:F1} ms, density {density:F1} ms, pressure {pressure:F1} ms, forces {forces:F1} ms, integrate {integrate:F1} ms"
         );
 
+        var densityParallel = Time("DensityPassParallel", () => DensityPassParallel());
+        var forcesParallel = Time("ForcesPassParallel", () => ForcesPassParallel());
+        Console.WriteLine(
+            $"  parallel:  density {densityParallel:F1} ms ({density / densityParallel:F1}x), forces {forcesParallel:F1} ms ({forces / forcesParallel:F1}x)"
+        );
+
         var sw = System.Diagnostics.Stopwatch.StartNew();
         for (var i = 0; i < steps; i++)
             Step();
         sw.Stop();
         Console.WriteLine($"  {steps} full steps in {sw.Elapsed.TotalMilliseconds:F0} ms ({sw.Elapsed.TotalMilliseconds / steps:F1} ms/step)");
+
+        sw.Restart();
+        for (var i = 0; i < steps; i++)
+            StepParallel();
+        sw.Stop();
+        Console.WriteLine(
+            $"  {steps} parallel steps in {sw.Elapsed.TotalMilliseconds:F0} ms ({sw.Elapsed.TotalMilliseconds / steps:F1} ms/step)"
+        );
 
         var bad = 0;
         World.ForEach<Particle>((Entity entity, ref Particle p) =>
@@ -328,7 +455,7 @@ public sealed class SphWorld : IDisposable
 
     private static double Time(string name, Action action)
     {
-        action(); // warmup (JIT + caches)
+        action();
         var sw = System.Diagnostics.Stopwatch.StartNew();
         action();
         return sw.Elapsed.TotalMilliseconds;
@@ -341,9 +468,6 @@ public class BenchmarkConfig : ManualConfig
 {
     public BenchmarkConfig()
     {
-        // In-process toolchain avoids BenchmarkDotNet's generated projects
-        // (the referenced library depends on MonoGame); ShortRun keeps the
-        // suite fast for 100k-particle macro benchmarks.
         AddJob(Job.ShortRun.WithToolchain(InProcessEmitToolchain.Instance));
         AddDiagnoser(MemoryDiagnoser.Default);
         AddColumnProvider(DefaultColumnProviders.Instance);
@@ -378,11 +502,20 @@ public class SphBenchmarks
     [Benchmark(Description = "PressureViscosityPass/SymmetricPairs")]
     public void ForcesPass() => _sim.ForcesPass();
 
+    [Benchmark(Description = "DensityPass/Parallel")]
+    public void DensityPassParallel() => _sim.DensityPassParallel();
+
+    [Benchmark(Description = "PressureViscosityPass/SymmetricPairsParallel")]
+    public void ForcesPassParallel() => _sim.ForcesPassParallel();
+
     [Benchmark(Description = "IntegratePass/World.ForEach")]
     public void IntegratePass() => _sim.IntegratePass(true);
 
     [Benchmark(Description = "FullSphStep (frame+density+forces+integrate)")]
     public void FullSphStep() => _sim.Step();
+
+    [Benchmark(Description = "FullSphStepParallel (frame+density+forces+integrate)")]
+    public void FullSphStepParallel() => _sim.StepParallel();
 }
 
 #endregion
