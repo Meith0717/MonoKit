@@ -6,12 +6,16 @@
 using System;
 using System.Collections.Generic;
 
-namespace MonoKit.ArchetypeEcs.Archtypes;
+namespace MonoKit.ArchetypeEcs.Archetypes;
 
 internal sealed class ArchetypeManager : IDisposable
 {
     private readonly Dictionary<ArchetypeType, Archetype> _archetypes = new();
     private readonly Dictionary<Type, HashSet<Archetype>> _componentTypeToArchetypes = new();
+
+    // Snapshot arrays handed out to iteration; rebuilt lazily after a new archetype is created.
+    private readonly Dictionary<Type, Archetype[]> _componentTypeToArchetypeSnapshots = new();
+    private bool _snapshotsDirty;
 
     internal Archetype EmptyArchetype { get; }
 
@@ -19,8 +23,7 @@ internal sealed class ArchetypeManager : IDisposable
 
     internal ArchetypeManager()
     {
-        var archeTypeType = ArchetypeType.Empty;
-        EmptyArchetype = GetOrCreateArchetype(archeTypeType);
+        EmptyArchetype = GetOrCreateArchetype(ArchetypeType.Empty);
     }
 
     internal Archetype GetOrCreateArchetype(ArchetypeType archetypeType)
@@ -30,6 +33,7 @@ internal sealed class ArchetypeManager : IDisposable
 
         archetype = new Archetype(archetypeType);
         _archetypes[archetypeType] = archetype;
+        _snapshotsDirty = true;
 
         foreach (var componentType in archetypeType.ComponentTypes)
         {
@@ -41,10 +45,24 @@ internal sealed class ArchetypeManager : IDisposable
         return archetype;
     }
 
-    internal IReadOnlyCollection<Archetype> GetArchetypesWith(Type componentType)
+    /// <summary>
+    /// Returns a stable snapshot of all archetypes holding <paramref name="componentType"/>.
+    /// The array stays valid across archetype creation during iteration.
+    /// </summary>
+    internal Archetype[] GetArchetypesWith(Type componentType)
     {
-        _componentTypeToArchetypes.TryGetValue(componentType, out var set);
-        return set;
+        if (!_componentTypeToArchetypes.TryGetValue(componentType, out var set))
+            return [];
+
+        if (_snapshotsDirty)
+        {
+            _componentTypeToArchetypeSnapshots.Clear();
+            _snapshotsDirty = false;
+        }
+
+        if (!_componentTypeToArchetypeSnapshots.TryGetValue(componentType, out var snapshot))
+            _componentTypeToArchetypeSnapshots[componentType] = snapshot = [.. set];
+        return snapshot;
     }
 
     internal IEnumerable<Archetype> Archetypes => _archetypes.Values;
@@ -55,5 +73,7 @@ internal sealed class ArchetypeManager : IDisposable
             archetype.Dispose();
         _archetypes.Clear();
         _componentTypeToArchetypes.Clear();
+        _componentTypeToArchetypeSnapshots.Clear();
+        _snapshotsDirty = false;
     }
 }

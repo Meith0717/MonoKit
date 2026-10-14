@@ -11,6 +11,7 @@ internal class EntityManager
 {
     private int _nextId = 0;
     private readonly Stack<int> _freeIds = new();
+    private readonly List<int> _generations = new();
     private readonly List<bool> _alive = new();
 
     internal int Count { get; private set; }
@@ -21,29 +22,25 @@ internal class EntityManager
         if (_freeIds.Count > 0)
         {
             id = _freeIds.Pop();
-            if (id >= _alive.Count)
-                _alive.Add(true);
-            else
-                _alive[id] = true;
+            _alive[id] = true;
         }
         else
         {
             id = _nextId++;
             _alive.Add(true);
+            _generations.Add(0);
         }
         Count++;
-        return new Entity(id);
+        return new Entity(id, _generations[id]);
     }
 
     internal bool Destroy(Entity entity)
     {
-        if (entity.Id < 0 || entity.Id >= _alive.Count)
-            return false;
-
-        if (!_alive[entity.Id])
+        if (!IsValidHandle(entity))
             return false;
 
         _alive[entity.Id] = false;
+        _generations[entity.Id]++; // invalidates all outstanding handles with the old generation
         _freeIds.Push(entity.Id);
         Count--;
         return true;
@@ -51,12 +48,20 @@ internal class EntityManager
 
     internal bool IsAlive(Entity entity)
     {
-        return entity.Id >= 0 && entity.Id < _alive.Count && _alive[entity.Id];
+        return IsValidHandle(entity) && _alive[entity.Id];
+    }
+
+    private bool IsValidHandle(Entity entity)
+    {
+        return entity.Id >= 0
+            && entity.Id < _alive.Count
+            && entity.Generation == _generations[entity.Id];
     }
 
     public void Dispose()
     {
         _nextId = 0;
+        _generations.Clear();
         _alive.Clear();
         _freeIds.Clear();
         Count = 0;

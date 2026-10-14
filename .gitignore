@@ -140,3 +140,6 @@ TestResult.xml
 ###############################################################################
 node_modules/
 bower_components/
+
+# BenchmarkDotNet results
+BenchmarkDotNet.Artifacts/

@@ -5,17 +5,16 @@
 
 using System;
 using System.Collections.Generic;
-using MonoKit.ArchetypeEcs;
 using MonoKit.ArchetypeEcs.Entities;
 using MonoKit.ArchetypeEcs.SpatialQueries;
 
-namespace MonoKit.ArchetypeEcs.Archtypes;
+namespace MonoKit.ArchetypeEcs.Archetypes;
 
 internal sealed class Archetype : IDisposable
 {
     private const int InitialCapacity = 16;
     private object[] _columns;
-    private int[] _entityIds;
+    private Entity[] _entityIds;
     private int _capacity;
     private readonly Dictionary<Type, int> _typeToColumnIndex;
 
@@ -28,7 +27,7 @@ internal sealed class Archetype : IDisposable
 
         Type = type;
         _columns = new object[componentTypes.Length];
-        _entityIds = new int[InitialCapacity];
+        _entityIds = new Entity[InitialCapacity];
         _capacity = InitialCapacity;
         _typeToColumnIndex = new Dictionary<Type, int>(componentTypes.Length);
 
@@ -68,7 +67,7 @@ internal sealed class Archetype : IDisposable
             );
 
         EnsureCapacity(RowCount);
-        _entityIds[RowCount] = entity.Id;
+        _entityIds[RowCount] = entity;
 
         for (var i = 0; i < components.Length; i++)
         {
@@ -87,15 +86,17 @@ internal sealed class Archetype : IDisposable
         RowCount++;
     }
 
+    /// <summary>
+    /// Removes the row with swap-remove. Returns the entity moved into
+    /// <paramref name="row"/> from the last row, or null when the removed row was the last one.
+    /// </summary>
     internal Entity? RemoveRow(int row)
     {
-        Entity? lastEntity = null;
+        Entity? movedEntity = null;
         if (row < RowCount - 1)
         {
-            var lastEntityId = _entityIds[RowCount - 1];
-            if (lastEntityId >= 0)
-                lastEntity = new Entity(lastEntityId);
-            _entityIds[row] = lastEntityId;
+            movedEntity = _entityIds[RowCount - 1];
+            _entityIds[row] = movedEntity.Value;
             foreach (var t in _columns)
             {
                 var column = (Array)t;
@@ -104,10 +105,10 @@ internal sealed class Archetype : IDisposable
             }
         }
         RowCount--;
-        return lastEntity;
+        return movedEntity;
     }
 
-    internal Entity GetEntityAt(int row) => new(_entityIds[row]);
+    internal Entity GetEntityAt(int row) => _entityIds[row];
 
     internal void ApplyEntityIdOrder(int[] order, int rowCount) =>
         RowOrderUtility.PermuteColumn(_entityIds, order, rowCount);

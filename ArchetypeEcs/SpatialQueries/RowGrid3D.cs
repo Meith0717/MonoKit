@@ -24,6 +24,10 @@ internal sealed class RowGrid3D<TPos>
     private long[] _keys = [];
     private int[] _order = [];
 
+    // Morton-sorted positions captured by the last Prepare call; used for
+    // radius culling in GetInRadius as plain float math (no delegate calls).
+    private Vector3[] _vecPositions = [];
+
     public float CellSize { get; }
 
     public RowGrid3D(float cellSize)
@@ -55,10 +59,17 @@ internal sealed class RowGrid3D<TPos>
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     private static long CellKey(int x, int y, int z) =>
-        (long)(x & 0x1F_FFFF) << 42 | (long)(y & 0x1F_FFFF) << 21 | (z & 0x1F_FFFF);
+        (long)(uint)(x & 0x1F_FFFF) << 42 | (long)(uint)(y & 0x1F_FFFF) << 21 | (uint)(z & 0x1F_FFFF);
 
-    public int[] Prepare(TPos[] positions, int rowCount, Func<TPos, Vector3> getPosition)
+    public int[] Prepare(
+        TPos[] positions,
+        Vector3[] vecPositions,
+        int rowCount,
+        Func<TPos, Vector3> getPosition
+    )
     {
+        _vecPositions = vecPositions;
+
         if (_keys.Length < rowCount)
         {
             var capacity = int.Max(rowCount, _keys.Length * 2);
@@ -106,9 +117,18 @@ internal sealed class RowGrid3D<TPos>
         _ranges[CellKey(cx, cy, cz)] = new CellRange(start, rowCount - start);
     }
 
+    /// <summary>
+    /// Collects the sorted indices of all entities within <paramref name="radius"/>
+    /// of <paramref name="center"/>. Candidates from overlapping cells are culled
+    /// by exact distance, so every returned index satisfies r² &lt; radius².
+    /// The result includes the querying entity itself when querying its own position.
+    /// </summary>
     public void GetInRadius(Vector3 center, float radius, List<int> results)
     {
         results.Clear();
+
+        var radiusSq = radius * radius;
+        var vecPositions = _vecPositions;
 
         var startX = ToCell(center.X - radius);
         var endX = ToCell(center.X + radius) + 1;
@@ -126,7 +146,15 @@ internal sealed class RowGrid3D<TPos>
             if (!_ranges.TryGetValue(CellKey(x, y, z), out var range))
                 continue;
             for (var i = 0; i < range.Count; i++)
-                results.Add(range.Start + i);
+            {
+                var index = range.Start + i;
+                var p = vecPositions[index];
+                var dx = p.X - center.X;
+                var dy = p.Y - center.Y;
+                var dz = p.Z - center.Z;
+                if (dx * dx + dy * dy + dz * dz < radiusSq)
+                    results.Add(index);
+            }
         }
     }
 }

@@ -4,7 +4,7 @@
 // Portions generated or assisted by AI.
 
 using System;
-using MonoKit.ArchetypeEcs.Archtypes;
+using MonoKit.ArchetypeEcs.Archetypes;
 
 namespace MonoKit.ArchetypeEcs.Entities;
 
@@ -12,9 +12,10 @@ internal sealed class EntityRecords : IDisposable
 {
     private const int InitialCapacity = 16;
 
-    private readonly struct EntityRecord(int row, Archetype archetype)
+    private readonly struct EntityRecord(int row, int generation, Archetype archetype)
     {
         internal readonly int Row = row;
+        internal readonly int Generation = generation;
         internal readonly Archetype Archetype = archetype;
     }
 
@@ -37,9 +38,12 @@ internal sealed class EntityRecords : IDisposable
         if (id < _entityRecords.Length && _isValid[id])
         {
             var entityRecord = _entityRecords[id];
-            archetype = entityRecord.Archetype;
-            row = entityRecord.Row;
-            return true;
+            if (entityRecord.Generation == entity.Generation)
+            {
+                archetype = entityRecord.Archetype;
+                row = entityRecord.Row;
+                return true;
+            }
         }
         archetype = null!;
         row = -1;
@@ -49,7 +53,7 @@ internal sealed class EntityRecords : IDisposable
     internal void SetEntityLocation(Entity entity, Archetype archetype, int row)
     {
         EnsureCapacity(entity.Id);
-        _entityRecords[entity.Id] = new EntityRecord(row, archetype);
+        _entityRecords[entity.Id] = new EntityRecord(row, entity.Generation, archetype);
         _isValid[entity.Id] = true;
     }
 
@@ -66,6 +70,6 @@ internal sealed class EntityRecords : IDisposable
     public void Dispose()
     {
         Array.Clear(_entityRecords, 0, _entityRecords.Length);
-        Array.Clear(_isValid, 0, _entityRecords.Length);
+        Array.Clear(_isValid, 0, _isValid.Length);
     }
 }

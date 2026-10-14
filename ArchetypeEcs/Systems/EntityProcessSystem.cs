@@ -1,4 +1,4 @@
-// EntitySystem.cs
+// EntityProcessSystem.cs
 // Copyright (c) 2023-2026 Thierry Meiers
 // All rights reserved.
 // Portions generated or assisted by AI.
@@ -21,23 +21,29 @@ public abstract class EntityProcessSystem<T1> : IUpdateSystem, IEntityProcessSys
 
     public void Update(double elapsedMs, World world)
     {
-        Begin();
-
-        var componentType = typeof(T1);
-        var archetypeCollection = world.ArchetypeManager.GetArchetypesWith(componentType);
-        if (archetypeCollection != null)
+        world.BeginIteration();
+        try
         {
+            Begin();
+
+            var componentType = typeof(T1);
+            var archetypeCollection = world.ArchetypeManager.GetArchetypesWith(componentType);
             foreach (var archetype in archetypeCollection)
             {
                 if (!archetype.TryGetColumn(componentType, out var column))
                     continue;
                 var columnArray = (T1[])column;
-                for (var row = 0; row < archetype.RowCount; row++)
+                var rowCount = archetype.RowCount; // snapshot: rows added during iteration are skipped
+                for (var row = 0; row < rowCount; row++)
                     Process(elapsedMs, world, ref columnArray[row]);
             }
-        }
 
-        End();
+            End();
+        }
+        finally
+        {
+            world.EndIteration();
+        }
     }
 
     protected abstract void Begin();
@@ -51,6 +57,7 @@ public abstract class EntityProcessSystem<T1> : IUpdateSystem, IEntityProcessSys
 
 public abstract class EntityProcessSystem<T1, T2> : IUpdateSystem, IEntityProcessSystem
     where T1 : struct
+    where T2 : struct
 {
     public abstract void Dispose();
 
@@ -58,13 +65,14 @@ public abstract class EntityProcessSystem<T1, T2> : IUpdateSystem, IEntityProces
 
     public void Update(double elapsedMs, World world)
     {
-        Begin();
-
-        var type1 = typeof(T1);
-        var type2 = typeof(T2);
-        var archetypesCollection = world.ArchetypeManager.GetArchetypesWith(type1);
-        if (archetypesCollection != null)
+        world.BeginIteration();
+        try
         {
+            Begin();
+
+            var type1 = typeof(T1);
+            var type2 = typeof(T2);
+            var archetypesCollection = world.ArchetypeManager.GetArchetypesWith(type1);
             foreach (var archetype in archetypesCollection)
             {
                 if (
@@ -75,12 +83,17 @@ public abstract class EntityProcessSystem<T1, T2> : IUpdateSystem, IEntityProces
 
                 var col1Array = (T1[])column1;
                 var col2Array = (T2[])column2;
-                for (var row = 0; row < archetype.RowCount; row++)
+                var rowCount = archetype.RowCount; // snapshot: rows added during iteration are skipped
+                for (var row = 0; row < rowCount; row++)
                     Process(elapsedMs, world, ref col1Array[row], ref col2Array[row]);
             }
-        }
 
-        End();
+            End();
+        }
+        finally
+        {
+            world.EndIteration();
+        }
     }
 
     protected abstract void Begin();
@@ -94,6 +107,8 @@ public abstract class EntityProcessSystem<T1, T2> : IUpdateSystem, IEntityProces
 
 public abstract class EntityProcessSystem<T1, T2, T3> : IUpdateSystem, IEntityProcessSystem
     where T1 : struct
+    where T2 : struct
+    where T3 : struct
 {
     public abstract void Dispose();
 
@@ -101,14 +116,15 @@ public abstract class EntityProcessSystem<T1, T2, T3> : IUpdateSystem, IEntityPr
 
     public void Update(double elapsedMs, World world)
     {
-        Begin();
-
-        var type1 = typeof(T1);
-        var type2 = typeof(T2);
-        var type3 = typeof(T3);
-        var archetypesCollection = world.ArchetypeManager.GetArchetypesWith(type1);
-        if (archetypesCollection != null)
+        world.BeginIteration();
+        try
         {
+            Begin();
+
+            var type1 = typeof(T1);
+            var type2 = typeof(T2);
+            var type3 = typeof(T3);
+            var archetypesCollection = world.ArchetypeManager.GetArchetypesWith(type1);
             foreach (var archetype in archetypesCollection)
             {
                 if (
@@ -120,7 +136,8 @@ public abstract class EntityProcessSystem<T1, T2, T3> : IUpdateSystem, IEntityPr
                 var col1Array = (T1[])column1;
                 var col2Array = (T2[])column2;
                 var col3Array = (T3[])column3;
-                for (var row = 0; row < archetype.RowCount; row++)
+                var rowCount = archetype.RowCount; // snapshot: rows added during iteration are skipped
+                for (var row = 0; row < rowCount; row++)
                     Process(
                         elapsedMs,
                         world,
@@ -129,9 +146,13 @@ public abstract class EntityProcessSystem<T1, T2, T3> : IUpdateSystem, IEntityPr
                         ref col3Array[row]
                     );
             }
-        }
 
-        End();
+            End();
+        }
+        finally
+        {
+            world.EndIteration();
+        }
     }
 
     protected abstract void Begin();
@@ -145,6 +166,9 @@ public abstract class EntityProcessSystem<T1, T2, T3> : IUpdateSystem, IEntityPr
 
 public abstract class EntityProcessSystem<T1, T2, T3, T4> : IUpdateSystem, IEntityProcessSystem
     where T1 : struct
+    where T2 : struct
+    where T3 : struct
+    where T4 : struct
 {
     public abstract void Dispose();
 
@@ -152,15 +176,16 @@ public abstract class EntityProcessSystem<T1, T2, T3, T4> : IUpdateSystem, IEnti
 
     public void Update(double elapsedMs, World world)
     {
-        Begin();
-
-        var type1 = typeof(T1);
-        var type2 = typeof(T2);
-        var type3 = typeof(T3);
-        var type4 = typeof(T4);
-        var archetypesCollection = world.ArchetypeManager.GetArchetypesWith(type1);
-        if (archetypesCollection != null)
+        world.BeginIteration();
+        try
         {
+            Begin();
+
+            var type1 = typeof(T1);
+            var type2 = typeof(T2);
+            var type3 = typeof(T3);
+            var type4 = typeof(T4);
+            var archetypesCollection = world.ArchetypeManager.GetArchetypesWith(type1);
             foreach (var archetype in archetypesCollection)
             {
                 if (
@@ -174,7 +199,8 @@ public abstract class EntityProcessSystem<T1, T2, T3, T4> : IUpdateSystem, IEnti
                 var col2Array = (T2[])column2;
                 var col3Array = (T3[])column3;
                 var col4Array = (T4[])column4;
-                for (var row = 0; row < archetype.RowCount; row++)
+                var rowCount = archetype.RowCount; // snapshot: rows added during iteration are skipped
+                for (var row = 0; row < rowCount; row++)
                     Process(
                         elapsedMs,
                         world,
@@ -184,9 +210,13 @@ public abstract class EntityProcessSystem<T1, T2, T3, T4> : IUpdateSystem, IEnti
                         ref col4Array[row]
                     );
             }
-        }
 
-        End();
+            End();
+        }
+        finally
+        {
+            world.EndIteration();
+        }
     }
 
     protected abstract void Begin();

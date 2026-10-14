@@ -6,11 +6,11 @@
 using System;
 using System.Linq;
 
-namespace MonoKit.ArchetypeEcs.Archtypes;
+namespace MonoKit.ArchetypeEcs.Archetypes;
 
 internal readonly struct ArchetypeType : IEquatable<ArchetypeType>
 {
-    internal static ArchetypeType Empty = new([]);
+    internal static readonly ArchetypeType Empty = new([]);
     internal readonly Type[] ComponentTypes = [];
 
     internal ArchetypeType(params Type[] componentTypes)
