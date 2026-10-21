@@ -321,25 +321,26 @@ public class EcsSpatialApiBenchmarks
             cache.GetRef(i).Value++;
     }
 
-    [Benchmark(Description = "ForEachNeighbor all-pairs (100k entities, r=0.9)")]
-    public void ForEachNeighborAllPairs()
+    [Benchmark(Description = "ForEachSelfNeighbor serial all-pairs (100k entities, r=0.9)")]
+    public void ForEachSelfNeighborAllPairs()
     {
         _pairs = 0;
-        ApiWorld.Spatial.ForEachNeighbor<Position>(
+        ApiWorld.Spatial.ForEachSelfNeighbor<Position, Velocity>(
             ApiWorld.QueryRadius,
-            (Entity entity, Entity neighbor, ref Position p) => _pairs++
+            (Entity entity, ref Position p, Entity neighbor, ref Velocity v) => _pairs++
         );
         _sink += _pairs;
     }
 
-    [Benchmark(Description = "ForEachNeighborParallel all-pairs (100k entities, r=0.9)")]
-    public void ForEachNeighborParallelAllPairs()
+    [Benchmark(Description = "ForEachSelfNeighborParallel all-pairs (100k entities, r=0.9)")]
+    public void ForEachSelfNeighborParallelAllPairs()
     {
-        ApiWorld.Spatial.ForEachNeighborParallel<Position>(
+        _pairs = 0;
+        ApiWorld.Spatial.ForEachSelfNeighborParallel<Position, Velocity>(
             ApiWorld.QueryRadius,
-            (Entity entity, Entity neighbor, ref Position p) =>
+            (Entity entity, ref Position p, Entity neighbor, ref Velocity v) =>
             {
-                if (p.Value.X > 1e30f)
+                if (v.Value.X > 1e30f)
                     _pairs++;
             }
         );
@@ -356,29 +357,6 @@ public class EcsSpatialApiBenchmarks
                     entity,
                     ApiWorld.QueryRadius,
                     (Entity neighbor, ref Position np) => _pairs++
-                )
-        );
-        _sink += _pairs;
-    }
-
-    [Benchmark(Description = "ForEachNeighbor nested, level 2 (100k + 1.3M queries, r=0.9)")]
-    public void ForEachNeighborNestedLevel2()
-    {
-        _pairs = 0;
-        ApiWorld.World.ForEach<Position>(
-            (Entity entity, ref Position p) =>
-                ApiWorld.Spatial.ForEachNeighbor<Position>(
-                    entity,
-                    ApiWorld.QueryRadius,
-                    (Entity neighbor, ref Position np) =>
-                    {
-                        _pairs++;
-                        ApiWorld.Spatial.ForEachNeighbor<Position>(
-                            neighbor,
-                            ApiWorld.QueryRadius,
-                            (Entity n2, ref Position p2) => _pairs++
-                        );
-                    }
                 )
         );
         _sink += _pairs;
@@ -419,10 +397,45 @@ public static class EcsApiSmoke
             }
         }
 
+        ApiWorld.EnsureBuilt();
+        ApiWorld.Spatial.BeginFrame(ApiWorld.World, ApiWorld.QueryRadius, static p => p.Value);
+
+        var allPairs = 0L;
+        ApiWorld.Spatial.ForEachSelfNeighbor<Position, Position>(
+            ApiWorld.QueryRadius,
+            (Entity entity, ref Position self, Entity neighbor, ref Position np) => allPairs++
+        );
+
+        var selfNeighborPairs = 0L;
+        ApiWorld.Spatial.ForEachSelfNeighbor<Health, Position>(
+            ApiWorld.QueryRadius,
+            (Entity entity, ref Health h, Entity neighbor, ref Position p) => selfNeighborPairs++
+        );
+
+        var perEntityPairs = 0L;
+        foreach (var entity in ApiWorld.Entities)
+        {
+            ApiWorld.Spatial.ForEachNeighbor<Position>(
+                entity,
+                ApiWorld.QueryRadius,
+                (Entity neighbor, ref Position p) => perEntityPairs++
+            );
+        }
+
+        var queriesConsistent =
+            allPairs == selfNeighborPairs && allPairs == perEntityPairs;
+        Console.WriteLine(
+            queriesConsistent
+                ? $"Neighbor query APIs consistent: {allPairs} pairs (self-neighbor, self-neighbor filtered, per-entity)"
+                : $"FAIL: neighbor query APIs disagree (self-neighbor {allPairs}, self-neighbor filtered {selfNeighborPairs}, per-entity {perEntityPairs})"
+        );
+
         var worldCount = ApiWorld.World.EntityCount;
         var systemWorldCount = ApiWorld.SystemWorld.EntityCount;
         var ok =
-            worldCount == ApiWorld.TotalEntities && systemWorldCount == ApiWorld.TotalEntities;
+            queriesConsistent
+            && worldCount == ApiWorld.TotalEntities
+            && systemWorldCount == ApiWorld.TotalEntities;
         Console.WriteLine(
             ok
                 ? $"\nWorld state restored: {worldCount} + {systemWorldCount} entities OK"

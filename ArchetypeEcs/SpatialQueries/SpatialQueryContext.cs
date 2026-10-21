@@ -14,12 +14,20 @@ using MonoKit.ArchetypeEcs.Entities;
 
 namespace MonoKit.ArchetypeEcs.SpatialQueries;
 
+/// <summary>
+/// Spatial neighbor queries over entities holding a <typeparamref name="TPos"/> component.
+/// Call <see cref="BeginFrame"/> once per frame before any query; all query methods are
+/// valid only until the next <see cref="BeginFrame"/> call. Neighbor results always
+/// include the query entity itself (distance 0 passes the radius test). For symmetric
+/// pair interactions, process only <c>n &gt; i</c> (or <c>n &lt; i</c>) to visit each pair once.
+/// </summary>
 public sealed class SpatialQueryContext<TPos> : IDisposable
     where TPos : struct
 {
     private readonly SpatialEpoch _epoch = new();
     private readonly Dictionary<Type, object> _componentCaches = new();
-    private readonly Dictionary<Entity, int> _entityToSpatialIndex = new();
+    private int[] _spatialIndexById = [];
+    private int[] _generationById = [];
     private readonly ConcurrentStack<List<int>> _scratchBuffers = new();
     private SpatialSorter<TPos>? _sorter;
     private SpatialField<TPos>? _field;
@@ -33,11 +41,44 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
         _scratchBuffers.Push(buffer);
     }
 
+    private void ClearEntityToSpatialIndex()
+    {
+        if (_spatialIndexById.Length > 0)
+            Array.Fill(_spatialIndexById, -1);
+    }
+
+    private void EnsureEntityMapCapacity(int id)
+    {
+        if (id < _spatialIndexById.Length)
+            return;
+
+        var oldLength = _spatialIndexById.Length;
+        var newLength = int.Max(id + 1, oldLength * 2);
+        Array.Resize(ref _spatialIndexById, newLength);
+        Array.Resize(ref _generationById, newLength);
+        Array.Fill(_spatialIndexById, -1, oldLength, newLength - oldLength);
+    }
+
+    private bool TryGetSpatialIndex(Entity entity, out int index)
+    {
+        index = -1;
+        var id = entity.Id;
+        if ((uint)id >= (uint)_spatialIndexById.Length)
+            return false;
+
+        var spatialIndex = _spatialIndexById[id];
+        if (spatialIndex < 0 || _generationById[id] != entity.Generation)
+            return false;
+
+        index = spatialIndex;
+        return true;
+    }
+
     public bool BeginFrame(World world, float cellSize, Func<TPos, Vector3> getPosition)
     {
         _epoch.Next();
         _componentCaches.Clear();
-        _entityToSpatialIndex.Clear();
+        ClearEntityToSpatialIndex();
         _field = null;
 
         if (_sorter == null || _sorter.CellSize != cellSize)
@@ -48,7 +89,12 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
 
         _field = field;
         for (var i = 0; i < field.Count; i++)
-            _entityToSpatialIndex[field.GetEntity(i)] = i;
+        {
+            var entity = field.GetEntity(i);
+            EnsureEntityMapCapacity(entity.Id);
+            _spatialIndexById[entity.Id] = i;
+            _generationById[entity.Id] = entity.Generation;
+        }
 
         return true;
     }
@@ -68,12 +114,13 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
             );
         return field;
     }
-
-    public void ForEachNeighbor<T1>(float radius, RefNeighborAction<T1> action)
+    public void ForEachSelfNeighbor<TSelf, T1>(float radius, RefSelfNeighborAction<TSelf, T1> action)
+        where TSelf : struct
         where T1 : struct
     {
         var field = GetField();
         var count = field.Count;
+        var selfCache = GetComponentCache<TSelf>();
         var cache1 = GetComponentCache<T1>();
         var neighbors = RentScratchBuffer();
 
@@ -81,13 +128,18 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
         {
             for (var i = 0; i < count; i++)
             {
-                field.GetNeighbors(i, radius, neighbors);
+                if (!selfCache.Has(i))
+                    continue;
+
+                ref var self = ref selfCache.GetRef(i);
                 var entity = field.GetEntity(i);
+                field.GetNeighbors(i, radius, neighbors);
 
                 foreach (var n in neighbors)
                 {
-                    if (cache1.TryGet(n, out T1 c1))
-                        action(entity, field.GetEntity(n), ref c1);
+                    if (!cache1.TryGet(n, out T1 c1))
+                        continue;
+                    action(entity, ref self, field.GetEntity(n), ref c1);
                 }
             }
         }
@@ -97,12 +149,17 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
         }
     }
 
-    public void ForEachNeighbor<T1, T2>(float radius, RefNeighborAction<T1, T2> action)
+    public void ForEachSelfNeighbor<TSelf, T1, T2>(
+        float radius,
+        RefSelfNeighborAction<TSelf, T1, T2> action
+    )
+        where TSelf : struct
         where T1 : struct
         where T2 : struct
     {
         var field = GetField();
         var count = field.Count;
+        var selfCache = GetComponentCache<TSelf>();
         var cache1 = GetComponentCache<T1>();
         var cache2 = GetComponentCache<T2>();
         var neighbors = RentScratchBuffer();
@@ -111,8 +168,12 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
         {
             for (var i = 0; i < count; i++)
             {
-                field.GetNeighbors(i, radius, neighbors);
+                if (!selfCache.Has(i))
+                    continue;
+
+                ref var self = ref selfCache.GetRef(i);
                 var entity = field.GetEntity(i);
+                field.GetNeighbors(i, radius, neighbors);
 
                 foreach (var n in neighbors)
                 {
@@ -120,7 +181,7 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
                         continue;
                     if (!cache2.TryGet(n, out T2 c2))
                         continue;
-                    action(entity, field.GetEntity(n), ref c1, ref c2);
+                    action(entity, ref self, field.GetEntity(n), ref c1, ref c2);
                 }
             }
         }
@@ -130,13 +191,18 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
         }
     }
 
-    public void ForEachNeighbor<T1, T2, T3>(float radius, RefNeighborAction<T1, T2, T3> action)
+    public void ForEachSelfNeighbor<TSelf, T1, T2, T3>(
+        float radius,
+        RefSelfNeighborAction<TSelf, T1, T2, T3> action
+    )
+        where TSelf : struct
         where T1 : struct
         where T2 : struct
         where T3 : struct
     {
         var field = GetField();
         var count = field.Count;
+        var selfCache = GetComponentCache<TSelf>();
         var cache1 = GetComponentCache<T1>();
         var cache2 = GetComponentCache<T2>();
         var cache3 = GetComponentCache<T3>();
@@ -146,8 +212,12 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
         {
             for (var i = 0; i < count; i++)
             {
-                field.GetNeighbors(i, radius, neighbors);
+                if (!selfCache.Has(i))
+                    continue;
+
+                ref var self = ref selfCache.GetRef(i);
                 var entity = field.GetEntity(i);
+                field.GetNeighbors(i, radius, neighbors);
 
                 foreach (var n in neighbors)
                 {
@@ -157,7 +227,7 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
                         continue;
                     if (!cache3.TryGet(n, out T3 c3))
                         continue;
-                    action(entity, field.GetEntity(n), ref c1, ref c2, ref c3);
+                    action(entity, ref self, field.GetEntity(n), ref c1, ref c2, ref c3);
                 }
             }
         }
@@ -167,10 +237,11 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
         }
     }
 
-    public void ForEachNeighbor<T1, T2, T3, T4>(
+    public void ForEachSelfNeighbor<TSelf, T1, T2, T3, T4>(
         float radius,
-        RefNeighborAction<T1, T2, T3, T4> action
+        RefSelfNeighborAction<TSelf, T1, T2, T3, T4> action
     )
+        where TSelf : struct
         where T1 : struct
         where T2 : struct
         where T3 : struct
@@ -178,6 +249,7 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
     {
         var field = GetField();
         var count = field.Count;
+        var selfCache = GetComponentCache<TSelf>();
         var cache1 = GetComponentCache<T1>();
         var cache2 = GetComponentCache<T2>();
         var cache3 = GetComponentCache<T3>();
@@ -188,8 +260,12 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
         {
             for (var i = 0; i < count; i++)
             {
-                field.GetNeighbors(i, radius, neighbors);
+                if (!selfCache.Has(i))
+                    continue;
+
+                ref var self = ref selfCache.GetRef(i);
                 var entity = field.GetEntity(i);
+                field.GetNeighbors(i, radius, neighbors);
 
                 foreach (var n in neighbors)
                 {
@@ -201,7 +277,7 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
                         continue;
                     if (!cache4.TryGet(n, out T4 c4))
                         continue;
-                    action(entity, field.GetEntity(n), ref c1, ref c2, ref c3, ref c4);
+                    action(entity, ref self, field.GetEntity(n), ref c1, ref c2, ref c3, ref c4);
                 }
             }
         }
@@ -209,162 +285,6 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
         {
             ReturnScratchBuffer(neighbors);
         }
-    }
-
-    public void ForEachNeighborParallel<T1>(float radius, RefNeighborAction<T1> action)
-        where T1 : struct
-    {
-        var field = GetField();
-        var count = field.Count;
-        var cache1 = GetComponentCache<T1>();
-
-        Parallel.ForEach(
-            Partitioner.Create(0, count),
-            RentScratchBuffer,
-            (range, _, neighbors) =>
-            {
-                for (var i = range.Item1; i < range.Item2; i++)
-                {
-                    field.GetNeighbors(i, radius, neighbors);
-                    var entity = field.GetEntity(i);
-
-                    foreach (var n in neighbors)
-                    {
-                        if (cache1.TryGet(n, out T1 c1))
-                            action(entity, field.GetEntity(n), ref c1);
-                    }
-                }
-
-                return neighbors;
-            },
-            ReturnScratchBuffer
-        );
-    }
-
-    public void ForEachNeighborParallel<T1, T2>(
-        float radius,
-        RefNeighborAction<T1, T2> action
-    )
-        where T1 : struct
-        where T2 : struct
-    {
-        var field = GetField();
-        var count = field.Count;
-        var cache1 = GetComponentCache<T1>();
-        var cache2 = GetComponentCache<T2>();
-
-        Parallel.ForEach(
-            Partitioner.Create(0, count),
-            RentScratchBuffer,
-            (range, _, neighbors) =>
-            {
-                for (var i = range.Item1; i < range.Item2; i++)
-                {
-                    field.GetNeighbors(i, radius, neighbors);
-                    var entity = field.GetEntity(i);
-
-                    foreach (var n in neighbors)
-                    {
-                        if (!cache1.TryGet(n, out T1 c1))
-                            continue;
-                        if (!cache2.TryGet(n, out T2 c2))
-                            continue;
-                        action(entity, field.GetEntity(n), ref c1, ref c2);
-                    }
-                }
-
-                return neighbors;
-            },
-            ReturnScratchBuffer
-        );
-    }
-
-    public void ForEachNeighborParallel<T1, T2, T3>(
-        float radius,
-        RefNeighborAction<T1, T2, T3> action
-    )
-        where T1 : struct
-        where T2 : struct
-        where T3 : struct
-    {
-        var field = GetField();
-        var count = field.Count;
-        var cache1 = GetComponentCache<T1>();
-        var cache2 = GetComponentCache<T2>();
-        var cache3 = GetComponentCache<T3>();
-
-        Parallel.ForEach(
-            Partitioner.Create(0, count),
-            RentScratchBuffer,
-            (range, _, neighbors) =>
-            {
-                for (var i = range.Item1; i < range.Item2; i++)
-                {
-                    field.GetNeighbors(i, radius, neighbors);
-                    var entity = field.GetEntity(i);
-
-                    foreach (var n in neighbors)
-                    {
-                        if (!cache1.TryGet(n, out T1 c1))
-                            continue;
-                        if (!cache2.TryGet(n, out T2 c2))
-                            continue;
-                        if (!cache3.TryGet(n, out T3 c3))
-                            continue;
-                        action(entity, field.GetEntity(n), ref c1, ref c2, ref c3);
-                    }
-                }
-
-                return neighbors;
-            },
-            ReturnScratchBuffer
-        );
-    }
-
-    public void ForEachNeighborParallel<T1, T2, T3, T4>(
-        float radius,
-        RefNeighborAction<T1, T2, T3, T4> action
-    )
-        where T1 : struct
-        where T2 : struct
-        where T3 : struct
-        where T4 : struct
-    {
-        var field = GetField();
-        var count = field.Count;
-        var cache1 = GetComponentCache<T1>();
-        var cache2 = GetComponentCache<T2>();
-        var cache3 = GetComponentCache<T3>();
-        var cache4 = GetComponentCache<T4>();
-
-        Parallel.ForEach(
-            Partitioner.Create(0, count),
-            RentScratchBuffer,
-            (range, _, neighbors) =>
-            {
-                for (var i = range.Item1; i < range.Item2; i++)
-                {
-                    field.GetNeighbors(i, radius, neighbors);
-                    var entity = field.GetEntity(i);
-
-                    foreach (var n in neighbors)
-                    {
-                        if (!cache1.TryGet(n, out T1 c1))
-                            continue;
-                        if (!cache2.TryGet(n, out T2 c2))
-                            continue;
-                        if (!cache3.TryGet(n, out T3 c3))
-                            continue;
-                        if (!cache4.TryGet(n, out T4 c4))
-                            continue;
-                        action(entity, field.GetEntity(n), ref c1, ref c2, ref c3, ref c4);
-                    }
-                }
-
-                return neighbors;
-            },
-            ReturnScratchBuffer
-        );
     }
 
     public void ForEachSelfNeighborParallel<TSelf, T1>(
@@ -556,7 +476,7 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
     {
         var field = GetField();
 
-        if (!_entityToSpatialIndex.TryGetValue(entity, out var index))
+        if (!TryGetSpatialIndex(entity, out var index))
             return;
 
         var cache1 = GetComponentCache<T1>();
@@ -588,7 +508,7 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
     {
         var field = GetField();
 
-        if (!_entityToSpatialIndex.TryGetValue(entity, out var index))
+        if (!TryGetSpatialIndex(entity, out var index))
             return;
 
         var cache1 = GetComponentCache<T1>();
@@ -625,7 +545,7 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
     {
         var field = GetField();
 
-        if (!_entityToSpatialIndex.TryGetValue(entity, out var index))
+        if (!TryGetSpatialIndex(entity, out var index))
             return;
 
         var cache1 = GetComponentCache<T1>();
@@ -666,7 +586,7 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
     {
         var field = GetField();
 
-        if (!_entityToSpatialIndex.TryGetValue(entity, out var index))
+        if (!TryGetSpatialIndex(entity, out var index))
             return;
 
         var cache1 = GetComponentCache<T1>();
@@ -712,35 +632,13 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
     public void Dispose()
     {
         _componentCaches.Clear();
-        _entityToSpatialIndex.Clear();
+        _spatialIndexById = [];
+        _generationById = [];
         _scratchBuffers.Clear();
         _field = null;
         _sorter = null;
     }
 }
-
-public delegate void RefNeighborAction<T1>(Entity entity, Entity neighbor, ref T1 nComponent1);
-public delegate void RefNeighborAction<T1, T2>(
-    Entity entity,
-    Entity neighbor,
-    ref T1 nComponent1,
-    ref T2 nComponent2
-);
-public delegate void RefNeighborAction<T1, T2, T3>(
-    Entity entity,
-    Entity neighbor,
-    ref T1 nComponent1,
-    ref T2 nComponent2,
-    ref T3 nComponent3
-);
-public delegate void RefNeighborAction<T1, T2, T3, T4>(
-    Entity entity,
-    Entity neighbor,
-    ref T1 nComponent1,
-    ref T2 nComponent2,
-    ref T3 nComponent3,
-    ref T4 nComponent4
-);
 
 public delegate void RefSelfNeighborAction<TSelf, T1>(
     Entity entity,
