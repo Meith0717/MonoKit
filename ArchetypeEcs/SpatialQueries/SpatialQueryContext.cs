@@ -367,6 +367,190 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
         );
     }
 
+    public void ForEachSelfNeighborParallel<TSelf, T1>(
+        float radius,
+        RefSelfNeighborAction<TSelf, T1> action
+    )
+        where TSelf : struct
+        where T1 : struct
+    {
+        var field = GetField();
+        var count = field.Count;
+        var selfCache = GetComponentCache<TSelf>();
+        var cache1 = GetComponentCache<T1>();
+
+        Parallel.ForEach(
+            Partitioner.Create(0, count),
+            RentScratchBuffer,
+            (range, _, neighbors) =>
+            {
+                for (var i = range.Item1; i < range.Item2; i++)
+                {
+                    if (!selfCache.Has(i))
+                        continue;
+
+                    ref var self = ref selfCache.GetRef(i);
+                    var entity = field.GetEntity(i);
+                    field.GetNeighbors(i, radius, neighbors);
+
+                    foreach (var n in neighbors)
+                    {
+                        if (!cache1.TryGet(n, out T1 c1))
+                            continue;
+                        action(entity, ref self, field.GetEntity(n), ref c1);
+                    }
+                }
+
+                return neighbors;
+            },
+            ReturnScratchBuffer
+        );
+    }
+
+    public void ForEachSelfNeighborParallel<TSelf, T1, T2>(
+        float radius,
+        RefSelfNeighborAction<TSelf, T1, T2> action
+    )
+        where TSelf : struct
+        where T1 : struct
+        where T2 : struct
+    {
+        var field = GetField();
+        var count = field.Count;
+        var selfCache = GetComponentCache<TSelf>();
+        var cache1 = GetComponentCache<T1>();
+        var cache2 = GetComponentCache<T2>();
+
+        Parallel.ForEach(
+            Partitioner.Create(0, count),
+            RentScratchBuffer,
+            (range, _, neighbors) =>
+            {
+                for (var i = range.Item1; i < range.Item2; i++)
+                {
+                    if (!selfCache.Has(i))
+                        continue;
+
+                    ref var self = ref selfCache.GetRef(i);
+                    var entity = field.GetEntity(i);
+                    field.GetNeighbors(i, radius, neighbors);
+
+                    foreach (var n in neighbors)
+                    {
+                        if (!cache1.TryGet(n, out T1 c1))
+                            continue;
+                        if (!cache2.TryGet(n, out T2 c2))
+                            continue;
+                        action(entity, ref self, field.GetEntity(n), ref c1, ref c2);
+                    }
+                }
+
+                return neighbors;
+            },
+            ReturnScratchBuffer
+        );
+    }
+
+    public void ForEachSelfNeighborParallel<TSelf, T1, T2, T3>(
+        float radius,
+        RefSelfNeighborAction<TSelf, T1, T2, T3> action
+    )
+        where TSelf : struct
+        where T1 : struct
+        where T2 : struct
+        where T3 : struct
+    {
+        var field = GetField();
+        var count = field.Count;
+        var selfCache = GetComponentCache<TSelf>();
+        var cache1 = GetComponentCache<T1>();
+        var cache2 = GetComponentCache<T2>();
+        var cache3 = GetComponentCache<T3>();
+
+        Parallel.ForEach(
+            Partitioner.Create(0, count),
+            RentScratchBuffer,
+            (range, _, neighbors) =>
+            {
+                for (var i = range.Item1; i < range.Item2; i++)
+                {
+                    if (!selfCache.Has(i))
+                        continue;
+
+                    ref var self = ref selfCache.GetRef(i);
+                    var entity = field.GetEntity(i);
+                    field.GetNeighbors(i, radius, neighbors);
+
+                    foreach (var n in neighbors)
+                    {
+                        if (!cache1.TryGet(n, out T1 c1))
+                            continue;
+                        if (!cache2.TryGet(n, out T2 c2))
+                            continue;
+                        if (!cache3.TryGet(n, out T3 c3))
+                            continue;
+                        action(entity, ref self, field.GetEntity(n), ref c1, ref c2, ref c3);
+                    }
+                }
+
+                return neighbors;
+            },
+            ReturnScratchBuffer
+        );
+    }
+
+    public void ForEachSelfNeighborParallel<TSelf, T1, T2, T3, T4>(
+        float radius,
+        RefSelfNeighborAction<TSelf, T1, T2, T3, T4> action
+    )
+        where TSelf : struct
+        where T1 : struct
+        where T2 : struct
+        where T3 : struct
+        where T4 : struct
+    {
+        var field = GetField();
+        var count = field.Count;
+        var selfCache = GetComponentCache<TSelf>();
+        var cache1 = GetComponentCache<T1>();
+        var cache2 = GetComponentCache<T2>();
+        var cache3 = GetComponentCache<T3>();
+        var cache4 = GetComponentCache<T4>();
+
+        Parallel.ForEach(
+            Partitioner.Create(0, count),
+            RentScratchBuffer,
+            (range, _, neighbors) =>
+            {
+                for (var i = range.Item1; i < range.Item2; i++)
+                {
+                    if (!selfCache.Has(i))
+                        continue;
+
+                    ref var self = ref selfCache.GetRef(i);
+                    var entity = field.GetEntity(i);
+                    field.GetNeighbors(i, radius, neighbors);
+
+                    foreach (var n in neighbors)
+                    {
+                        if (!cache1.TryGet(n, out T1 c1))
+                            continue;
+                        if (!cache2.TryGet(n, out T2 c2))
+                            continue;
+                        if (!cache3.TryGet(n, out T3 c3))
+                            continue;
+                        if (!cache4.TryGet(n, out T4 c4))
+                            continue;
+                        action(entity, ref self, field.GetEntity(n), ref c1, ref c2, ref c3, ref c4);
+                    }
+                }
+
+                return neighbors;
+            },
+            ReturnScratchBuffer
+        );
+    }
+
     public void ForEachNeighbor<T1>(Entity entity, float radius, RefEntityNeighborAction<T1> action)
         where T1 : struct
     {
@@ -551,6 +735,37 @@ public delegate void RefNeighborAction<T1, T2, T3>(
 );
 public delegate void RefNeighborAction<T1, T2, T3, T4>(
     Entity entity,
+    Entity neighbor,
+    ref T1 nComponent1,
+    ref T2 nComponent2,
+    ref T3 nComponent3,
+    ref T4 nComponent4
+);
+
+public delegate void RefSelfNeighborAction<TSelf, T1>(
+    Entity entity,
+    ref TSelf selfComponent,
+    Entity neighbor,
+    ref T1 nComponent1
+);
+public delegate void RefSelfNeighborAction<TSelf, T1, T2>(
+    Entity entity,
+    ref TSelf selfComponent,
+    Entity neighbor,
+    ref T1 nComponent1,
+    ref T2 nComponent2
+);
+public delegate void RefSelfNeighborAction<TSelf, T1, T2, T3>(
+    Entity entity,
+    ref TSelf selfComponent,
+    Entity neighbor,
+    ref T1 nComponent1,
+    ref T2 nComponent2,
+    ref T3 nComponent3
+);
+public delegate void RefSelfNeighborAction<TSelf, T1, T2, T3, T4>(
+    Entity entity,
+    ref TSelf selfComponent,
     Entity neighbor,
     ref T1 nComponent1,
     ref T2 nComponent2,
