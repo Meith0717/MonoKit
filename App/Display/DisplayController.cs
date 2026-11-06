@@ -7,7 +7,7 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace MonoKit.App.Graphics;
+namespace MonoKit.App.Display;
 
 /// <summary>
 /// Manages the game window: display mode, backbuffer resolution, refresh rate/vsync,

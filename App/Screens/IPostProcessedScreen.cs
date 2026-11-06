@@ -3,7 +3,7 @@
 // All rights reserved.
 // Portions generated or assisted by AI.
 
-using MonoKit.App.Graphics.Rendering;
+using MonoKit.App.Rendering;
 
 namespace MonoKit.App.Screens;
 

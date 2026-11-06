@@ -8,7 +8,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using MonoKit.App.Graphics.Rendering;
+using MonoKit.App.Rendering;
 using MonoKit.App.Input;
 
 namespace MonoKit.App.Screens;
@@ -85,6 +85,8 @@ public class ScreenManager(Game game)
     /// <summary>Draws the visible screen chain: lower screens composited (optionally with the effect), top screen last.</summary>
     public void Draw(SpriteBatch spriteBatch)
     {
+        _postProcessingRunner.BeginFrame();
+
         if (_screens.Count == 0)
             return;
 

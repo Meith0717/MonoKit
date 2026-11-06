@@ -15,7 +15,8 @@ namespace MonoKit.App.Screens;
 public abstract class UiScreen(GameServiceContainer appServices) : IScreen
 {
     /// <summary>Root of the screen's UI tree.</summary>
-    public readonly UiFrame UiRoot = new()
+    // ReSharper disable once MemberCanBePrivate.Global
+    protected readonly UiFrame UiRoot = new()
     {
         Color = Color.Transparent,
         RelWidth = 1,

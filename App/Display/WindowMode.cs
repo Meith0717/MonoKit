@@ -3,7 +3,7 @@
 // All rights reserved.
 // Portions generated or assisted by AI.
 
-namespace MonoKit.App.Graphics;
+namespace MonoKit.App.Display;
 
 /// <summary>Window display mode, applied via <see cref="DisplayController.ApplyMode"/>.</summary>
 public enum WindowMode

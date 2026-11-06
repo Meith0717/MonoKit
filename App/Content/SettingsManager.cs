@@ -4,7 +4,7 @@
 // Portions generated or assisted by AI.
 
 using System;
-using MonoKit.App.Graphics;
+using MonoKit.App.Display;
 using Newtonsoft.Json;
 
 namespace MonoKit.App.Content;
