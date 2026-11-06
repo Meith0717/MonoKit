@@ -1,4 +1,4 @@
-// Screen.cs
+// UiScreen.cs
 // Copyright (c) 2023-2026 Thierry Meiers
 // All rights reserved.
 // Portions generated or assisted by AI.
@@ -6,98 +6,56 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using MonoKit.App.Graphics.Rendering;
 using MonoKit.App.Input;
 using MonoKit.App.Ui;
 
 namespace MonoKit.App.Screens;
 
-public abstract class Screen : IDisposable
+/// <summary>Base class for UI-driven screens: owns a full-viewport root <see cref="UiFrame"/> that receives update, draw and resize.</summary>
+public abstract class UiScreen(GameServiceContainer appServices) : IScreen
 {
-    private readonly PostProcessingRunner _postProcessingRunner;
-
-    protected readonly GameServiceContainer AppServices;
-    public readonly bool DrawBelow;
-    protected readonly GraphicsDevice GraphicsDevice;
-    protected readonly ScreenManager ScreenManager;
-    protected readonly UiFrame UiRoot;
-    public readonly bool UpdateBelow;
-    private RenderTarget2D _renderTarget;
-    public IPostProcessingEffect PostProcessingEffect;
-
-    protected Screen(GameServiceContainer appServices, bool updateBelow, bool drawBelow)
+    /// <summary>Root of the screen's UI tree.</summary>
+    public readonly UiFrame UiRoot = new()
     {
-        AppServices = appServices;
-        GraphicsDevice = appServices.GetService<GraphicsDevice>();
-        ScreenManager = appServices.GetService<ScreenManager>();
-        UpdateBelow = updateBelow;
-        DrawBelow = drawBelow;
-        _postProcessingRunner = new PostProcessingRunner(GraphicsDevice);
+        Color = Color.Transparent,
+        RelWidth = 1,
+        RelHeight = 1,
+        FillScale = FillScale.FillIn,
+        Align = Align.Center,
+    };
 
-        UiRoot = new UiFrame
-        {
-            Color = Color.Transparent,
-            RelWidth = 1,
-            RelHeight = 1,
-            FillScale = FillScale.FillIn,
-            Align = Align.Center,
-        };
-    }
+    private readonly GraphicsDevice _graphicsDevice = appServices.GetService<GraphicsDevice>();
 
-    public virtual void Dispose()
-    {
-        _renderTarget.Dispose();
-        _postProcessingRunner.Dispose();
-        GC.SuppressFinalize(this);
-    }
+    public bool UpdateBelow { get; init; } = false;
+    public bool DrawBelow { get; init; } = false;
 
-    public virtual void Initialize()
-    {
-        ;
-    }
+    /// <summary>Called once on push; build the UI tree here.</summary>
+    public abstract void Initialize();
 
+    /// <summary>Updates the UI tree. Override to add custom logic.</summary>
     public virtual void Update(double elapsedMilliseconds, InputHandler inputHandler, float uiScale)
     {
-        UiRoot.Update(inputHandler, GraphicsDevice.Viewport.Bounds, uiScale);
+        UiRoot.Update(inputHandler, _graphicsDevice.Viewport.Bounds, uiScale);
     }
 
-    public virtual void Draw(SpriteBatch spriteBatch)
+    /// <summary>Draws the UI tree. Override to additionally draw 3D content via <paramref name="graphicsDevice"/>.</summary>
+    public virtual void Draw(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice)
     {
         spriteBatch.Begin();
         UiRoot.Draw(spriteBatch);
         spriteBatch.End();
     }
 
-    public virtual void ApplyResolution(double elapsedMilliseconds, float uiScale)
+    /// <summary>Reapplies the UI scale to the root element.</summary>
+    public virtual void OnResolutionChanged(float uiScale)
     {
-        UiRoot.ApplyScale(GraphicsDevice.Viewport.Bounds, uiScale);
-        _renderTarget?.Dispose();
-        _renderTarget = new RenderTarget2D(
-            GraphicsDevice,
-            GraphicsDevice.Viewport.Width,
-            GraphicsDevice.Viewport.Height,
-            false,
-            SurfaceFormat.Color,
-            DepthFormat.Depth24Stencil8,
-            4,
-            RenderTargetUsage.PreserveContents
-        );
-        _postProcessingRunner.ApplyResolution(
-            GraphicsDevice.Viewport.Width,
-            GraphicsDevice.Viewport.Height
-        );
+        UiRoot.ApplyScale(_graphicsDevice.Viewport.Bounds, uiScale);
     }
 
-    public RenderTarget2D RenderTarget(SpriteBatch spriteBatch)
+    /// <summary>Disposes the UI tree.</summary>
+    public void Dispose()
     {
-        GraphicsDevice.SetRenderTarget(_renderTarget);
-        GraphicsDevice.Clear(Color.Transparent);
-        Draw(spriteBatch);
-        GraphicsDevice.SetRenderTarget(null);
-
-        if (PostProcessingEffect is not null)
-            return PostProcessingEffect.Apply(spriteBatch, _postProcessingRunner, _renderTarget);
-
-        return _renderTarget;
+        UiRoot.Dispose();
+        GC.SuppressFinalize(this);
     }
 }

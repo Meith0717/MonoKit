@@ -20,9 +20,8 @@ public interface IPostProcessingEffect
 
 public class PostProcessingRunner(GraphicsDevice graphicsDevice) : IDisposable
 {
-    private readonly GraphicsDevice _graphicsDevice = graphicsDevice;
     private readonly RenderTarget2D[] _renderTargets = new RenderTarget2D[2];
-    private int currentIndex;
+    private int _currentIndex;
 
     public void Dispose()
     {
@@ -35,14 +34,14 @@ public class PostProcessingRunner(GraphicsDevice graphicsDevice) : IDisposable
     {
         var destination = GetNextRenderTarget();
 
-        _graphicsDevice.SetRenderTarget(destination);
-        _graphicsDevice.Clear(Color.Transparent);
+        graphicsDevice.SetRenderTarget(destination);
+        graphicsDevice.Clear(Color.Transparent);
 
         spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Opaque, null, null, null, effect);
         spriteBatch.Draw(input, input.Bounds, Color.White);
         spriteBatch.End();
 
-        _graphicsDevice.SetRenderTarget(null);
+        graphicsDevice.SetRenderTarget(null);
 
         return destination;
     }
@@ -53,7 +52,7 @@ public class PostProcessingRunner(GraphicsDevice graphicsDevice) : IDisposable
         {
             _renderTargets[i]?.Dispose();
             _renderTargets[i] = new RenderTarget2D(
-                _graphicsDevice,
+                graphicsDevice,
                 width,
                 height,
                 false,
@@ -65,7 +64,7 @@ public class PostProcessingRunner(GraphicsDevice graphicsDevice) : IDisposable
 
     private RenderTarget2D GetNextRenderTarget()
     {
-        currentIndex = (currentIndex + 1) % _renderTargets.Length;
-        return _renderTargets[currentIndex];
+        _currentIndex = (_currentIndex + 1) % _renderTargets.Length;
+        return _renderTargets[_currentIndex];
     }
 }

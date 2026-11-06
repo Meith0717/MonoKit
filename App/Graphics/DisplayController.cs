@@ -9,6 +9,10 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace MonoKit.App.Graphics;
 
+/// <summary>
+/// Manages the game window: display mode, backbuffer resolution, refresh rate/vsync,
+/// and the scale from a virtual resolution to the current viewport.
+/// </summary>
 public class DisplayController : IDisposable
 {
     private readonly Game _game;
@@ -20,6 +24,8 @@ public class DisplayController : IDisposable
     private int _oldWidth;
     private bool _resolutionWasResized;
 
+    /// <param name="virtualWidth">Virtual resolution width used for <see cref="ViewportScale"/>.</param>
+    /// <param name="virtualHeight">Virtual resolution height used for <see cref="ViewportScale"/>.</param>
     public DisplayController(
         Game game,
         GameWindow window,
@@ -56,8 +62,10 @@ public class DisplayController : IDisposable
         ViewportScale = float.Min(viewport.X / _virtualWidth, viewport.Y / _virtualHeight);
     }
 
+    /// <summary>Scale factor from the virtual resolution to the current viewport.</summary>
     public float ViewportScale { get; private set; }
 
+    /// <summary>True once after the window was resized; reading the property resets the flag.</summary>
     public bool ResolutionWasResized
     {
         get
@@ -74,6 +82,7 @@ public class DisplayController : IDisposable
             GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height
         );
 
+    /// <summary>Sets the target refresh rate in Hz; when <paramref name="vSync"/> is on, the rate is ignored.</summary>
     public void ApplyRefreshRate(int value, bool vSync)
     {
         if (value <= 0)
@@ -88,6 +97,7 @@ public class DisplayController : IDisposable
         _graphicsDeviceManager.ApplyChanges();
     }
 
+    /// <summary>Switches between windowed, borderless and fullscreen.</summary>
     public void ApplyMode(WindowMode mode)
     {
         switch (mode)
@@ -134,6 +144,7 @@ public class DisplayController : IDisposable
         _window.AllowUserResizing = true;
     }
 
+    /// <summary>Unsubscribes from the window's size-changed event.</summary>
     public void Dispose()
     {
         _window.ClientSizeChanged -= OnClientSizeChanged;
