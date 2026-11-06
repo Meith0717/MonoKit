@@ -14,7 +14,7 @@ public class AudioService(ContentProvider contentProvider) : IDisposable
     private MusicManager _musicManager;
     private bool _isDisposed;
 
-    public SoundEffectManager GetOrCreateSFXManager(string category, int maxInstances = 10)
+    public SoundEffectManager GetOrCreateSfxManager(string category, int maxInstances = 10)
     {
         if (_sfxManagers.TryGetValue(category, out var manager))
             return manager;

@@ -8,11 +8,10 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework.Input;
 
-namespace MonoKit.App.Input;
+namespace MonoKit.App.Input.Listeners;
 
 public class KeyboardListener(Dictionary<(Keys, InputEventType), byte> bindings) : IInputDevice
 {
-    private readonly Dictionary<(Keys, InputEventType), byte> _bindings = bindings;
     private readonly List<(Keys, InputEventType)> _pressedKeyStates = new();
     private Keys[] _currentPressedKeys,
         _previousPressedKeys = [];
@@ -38,7 +37,7 @@ public class KeyboardListener(Dictionary<(Keys, InputEventType), byte> bindings)
         _previousPressedKeys = _currentPressedKeys.ToArray();
 
         foreach (var item in _pressedKeyStates)
-            if (_bindings.TryGetValue(item, out var actionID))
+            if (bindings.TryGetValue(item, out var actionID))
                 actionFlags[actionID] = true;
     }
 }

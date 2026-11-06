@@ -97,6 +97,13 @@ public class DisplayController : IDisposable
         _graphicsDeviceManager.ApplyChanges();
     }
 
+    /// <summary>Applies a full display configuration: refresh rate/vsync, then window mode.</summary>
+    public void ApplySettings(DisplaySettings settings)
+    {
+        ApplyRefreshRate(settings.RefreshRate, settings.VSync);
+        ApplyMode(settings.Mode);
+    }
+
     /// <summary>Switches between windowed, borderless and fullscreen.</summary>
     public void ApplyMode(WindowMode mode)
     {

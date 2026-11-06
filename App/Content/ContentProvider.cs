@@ -8,6 +8,7 @@ using System.Collections.Generic;
 
 namespace MonoKit.App.Content;
 
+// ReSharper disable once ClassNeverInstantiated.Global
 public class ContentProvider
 {
     private readonly Dictionary<Type, object> _containers = new();

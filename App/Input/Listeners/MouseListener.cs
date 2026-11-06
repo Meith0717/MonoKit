@@ -7,7 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Input;
 
-namespace MonoKit.App.Input;
+namespace MonoKit.App.Input.Listeners;
 
 public enum MouseButton
 {
@@ -23,7 +23,6 @@ public enum MouseButton
 public class MouseListener(Dictionary<(MouseButton, InputEventType), byte> bindings) : IInputDevice
 {
     private const int HeldMaxCoolDown = 100; // Milliseconds
-    private readonly Dictionary<(MouseButton, InputEventType), byte> _bindings = bindings;
 
     private readonly Dictionary<MouseButton, double> _buttonHeldCoolDown = new()
     {
@@ -46,37 +45,54 @@ public class MouseListener(Dictionary<(MouseButton, InputEventType), byte> bindi
         _buttonsStates[MouseButton.Right] = (_currentState.RightButton, _previousState.RightButton);
         _buttonsStates[MouseButton.Forward] = (_currentState.XButton1, _previousState.XButton1);
         _buttonsStates[MouseButton.Back] = (_currentState.XButton2, _previousState.XButton2);
+        var wheelDelta = _currentState.ScrollWheelValue - _previousState.ScrollWheelValue;
         _previousState = _currentState;
 
         foreach (var (button, (current, previous)) in _buttonsStates)
         {
-            if (previous == ButtonState.Released && current == ButtonState.Released)
-            {
-                _buttonHeldCoolDown[button] = HeldMaxCoolDown;
-                continue;
-            }
+            InputEventType? inputEvent = null;
 
-            var inputEventType = InputEventType.Pressed;
-
-            if (previous == ButtonState.Pressed && current == ButtonState.Released)
-                inputEventType = InputEventType.Released;
-
-            if (previous == ButtonState.Pressed && current == ButtonState.Pressed)
+            if (previous == ButtonState.Released && current == ButtonState.Pressed)
+                inputEvent = InputEventType.Pressed;
+            else if (previous == ButtonState.Pressed && current == ButtonState.Released)
+                inputEvent = InputEventType.Released;
+            else if (previous == ButtonState.Pressed && current == ButtonState.Pressed)
             {
                 _buttonHeldCoolDown[button] -= elapsedMilliseconds;
                 if (_buttonHeldCoolDown[button] < 0)
-                    inputEventType = InputEventType.Held;
+                    inputEvent = InputEventType.Held;
             }
+            else
+                _buttonHeldCoolDown[button] = HeldMaxCoolDown;
 
-            var inputEvent = (button, inputEventType);
-            if (_bindings.TryGetValue(inputEvent, out var actionID))
+            if (
+                inputEvent.HasValue
+                && bindings.TryGetValue((button, inputEvent.Value), out var actionID)
+            )
                 actionFlags[actionID] = true;
 
-            if (button == MouseButton.Left && inputEventType == InputEventType.Released)
+            if (button == MouseButton.Left && inputEvent == InputEventType.Released)
                 actionFlags[EngineInputActions.ButtonPressed] = true;
 
-            if (button == MouseButton.Left && inputEventType == InputEventType.Held)
+            if (button == MouseButton.Left && inputEvent == InputEventType.Held)
                 actionFlags[EngineInputActions.SliderHold] = true;
         }
+
+        if (
+            wheelDelta > 0
+            && bindings.TryGetValue(
+                (MouseButton.WheelForward, InputEventType.Pressed),
+                out var wheelForwardID
+            )
+        )
+            actionFlags[wheelForwardID] = true;
+        else if (
+            wheelDelta < 0
+            && bindings.TryGetValue(
+                (MouseButton.WheelBack, InputEventType.Pressed),
+                out var wheelBackID
+            )
+        )
+            actionFlags[wheelBackID] = true;
     }
 }
