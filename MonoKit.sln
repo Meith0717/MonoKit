@@ -5,8 +5,6 @@ VisualStudioVersion = 17.14.36603.0 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoKit", "MonoKit.csproj", "{6C8193CC-231B-2436-9F34-261BCA3DD756}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoKit.Benchmarks", "Benchmarks\MonoKit.Benchmarks.csproj", "{96DE588B-B962-4230-91FD-C8C1428C44D7}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,10 +15,6 @@ Global
 		{6C8193CC-231B-2436-9F34-261BCA3DD756}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6C8193CC-231B-2436-9F34-261BCA3DD756}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6C8193CC-231B-2436-9F34-261BCA3DD756}.Release|Any CPU.Build.0 = Release|Any CPU
-		{96DE588B-B962-4230-91FD-C8C1428C44D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{96DE588B-B962-4230-91FD-C8C1428C44D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{96DE588B-B962-4230-91FD-C8C1428C44D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{96DE588B-B962-4230-91FD-C8C1428C44D7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

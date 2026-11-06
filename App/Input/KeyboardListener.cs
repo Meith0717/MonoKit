@@ -1,0 +1,44 @@
+﻿// KeyboardListener.cs
+// Copyright (c) 2023-2026 Thierry Meiers
+// All rights reserved.
+// Portions generated or assisted by AI.
+
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Xna.Framework.Input;
+
+namespace MonoKit.App.Input;
+
+public class KeyboardListener(Dictionary<(Keys, InputEventType), byte> bindings) : IInputDevice
+{
+    private readonly Dictionary<(Keys, InputEventType), byte> _bindings = bindings;
+    private readonly List<(Keys, InputEventType)> _pressedKeyStates = new();
+    private Keys[] _currentPressedKeys,
+        _previousPressedKeys = [];
+
+    public void Update(double elapsedMilliseconds, BitArray actionFlags)
+    {
+        _pressedKeyStates.Clear();
+
+        _currentPressedKeys = Keyboard.GetState().GetPressedKeys();
+        var currentSet = _currentPressedKeys.ToHashSet();
+        var previousSet = _previousPressedKeys.ToHashSet();
+
+        foreach (var key in currentSet)
+            if (previousSet.Contains(key))
+                _pressedKeyStates.Add((key, InputEventType.Held));
+            else
+                _pressedKeyStates.Add((key, InputEventType.Pressed));
+
+        foreach (var key in previousSet)
+            if (!currentSet.Contains(key))
+                _pressedKeyStates.Add((key, InputEventType.Released));
+
+        _previousPressedKeys = _currentPressedKeys.ToArray();
+
+        foreach (var item in _pressedKeyStates)
+            if (_bindings.TryGetValue(item, out var actionID))
+                actionFlags[actionID] = true;
+    }
+}

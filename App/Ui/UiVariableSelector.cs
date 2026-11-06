@@ -1,0 +1,145 @@
+﻿// UiVariableSelector.cs
+// Copyright (c) 2023-2026 Thierry Meiers
+// All rights reserved.
+// Portions generated or assisted by AI.
+
+using System;
+using System.Collections.Generic;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using MonoKit.App.Input;
+
+namespace MonoKit.App.Ui;
+
+public sealed class UiVariableSelector<T> : UiElement
+{
+    private readonly UiButton.Sprite _arrowL;
+    private readonly UiButton.Sprite _arrowR;
+    private readonly UiText _text;
+    private List<T> _items;
+    private int _selectedIndex;
+
+    public UiVariableSelector(
+        Texture2D leftButton,
+        Texture2D rightButton,
+        SpriteFont spriteFont,
+        T[] items
+    )
+    {
+        _items = [.. items];
+
+        _arrowL = new UiButton.Sprite(leftButton) { Align = Align.W };
+        _arrowL.OnClickAction += DecreaseIndex;
+
+        _arrowR = new UiButton.Sprite(rightButton) { Align = Align.E };
+        _arrowR.OnClickAction += IncreaseIndex;
+
+        _text = new UiText(spriteFont)
+        {
+            Align = Align.Center,
+            Text = _items.Count == 0 ? string.Empty : _items[_selectedIndex].ToString(),
+        };
+    }
+
+    public Action<T> OnClickAction { get; set; }
+
+    public T[] Items
+    {
+        set
+        {
+            _items = [.. value];
+            _text.Text = _items.Count == 0 ? string.Empty : _items[_selectedIndex].ToString();
+        }
+    }
+
+    public float TextScale
+    {
+        set => _text.Scale = value;
+    }
+
+    public float ButtonScale
+    {
+        set => _arrowL.Scale = _arrowR.Scale = value;
+    }
+
+    public Color TextColor
+    {
+        set => _text.Color = value;
+    }
+
+    public bool Disable
+    {
+        set => _arrowL.Disable = _arrowR.Disable = value;
+    }
+
+    public T Value
+    {
+        set => _selectedIndex = GetIndex(value);
+        get => _items[_selectedIndex];
+    }
+
+    protected override void Updater(InputHandler inputHandler)
+    {
+        _arrowL.Update(inputHandler, Bounds, UiScale);
+        _arrowR.Update(inputHandler, Bounds, UiScale);
+        _text.Update(inputHandler, Bounds, UiScale);
+        Height = (int)
+            float.Floor(
+                int.Max(_text.Bounds.Height, int.Max(_arrowL.Bounds.Height, _arrowR.Bounds.Height))
+                    / UiScale
+            );
+    }
+
+    protected override void Drawer(SpriteBatch spriteBatch)
+    {
+        _arrowL.Draw(spriteBatch);
+        _arrowR.Draw(spriteBatch);
+        _text.Draw(spriteBatch);
+    }
+
+    public override void ApplyScale(Rectangle root, float uiScale)
+    {
+        base.ApplyScale(root, uiScale);
+        _arrowL.ApplyScale(Bounds, UiScale);
+        _arrowR.ApplyScale(Bounds, UiScale);
+        _text.ApplyScale(Bounds, UiScale);
+    }
+
+    public override void Dispose()
+    {
+        base.Dispose();
+        _arrowL.Dispose();
+        _arrowR.Dispose();
+        _text.Dispose();
+    }
+
+    private void IncreaseIndex()
+    {
+        if (_items.Count <= 0)
+            return;
+        _selectedIndex++;
+        if (_selectedIndex >= _items.Count)
+            _selectedIndex = 0;
+        _text.Text = _items[_selectedIndex].ToString();
+        OnClickAction?.Invoke(_items[_selectedIndex]);
+    }
+
+    private void DecreaseIndex()
+    {
+        if (_items.Count <= 0)
+            return;
+        _selectedIndex--;
+        if (_selectedIndex < 0)
+            _selectedIndex = _items.Count - 1;
+        _text.Text = _items[_selectedIndex].ToString();
+        OnClickAction?.Invoke(_items[_selectedIndex]);
+    }
+
+    private int GetIndex(T value)
+    {
+        var index = _items.IndexOf(value);
+        if (index > -1)
+            return index;
+        throw new KeyNotFoundException($"{value} was not found.");
+    }
+}
