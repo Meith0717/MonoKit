@@ -28,7 +28,6 @@ public class DisplayController : IDisposable
     /// <param name="virtualHeight">Virtual resolution height used for <see cref="ViewportScale"/>.</param>
     public DisplayController(
         Game game,
-        GameWindow window,
         GraphicsDeviceManager graphicsManager,
         float virtualWidth = 1920,
         float virtualHeight = 1080
@@ -37,7 +36,7 @@ public class DisplayController : IDisposable
         _game = game;
         _graphicsDeviceManager = graphicsManager;
         _graphicsDeviceManager.ApplyChanges();
-        _window = window;
+        _window = game.Window;
         _virtualWidth = virtualWidth;
         _virtualHeight = virtualHeight;
 
