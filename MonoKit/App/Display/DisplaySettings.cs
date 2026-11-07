@@ -11,14 +11,17 @@ namespace MonoKit.App.Display;
 ///     via <see cref="DisplayController.ApplySettings" />. The virtual resolution is set
 ///     separately via the constructor or <see cref="DisplayController.SetVirtualResolution" />.
 /// </summary>
-public readonly struct DisplaySettings(WindowMode mode, int refreshRate, bool vSync)
+public readonly struct DisplaySettings(WindowMode mode, int refreshRate, bool vSync, int multiSampleCount = 0)
 {
     /// <summary>Windowed, borderless or fullscreen.</summary>
     public readonly WindowMode Mode = mode;
 
-    /// <summary>Target refresh rate in Hz; ignored when <see cref="VSync" /> is on.</summary>
+    /// <summary>Target refresh rate in Hz; ignored when <see cref="VSync" /> is on. Values &lt;= 0 with vsync off mean uncapped.</summary>
     public readonly int RefreshRate = refreshRate;
 
     /// <summary>Synchronize with the vertical retrace.</summary>
     public readonly bool VSync = vSync;
+
+    /// <summary>Requested MSAA sample count for the backbuffer; clamped to what the adapter supports.</summary>
+    public readonly int MultiSampleCount = multiSampleCount;
 }

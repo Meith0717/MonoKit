@@ -48,7 +48,9 @@ public abstract class UiElement : IDisposable
     public FillScale FillScale = FillScale.None;
 
     public int? HSpace = null;
-    public int? Height = null;
+
+    /// <summary>Explicit height in pixels; when null, derived from <see cref="RelHeight" /> or intrinsic size.</summary>
+    public int? Height { get; protected set; }
 
     public float RelHeight = .1f;
     public float RelWidth = .1f;
@@ -56,7 +58,10 @@ public abstract class UiElement : IDisposable
     public float RelX = 0;
     public float RelY = 0;
     public int? VSpace = null;
-    public int? Width = null;
+
+    /// <summary>Explicit width in pixels; when null, derived from <see cref="RelWidth" /> or intrinsic size.</summary>
+    public int? Width { get; protected set; }
+
     public float? X = null;
     public float? Y = null;
 
@@ -74,17 +79,22 @@ public abstract class UiElement : IDisposable
 
     protected abstract void Drawer(SpriteBatch spriteBatch);
 
+    /// <summary>
+    ///     Computes the element's intrinsic <see cref="Width" />/<see cref="Height" /> before layout.
+    ///     Override in widgets whose size derives from content (text, texture).
+    /// </summary>
+    protected virtual void MeasureSize() { }
+
     public void Update(InputHandler inputHandler, Rectangle root, float uiScale)
     {
         ApplyScale(root, uiScale);
         Updater(inputHandler);
-        ApplyScale(root, uiScale);
     }
 
     public void Draw(SpriteBatch spriteBatch)
     {
         Drawer(spriteBatch);
-# if DEBUG
+#if DEBUG
         spriteBatch.DrawRectangle(Bounds, Color.DeepSkyBlue);
 #endif
     }
@@ -92,6 +102,7 @@ public abstract class UiElement : IDisposable
     public virtual void ApplyScale(Rectangle root, float uiScale)
     {
         UiScale = uiScale;
+        MeasureSize();
         UpdateBounds(root);
     }
 
@@ -213,13 +224,13 @@ public abstract class UiElement : IDisposable
             Align.Left => 0,
             Align.N => (root.Width - width) / 2,
             Align.Center => (root.Width - width) / 2,
-            Align.CenterV => (root.Width - width) / 2,
+            Align.CenterH => (root.Width - width) / 2,
             Align.S => (root.Width - width) / 2,
             Align.NE => root.Width - width,
             Align.E => root.Width - width,
             Align.Right => root.Width - width,
             Align.SE => root.Width - width,
-            Align.CenterH => x,
+            Align.CenterV => x,
             Align.None => x,
             Align.Bottom => x,
             Align.Top => x,
@@ -234,12 +245,12 @@ public abstract class UiElement : IDisposable
             Align.E => (root.Height - height) / 2,
             Align.W => (root.Height - height) / 2,
             Align.Center => (root.Height - height) / 2,
-            Align.CenterH => (root.Height - height) / 2,
+            Align.CenterV => (root.Height - height) / 2,
             Align.SE => root.Height - height,
             Align.S => root.Height - height,
             Align.Bottom => root.Height - height,
             Align.SW => root.Height - height,
-            Align.CenterV => y,
+            Align.CenterH => y,
             Align.None => y,
             Align.Left => y,
             Align.Right => y,

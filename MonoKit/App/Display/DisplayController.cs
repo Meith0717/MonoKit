@@ -5,6 +5,7 @@
 // all output reviewed and adapted by the author.
 
 using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -49,6 +50,55 @@ public sealed class DisplayController : IDisposable
 
     /// <summary>Current window mode; updated by <see cref="ApplyMode" />.</summary>
     public WindowMode Mode { get; private set; } = WindowMode.Windowed;
+
+    /// <summary>Device capabilities for settings menus: MSAA counts, profiles, fullscreen modes, adapters.</summary>
+    public DisplayCapabilities Capabilities { get; } = QueryCapabilities();
+
+    /// <summary>Highest MSAA sample count the current adapter supports for the backbuffer (0 = none).</summary>
+    public int SupportedMultiSampleCount =>
+        Capabilities.MultiSampleCounts.Length > 1 ? Capabilities.MultiSampleCounts[0] : 0;
+
+    private static DisplayCapabilities QueryCapabilities()
+    {
+        var adapter = GraphicsAdapter.DefaultAdapter;
+
+        var sampleCounts = new List<int>();
+        foreach (var count in new[] { 16, 8, 4, 2 })
+            if (
+                adapter.QueryRenderTargetFormat(
+                    GraphicsProfile.HiDef,
+                    SurfaceFormat.Color,
+                    DepthFormat.Depth24,
+                    count,
+                    out _,
+                    out _,
+                    out var qualityLevels
+                ) && qualityLevels > 0
+            )
+                sampleCounts.Add(count);
+        sampleCounts.Add(0);
+
+        var profiles = new List<GraphicsProfile>();
+        if (adapter.IsProfileSupported(GraphicsProfile.HiDef))
+            profiles.Add(GraphicsProfile.HiDef);
+        if (adapter.IsProfileSupported(GraphicsProfile.Reach))
+            profiles.Add(GraphicsProfile.Reach);
+
+        var modes = new List<DisplayMode>();
+        foreach (var mode in adapter.SupportedDisplayModes)
+            modes.Add(mode);
+
+        var adapters = new List<string>();
+        foreach (var a in GraphicsAdapter.Adapters)
+            adapters.Add(a.Description);
+
+        return new DisplayCapabilities(
+            sampleCounts.ToArray(),
+            profiles.ToArray(),
+            modes.ToArray(),
+            adapters.ToArray()
+        );
+    }
 
     /// <summary>Scale factor from the virtual resolution to the current backbuffer. 1 until a device exists.</summary>
     public float ViewportScale { get; private set; } = 1f;
@@ -104,22 +154,39 @@ public sealed class DisplayController : IDisposable
     public void ApplySettings(DisplaySettings settings)
     {
         ApplyRefreshRate(settings.RefreshRate, settings.VSync);
+        ApplyMultiSample(Math.Min(settings.MultiSampleCount, SupportedMultiSampleCount));
         ApplyMode(settings.Mode);
     }
 
-    /// <summary>Sets the target refresh rate in Hz; when <paramref name="vSync" /> is on, the rate is ignored.</summary>
+    /// <summary>
+    /// Sets the target refresh rate in Hz; ignored when <paramref name="vSync" /> is on.
+    /// A value &lt;= 0 with vsync off runs uncapped (fixed timestep off, no frame limit).
+    /// </summary>
     public void ApplyRefreshRate(int value, bool vSync)
     {
-        if (value <= 0)
-            throw new ArgumentOutOfRangeException(nameof(value));
-
         _graphicsDeviceManager.SynchronizeWithVerticalRetrace = vSync;
-        _game.IsFixedTimeStep = !vSync;
+        _game.IsFixedTimeStep = !vSync && value > 0;
 
-        if (!vSync)
+        if (!vSync && value > 0)
             _game.TargetElapsedTime = TimeSpan.FromTicks(TimeSpan.TicksPerSecond / value);
 
         _graphicsDeviceManager.ApplyChanges();
+    }
+
+    /// <summary>Sets MSAA on the backbuffer via the presentation parameters; clamps to <see cref="SupportedMultiSampleCount" />.</summary>
+    public void ApplyMultiSample(int sampleCount)
+    {
+        var device = _graphicsDeviceManager.GraphicsDevice;
+        if (device == null)
+            return;
+
+        sampleCount = Math.Min(sampleCount, SupportedMultiSampleCount);
+        if (device.PresentationParameters.MultiSampleCount == sampleCount)
+            return;
+
+        var pp = device.PresentationParameters;
+        pp.MultiSampleCount = sampleCount;
+        device.Reset(pp);
     }
 
     /// <summary>Switches between windowed, borderless and fullscreen.</summary>

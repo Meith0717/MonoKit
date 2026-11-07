@@ -17,7 +17,7 @@ public class UiSprite(Texture2D texture2D, float scale = 1, Color color = defaul
 
     public Texture2D Texture2D { get; set; } = texture2D;
 
-    protected override void Updater(InputHandler inputHandler)
+    protected override void MeasureSize()
     {
         if (Texture2D == null)
         {
@@ -29,6 +29,8 @@ public class UiSprite(Texture2D texture2D, float scale = 1, Color color = defaul
         Width = (int)float.Floor(Texture2D.Width * Scale);
         Height = (int)float.Floor(Texture2D.Height * Scale);
     }
+
+    protected override void Updater(InputHandler inputHandler) { }
 
     protected override void Drawer(SpriteBatch spriteBatch)
     {

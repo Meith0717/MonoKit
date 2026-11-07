@@ -28,7 +28,6 @@ public static class UiButton
     {
         public bool IsHovered;
         private bool _isPressed;
-        private bool _wasHovered;
 
         public void Update(
             InputHandler inputHandler,
@@ -38,11 +37,11 @@ public static class UiButton
             bool isDisabled
         )
         {
+            var wasHovered = IsHovered;
             IsHovered = !isDisabled && bounds.Contains(Mouse.GetState().Position);
             _isPressed = IsHovered && inputHandler.HasAction(EngineInputActions.ButtonPressed);
-            _wasHovered = IsHovered;
 
-            if (IsHovered && !_wasHovered)
+            if (IsHovered && !wasHovered)
                 onHoverAction?.Invoke();
 
             if (!_isPressed)

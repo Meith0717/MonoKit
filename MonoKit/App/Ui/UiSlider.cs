@@ -15,7 +15,6 @@ namespace MonoKit.App.Ui;
 public sealed class UiSlider(bool interactive) : UiElement
 {
     private readonly bool _interactive = interactive;
-    private readonly ButtonStyle style = new();
     private bool _hovered;
     private bool _pressed;
     private float _sliderValue;

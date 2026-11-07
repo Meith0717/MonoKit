@@ -19,30 +19,23 @@ public sealed class UiText(SpriteFont spriteFont, string text = null) : UiElemen
     public string Text
     {
         get => _text;
-        set
-        {
-            _text = value;
-            UpdateSize();
-        }
+        set => _text = value;
     }
 
     public float Scale
     {
         get => _scale;
-        set
-        {
-            _scale = value;
-            UpdateSize();
-        }
+        set => _scale = value;
     }
 
     public Color Color { get; set; } = Color.Black;
     public Func<string> TextProvider { get; set; }
 
-    public override void ApplyScale(Rectangle root, float uiScale)
+    protected override void MeasureSize()
     {
-        UpdateSize();
-        base.ApplyScale(root, uiScale);
+        var textDimension = _text == null ? Vector2.Zero : spriteFont.MeasureString(_text);
+        Width = (int)(textDimension.X * _scale);
+        Height = (int)float.Floor(textDimension.Y * _scale);
     }
 
     protected override void Drawer(SpriteBatch spriteBatch)
@@ -68,10 +61,4 @@ public sealed class UiText(SpriteFont spriteFont, string text = null) : UiElemen
             Text = TextProvider();
     }
 
-    private void UpdateSize()
-    {
-        var textDimension = _text == null ? Vector2.Zero : spriteFont.MeasureString(_text);
-        Width = (int)(textDimension.X * _scale);
-        Height = (int)float.Floor(textDimension.Y * _scale);
-    }
 }

@@ -9,10 +9,11 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace MonoKit.App.Core.Diagnostics;
 
-public class FrameCounter(SpriteFont spriteFont)
+public class FrameCounter
 {
     private int _samples;
     private double _summedFps;
+    private int _windowFrames;
 
     private double _timeSinceLastSample;
 
@@ -27,6 +28,7 @@ public class FrameCounter(SpriteFont spriteFont)
     public void Update(double elapsedSeconds, double elapsedMilliseconds)
     {
         TotalFrames++;
+        _windowFrames++;
         _timeSinceLastSample += elapsedSeconds;
         TotalSeconds += elapsedSeconds;
 
@@ -34,7 +36,8 @@ public class FrameCounter(SpriteFont spriteFont)
             return;
 
         FrameTime = elapsedMilliseconds;
-        CurrentFramesPerSecond = 1d / FrameTime * 1e3d;
+        CurrentFramesPerSecond = _windowFrames / _timeSinceLastSample;
+        _windowFrames = 0;
 
         _samples++;
         _summedFps += CurrentFramesPerSecond;
@@ -43,25 +46,5 @@ public class FrameCounter(SpriteFont spriteFont)
         AverageFramesPerSecond = _summedFps / _samples;
 
         _timeSinceLastSample = 0;
-    }
-
-    public void Draw(SpriteBatch spriteBatch, Viewport viewport, float viewpointScale)
-    {
-        var scale = .12f;
-        var str = double.Round(CurrentFramesPerSecond).ToString();
-        var strSize = spriteFont.MeasureString(str) * scale * viewpointScale;
-        var ofset = new Vector2(10, -10) * scale * viewpointScale;
-        var position = new Vector2(viewport.Width - strSize.X, 0) - ofset;
-        spriteBatch.DrawString(
-            spriteFont,
-            str,
-            position,
-            Color.White,
-            0,
-            Vector2.Zero,
-            scale * viewpointScale,
-            SpriteEffects.None,
-            1
-        );
     }
 }

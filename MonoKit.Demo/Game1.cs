@@ -8,9 +8,8 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoKit.App;
-using MonoKit.App.Core.Diagnostics;
+using MonoKit.App.Content;
 using MonoKit.App.Core.IO;
-using MonoKit.App.Display;
 
 namespace MonoKit.Demo;
 
@@ -26,6 +25,7 @@ public class Game1 : Game
         {
             PathService = new PathService("MonoKit.Demo", Environment.SpecialFolder.MyDocuments),
         };
+        _appHost.DisplayController.ApplyRefreshRate(30, false);
 
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
@@ -33,6 +33,11 @@ public class Game1 : Game
 
     protected override void Initialize()
     {
+        ContentLoader
+            .Create(Content)
+            .RegisterContentDirectory<SpriteFont>("fonts")
+            .LoadAll(_appHost.ContentProvider);
+
         base.Initialize();
         _appHost.Initialize(GraphicsDevice);
     }
@@ -52,7 +57,17 @@ public class Game1 : Game
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
-        _appHost.Draw(GraphicsDevice, _spriteBatch);
+        _appHost.Draw(gameTime, GraphicsDevice, _spriteBatch);
+
+        _spriteBatch.Begin();
+        _spriteBatch.DrawString(
+            _appHost.ContentProvider.Get<SpriteFont>("default"),
+            $"{double.Round(_appHost.FrameCounter.CurrentFramesPerSecond, 2)} fps",
+            Vector2.Zero,
+            Color.White
+        );
+        _spriteBatch.End();
+
         base.Draw(gameTime);
     }
 

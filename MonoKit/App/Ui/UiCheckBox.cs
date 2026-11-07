@@ -25,6 +25,10 @@ public sealed class UiCheckBox : UiButton.Sprite
     public bool State
     {
         get => _state;
-        set => Texture2D = _state == value ? _trueButton : _falseButton;
+        set
+        {
+            _state = value;
+            Texture2D = value ? _trueButton : _falseButton;
+        }
     }
 }
