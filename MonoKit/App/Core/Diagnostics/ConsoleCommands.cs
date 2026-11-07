@@ -13,6 +13,7 @@ namespace MonoKit.App.Core.Diagnostics;
 public class ConsoleCommands
 {
     private readonly Dictionary<string, ConsoleCommand> _commands = new();
+    private readonly object _lock = new();
 
     public ConsoleCommands()
     {
@@ -21,7 +22,8 @@ public class ConsoleCommands
 
     public void Register(ConsoleCommand command)
     {
-        _commands[command.Name.ToLower()] = command;
+        lock (_lock)
+            _commands[command.Name.ToLower()] = command;
     }
 
     public bool Execute(string input)
@@ -33,7 +35,11 @@ public class ConsoleCommands
         var name = parts[0].ToLower();
         var args = parts.Skip(1).ToArray();
 
-        if (_commands.TryGetValue(name, out var command))
+        ConsoleCommand? command;
+        lock (_lock)
+            _commands.TryGetValue(name, out command);
+
+        if (command != null)
             try
             {
                 command.Execute(args);
@@ -52,7 +58,8 @@ public class ConsoleCommands
     public void PrintHelp()
     {
         Console.WriteLine("Available commands:");
-        foreach (var cmd in _commands.Values)
-            Console.WriteLine($"  {cmd.Name} - {cmd.Description}");
+        lock (_lock)
+            foreach (var cmd in _commands.Values)
+                Console.WriteLine($"  {cmd.Name} - {cmd.Description}");
     }
 }

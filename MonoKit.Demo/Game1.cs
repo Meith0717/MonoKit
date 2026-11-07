@@ -8,7 +8,9 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoKit.App;
+using MonoKit.App.Core.Diagnostics;
 using MonoKit.App.Core.IO;
+using MonoKit.App.Display;
 
 namespace MonoKit.Demo;
 
@@ -24,14 +26,15 @@ public class Game1 : Game
         {
             PathService = new PathService("MonoKit.Demo", Environment.SpecialFolder.MyDocuments),
         };
+
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
     }
 
     protected override void Initialize()
     {
-        _appHost.Initialize(GraphicsDevice);
         base.Initialize();
+        _appHost.Initialize(GraphicsDevice);
     }
 
     protected override void LoadContent()

@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoKit.App.Content;
 using MonoKit.App.Content.Audio;
+using MonoKit.App.Core.Diagnostics;
 using MonoKit.App.Core.IO;
 using MonoKit.App.Display;
 using MonoKit.App.Input;
@@ -29,10 +30,22 @@ public class AppHost(Game game, GraphicsDeviceManager graphicsDeviceManager) : I
 
     public PathService PathService { get; init; }
 
+    public DebugConsole EnableDebugConsole()
+    {
+        if (game.Services.GetService(typeof(DebugConsole)) is DebugConsole console)
+            return console;
+
+        var debugConsole = new DebugConsole();
+        game.Services.AddService(debugConsole);
+        debugConsole.Start();
+        return debugConsole;
+    }
+
     public void Initialize(GraphicsDevice graphicsDevice)
     {
         if (_wasInitialized)
             return;
+        _wasInitialized = true;
 
         AudioService.Initialize(ContentProvider);
 
@@ -50,8 +63,6 @@ public class AppHost(Game game, GraphicsDeviceManager graphicsDeviceManager) : I
         {
             ScreenManager.OnResolutionChanged(scale, graphicsDevice);
         };
-
-        _wasInitialized = true;
     }
 
     public void Update(GameTime gameTime, GraphicsDevice graphicsDevice)
@@ -75,6 +86,9 @@ public class AppHost(Game game, GraphicsDeviceManager graphicsDeviceManager) : I
 
     public void Dispose()
     {
+        if (game.Services.GetService<DebugConsole>() is DebugConsole console)
+            console.Dispose();
+
         AudioService.Dispose();
         DisplayController.Dispose();
     }
