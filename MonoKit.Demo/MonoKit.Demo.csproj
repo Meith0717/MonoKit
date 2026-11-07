@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <RootNamespace>MonoKit.Demo</RootNamespace>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\MonoKit\MonoKit.csproj" />
+        <!-- MonoKit references MonoGame with PrivateAssets="All", so the demo needs its own reference -->
+        <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.6" />
+    </ItemGroup>
+</Project>
