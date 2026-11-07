@@ -1,7 +1,8 @@
-// ArchetypeManager.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+// MonoKit - ArchetypeManager.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 using System;
 using System.Collections.Generic;
@@ -11,18 +12,30 @@ namespace MonoKit.GameRuntime.ArchetypeEcs.Archetypes;
 internal sealed class ArchetypeManager : IDisposable
 {
     private readonly Dictionary<ArchetypeType, Archetype> _archetypes = new();
-    private readonly Dictionary<Type, HashSet<Archetype>> _componentTypeToArchetypes = new();
 
     private readonly Dictionary<Type, Archetype[]> _componentTypeToArchetypeSnapshots = new();
+    private readonly Dictionary<Type, HashSet<Archetype>> _componentTypeToArchetypes = new();
     private bool _snapshotsDirty;
+
+    internal ArchetypeManager()
+    {
+        EmptyArchetype = GetOrCreateArchetype(ArchetypeType.Empty);
+    }
 
     internal Archetype EmptyArchetype { get; }
 
     internal int ArchetypeCount => _archetypes.Count;
 
-    internal ArchetypeManager()
+    internal IEnumerable<Archetype> Archetypes => _archetypes.Values;
+
+    public void Dispose()
     {
-        EmptyArchetype = GetOrCreateArchetype(ArchetypeType.Empty);
+        foreach (var archetype in _archetypes.Values)
+            archetype.Dispose();
+        _archetypes.Clear();
+        _componentTypeToArchetypes.Clear();
+        _componentTypeToArchetypeSnapshots.Clear();
+        _snapshotsDirty = false;
     }
 
     internal Archetype GetOrCreateArchetype(ArchetypeType archetypeType)
@@ -58,17 +71,5 @@ internal sealed class ArchetypeManager : IDisposable
         if (!_componentTypeToArchetypeSnapshots.TryGetValue(componentType, out var snapshot))
             _componentTypeToArchetypeSnapshots[componentType] = snapshot = [.. set];
         return snapshot;
-    }
-
-    internal IEnumerable<Archetype> Archetypes => _archetypes.Values;
-
-    public void Dispose()
-    {
-        foreach (var archetype in _archetypes.Values)
-            archetype.Dispose();
-        _archetypes.Clear();
-        _componentTypeToArchetypes.Clear();
-        _componentTypeToArchetypeSnapshots.Clear();
-        _snapshotsDirty = false;
     }
 }

@@ -1,7 +1,8 @@
-// RowGrid3D.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+// MonoKit - RowGrid3D.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 using System;
 using System.Collections.Generic;
@@ -13,20 +14,12 @@ namespace MonoKit.GameRuntime.ArchetypeEcs.SpatialQueries;
 internal sealed class RowGrid3D<TPos>
     where TPos : struct
 {
-    private struct CellRange(int start, int count)
-    {
-        public readonly int Start = start;
-        public readonly int Count = count;
-    }
-
     private readonly float _inverseCellSize;
     private readonly Dictionary<long, CellRange> _ranges = new();
     private long[] _keys = [];
     private int[] _order = [];
 
     private Vector3[] _vecPositions = [];
-
-    public float CellSize { get; }
 
     public RowGrid3D(float cellSize)
     {
@@ -35,6 +28,8 @@ internal sealed class RowGrid3D<TPos>
         _inverseCellSize = 1f / cellSize;
         CellSize = cellSize;
     }
+
+    public float CellSize { get; }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     private static long MortonEncode(int x, int y, int z)
@@ -48,18 +43,24 @@ internal sealed class RowGrid3D<TPos>
                 result |= ((long)(y >> i) & 1) << (3 * i + 1);
                 result |= ((long)(z >> i) & 1) << (3 * i + 2);
             }
+
             return result;
         }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    private int ToCell(float value) => (int)float.Floor(value * _inverseCellSize);
+    private int ToCell(float value)
+    {
+        return (int)float.Floor(value * _inverseCellSize);
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    private static long CellKey(int x, int y, int z) =>
-        (long)(uint)(x & 0x1F_FFFF) << 42
-        | (long)(uint)(y & 0x1F_FFFF) << 21
-        | (uint)(z & 0x1F_FFFF);
+    private static long CellKey(int x, int y, int z)
+    {
+        return ((long)(uint)(x & 0x1F_FFFF) << 42)
+            | ((long)(uint)(y & 0x1F_FFFF) << 21)
+            | (uint)(z & 0x1F_FFFF);
+    }
 
     public int[] Prepare(
         TPos[] positions,
@@ -150,5 +151,11 @@ internal sealed class RowGrid3D<TPos>
                     results.Add(index);
             }
         }
+    }
+
+    private struct CellRange(int start, int count)
+    {
+        public readonly int Start = start;
+        public readonly int Count = count;
     }
 }

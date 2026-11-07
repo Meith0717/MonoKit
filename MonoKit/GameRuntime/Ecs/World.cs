@@ -1,11 +1,13 @@
-// World.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+// MonoKit - World.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 // ReSharper disable MemberCanBePrivate.Global
 
 using System;
+using System.Text;
 using MonoKit.App.Input;
 using MonoKit.GameRuntime.Ecs.Components;
 using MonoKit.GameRuntime.Ecs.Entities;
@@ -18,15 +20,6 @@ namespace MonoKit.GameRuntime.Ecs;
 
 public sealed class World : IDisposable
 {
-    public EntityManager EntityManager { get; } = new();
-    public ComponentManager Components { get; } = new();
-    public EntityTypeTracker TypeTracker { get; }
-    public SystemManager Systems { get; }
-
-    public Entity WorldEntity { get; private set; }
-
-    public int EntityCount => EntityManager.Count;
-
     public World()
     {
         TypeTracker = new EntityTypeTracker();
@@ -38,6 +31,27 @@ public sealed class World : IDisposable
         Components.Add(WorldEntity, new WorldTag());
 
         Systems = new SystemManager(this);
+    }
+
+    public EntityManager EntityManager { get; } = new();
+    public ComponentManager Components { get; } = new();
+    public EntityTypeTracker TypeTracker { get; }
+    public SystemManager Systems { get; }
+
+    public Entity WorldEntity { get; private set; }
+
+    public int EntityCount => EntityManager.Count;
+
+    public void Dispose()
+    {
+        // Dispose all managers in the correct order
+        Systems.Dispose();
+        Components.Dispose();
+        TypeTracker.Dispose();
+        EntityManager.Dispose();
+
+        // Clean up the world entity reference
+        WorldEntity = default;
     }
 
     public void Update(
@@ -66,23 +80,11 @@ public sealed class World : IDisposable
 
     public override string ToString()
     {
-        var sb = new System.Text.StringBuilder();
+        var sb = new StringBuilder();
         sb.AppendLine("================ WORLD STATE ================");
         sb.AppendLine(Components.ToString());
         sb.AppendLine(Systems.ToString());
         sb.AppendLine("=============================================");
         return sb.ToString();
-    }
-
-    public void Dispose()
-    {
-        // Dispose all managers in the correct order
-        Systems.Dispose();
-        Components.Dispose();
-        TypeTracker.Dispose();
-        EntityManager.Dispose();
-
-        // Clean up the world entity reference
-        WorldEntity = default;
     }
 }

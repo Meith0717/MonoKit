@@ -1,7 +1,8 @@
-﻿// GameRenderer2D.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+﻿// MonoKit - GameRenderer2D.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 using System;
 using System.Collections.Generic;
@@ -16,13 +17,13 @@ namespace MonoKit.GameRuntime.Rendering;
 
 public class EcsGameRenderer2D(RuntimeContainer services)
 {
-    private readonly World _world = services.Get<World>();
     private readonly Camera2D _camera = services.Get<Camera2D>();
-    private readonly EcsSpatialHash2D _spatialHash2D = services.Get<EcsSpatialHash2D>();
-    private readonly List<IEcsGameRendererProcess> _renderer2DProcesses = [];
     private readonly List<Entity> _culledEntities = [];
-    private float _viewportScale;
+    private readonly List<IEcsGameRendererProcess> _renderer2DProcesses = [];
+    private readonly EcsSpatialHash2D _spatialHash2D = services.Get<EcsSpatialHash2D>();
+    private readonly World _world = services.Get<World>();
     private bool _hasBegan;
+    private float _viewportScale;
 
     public void AddProcess(IEcsGameRendererProcess gameRendererProcess)
     {

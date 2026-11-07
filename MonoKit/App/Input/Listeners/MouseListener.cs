@@ -1,7 +1,8 @@
-﻿// MouseListener.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+﻿// MonoKit - MouseListener.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 using System.Collections;
 using System.Collections.Generic;
@@ -34,6 +35,7 @@ public class MouseListener(Dictionary<(MouseButton, InputEventType), byte> bindi
     };
 
     private readonly Dictionary<MouseButton, (ButtonState, ButtonState)> _buttonsStates = new();
+
     private MouseState _currentState,
         _previousState;
 
@@ -53,9 +55,13 @@ public class MouseListener(Dictionary<(MouseButton, InputEventType), byte> bindi
             InputEventType? inputEvent = null;
 
             if (previous == ButtonState.Released && current == ButtonState.Pressed)
+            {
                 inputEvent = InputEventType.Pressed;
+            }
             else if (previous == ButtonState.Pressed && current == ButtonState.Released)
+            {
                 inputEvent = InputEventType.Released;
+            }
             else if (previous == ButtonState.Pressed && current == ButtonState.Pressed)
             {
                 _buttonHeldCoolDown[button] -= elapsedMilliseconds;
@@ -63,7 +69,9 @@ public class MouseListener(Dictionary<(MouseButton, InputEventType), byte> bindi
                     inputEvent = InputEventType.Held;
             }
             else
+            {
                 _buttonHeldCoolDown[button] = HeldMaxCoolDown;
+            }
 
             if (
                 inputEvent.HasValue

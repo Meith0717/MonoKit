@@ -1,7 +1,8 @@
-// EntityRecords.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+// MonoKit - EntityRecords.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 using System;
 using MonoKit.GameRuntime.ArchetypeEcs.Archetypes;
@@ -12,15 +13,14 @@ internal sealed class EntityRecords : IDisposable
 {
     private const int InitialCapacity = 16;
 
-    private readonly struct EntityRecord(int row, int generation, Archetype archetype)
-    {
-        internal readonly int Row = row;
-        internal readonly int Generation = generation;
-        internal readonly Archetype Archetype = archetype;
-    }
-
     private EntityRecord[] _entityRecords = new EntityRecord[InitialCapacity];
     private bool[] _isValid = new bool[InitialCapacity];
+
+    public void Dispose()
+    {
+        Array.Clear(_entityRecords, 0, _entityRecords.Length);
+        Array.Clear(_isValid, 0, _isValid.Length);
+    }
 
     private void EnsureCapacity(int entityId)
     {
@@ -45,6 +45,7 @@ internal sealed class EntityRecords : IDisposable
                 return true;
             }
         }
+
         archetype = null!;
         row = -1;
         return false;
@@ -67,9 +68,10 @@ internal sealed class EntityRecords : IDisposable
         return true;
     }
 
-    public void Dispose()
+    private readonly struct EntityRecord(int row, int generation, Archetype archetype)
     {
-        Array.Clear(_entityRecords, 0, _entityRecords.Length);
-        Array.Clear(_isValid, 0, _isValid.Length);
+        internal readonly int Row = row;
+        internal readonly int Generation = generation;
+        internal readonly Archetype Archetype = archetype;
     }
 }

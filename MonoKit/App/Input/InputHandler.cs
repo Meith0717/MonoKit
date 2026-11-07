@@ -1,7 +1,8 @@
-﻿// InputHandler.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+﻿// MonoKit - InputHandler.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 using System;
 using System.Collections;
@@ -16,9 +17,9 @@ internal static class EngineInputActions
 }
 
 /// <summary>
-/// Central input hub: registered <see cref="IInputDevice"/>s write action flags each frame,
-/// consumers read them via <see cref="IsActionActive"/>/<see cref="HasAction"/>.
-/// Flags are cleared at the start of every <see cref="Update"/>.
+///     Central input hub: registered <see cref="IInputDevice" />s write action flags each frame,
+///     consumers read them via <see cref="IsActionActive" />/<see cref="HasAction" />.
+///     Flags are cleared at the start of every <see cref="Update" />.
 /// </summary>
 public class InputHandler
 {
@@ -38,7 +39,10 @@ public class InputHandler
     }
 
     /// <summary>Returns whether the action fired this frame, without consuming it.</summary>
-    public bool IsActionActive(byte actionID) => _actionsFlags[actionID];
+    public bool IsActionActive(byte actionID)
+    {
+        return _actionsFlags[actionID];
+    }
 
     /// <summary>Consumes the action flag; returns true if it was set.</summary>
     public bool ConsumeAction(byte actionID)
@@ -49,7 +53,10 @@ public class InputHandler
     }
 
     /// <summary>Consumes the action; returns true if it fired this frame.</summary>
-    public bool HasAction(byte actionID) => ConsumeAction(actionID);
+    public bool HasAction(byte actionID)
+    {
+        return ConsumeAction(actionID);
+    }
 
     public void DoAction(byte actionID, Action function)
     {

@@ -1,7 +1,8 @@
-﻿// GameRuntime2D.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+﻿// MonoKit - GameRuntime2D.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 using System;
 using Microsoft.Xna.Framework;
@@ -17,9 +18,9 @@ namespace MonoKit.GameRuntime.Gameplay;
 
 public class GameRuntime2D : IDisposable
 {
-    private readonly World _world;
-    private readonly Camera2D _camera;
     public readonly RuntimeContainer Services = new();
+    private readonly Camera2D _camera;
+    private readonly World _world;
 
     public GameRuntime2D(GraphicsDevice graphicsDevice, int spatialHashingCellSize)
     {
@@ -38,6 +39,12 @@ public class GameRuntime2D : IDisposable
 
     public Vector2 WorldMousePosition { get; private set; }
 
+    public void Dispose()
+    {
+        _world.Dispose();
+        GC.SuppressFinalize(this);
+    }
+
     public void Update(double elapsedMilliseconds, InputHandler inputHandler)
     {
         _world.Update(elapsedMilliseconds, Services, inputHandler);
@@ -46,11 +53,5 @@ public class GameRuntime2D : IDisposable
             Mouse.GetState().Position.ToVector2(),
             _camera.ViewInvert
         );
-    }
-
-    public void Dispose()
-    {
-        _world.Dispose();
-        GC.SuppressFinalize(this);
     }
 }

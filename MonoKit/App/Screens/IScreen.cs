@@ -1,7 +1,8 @@
-// IScreen.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+// MonoKit - IScreen.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 using System;
 using Microsoft.Xna.Framework.Graphics;
@@ -9,7 +10,7 @@ using MonoKit.App.Input;
 
 namespace MonoKit.App.Screens;
 
-/// <summary>A screen managed by <see cref="ScreenManager"/>: updated and drawn as part of a stack.</summary>
+/// <summary>A screen managed by <see cref="ScreenManager" />: updated and drawn as part of a stack.</summary>
 public interface IScreen : IDisposable
 {
     /// <summary>When true, screens below this one keep updating.</summary>
@@ -21,7 +22,7 @@ public interface IScreen : IDisposable
     /// <summary>Called once when the screen is pushed onto the stack.</summary>
     public void Initialize();
 
-    /// <summary>Advances the screen. Skipped when a screen above has <see cref="UpdateBelow"/> set to false.</summary>
+    /// <summary>Advances the screen. Skipped when a screen above has <see cref="UpdateBelow" /> set to false.</summary>
     public void Update(double elapsedMs, InputHandler inputHandler, float uiScale);
 
     /// <summary>Draws the screen. The device is passed for screens doing 3D rendering.</summary>

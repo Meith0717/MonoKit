@@ -27,9 +27,6 @@ indent_size = 2
 [*.cs]
 #### Benennungsstile ####
 
-# Header
-file_header_template = {fileName} \nCopyright (c) 2023-2026 Thierry Meiers \nAll rights reserved.\nPortions generated or assisted by AI.
-
 # Benennungsregeln
 
 dotnet_naming_rule.interface_should_be_begins_with_i.severity = suggestion

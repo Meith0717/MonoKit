@@ -1,21 +1,22 @@
-// ScreenManager.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+// MonoKit - ScreenManager.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using MonoKit.App.Rendering;
 using MonoKit.App.Input;
+using MonoKit.App.Rendering;
 
 namespace MonoKit.App.Screens;
 
 /// <summary>
-/// Stack of <see cref="IScreen"/>s. Updates top-down, composites the visible lower chain
-/// with an optional effect, and draws the top screen unmodified on top.
+///     Stack of <see cref="IScreen" />s. Updates top-down, composites the visible lower chain
+///     with an optional effect, and draws the top screen unmodified on top.
 /// </summary>
 public class ScreenManager(Game game)
 {
@@ -104,6 +105,7 @@ public class ScreenManager(Game game)
                 skipTop = false;
                 continue;
             }
+
             _visibleChain.Add(screen);
             if (!screen.DrawBelow)
                 break;
@@ -143,10 +145,10 @@ public class ScreenManager(Game game)
     }
 
     /// <summary>
-    /// Draws a screen. Plain screens draw directly into the currently bound
-    /// target. Screens implementing IPostProcessedScreen are rendered into
-    /// the shared scratch target first, their effect is applied, and the
-    /// result is composited back onto the previous binding.
+    ///     Draws a screen. Plain screens draw directly into the currently bound
+    ///     target. Screens implementing IPostProcessedScreen are rendered into
+    ///     the shared scratch target first, their effect is applied, and the
+    ///     result is composited back onto the previous binding.
     /// </summary>
     private void RenderScreen(SpriteBatch spriteBatch, IScreen screen)
     {
@@ -197,6 +199,7 @@ public class ScreenManager(Game game)
                 DepthFormat.Depth24Stencil8
             );
         }
+
         return _screenScratch;
     }
 
@@ -223,6 +226,7 @@ public class ScreenManager(Game game)
                 DepthFormat.Depth24Stencil8
             );
         }
+
         return _lowerComposite;
     }
 

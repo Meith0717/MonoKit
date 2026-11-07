@@ -1,10 +1,12 @@
-// SystemManager.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+// MonoKit - SystemManager.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 using System;
 using System.Collections.Generic;
+using System.Text;
 using MonoKit.App.Input;
 using MonoKit.GameRuntime.Ecs.Entities;
 using MonoKit.GameRuntime.Gameplay;
@@ -13,9 +15,20 @@ namespace MonoKit.GameRuntime.Ecs.Systems;
 
 public class SystemManager(World world) : IDisposable
 {
-    private readonly List<ISystem> _systems = [];
     private readonly HashSet<ISystem> _addedSystems = [];
-    private bool _isDirty = false;
+    private readonly List<ISystem> _systems = [];
+    private bool _isDirty;
+
+    public void Dispose()
+    {
+        foreach (var system in _systems)
+            if (system is IDisposable disposableSystem)
+                disposableSystem.Dispose();
+
+        _systems.Clear();
+        _addedSystems.Clear();
+        _isDirty = false;
+    }
 
     public void Add(ISystem system)
     {
@@ -49,21 +62,20 @@ public class SystemManager(World world) : IDisposable
                 system.Initialize(world);
             system.Update(elapsedMs, world, runtimeServices, inputHandler);
         }
+
         _addedSystems.Clear();
     }
 
     public void NotifyEntityDestroyed(Entity entity)
     {
         foreach (var system in _systems)
-        {
             if (system is IOnEntityDestroyed listener)
                 listener.OnEntityDestroyed(entity);
-        }
     }
 
     public override string ToString()
     {
-        var sb = new System.Text.StringBuilder();
+        var sb = new StringBuilder();
         sb.AppendLine("--- System Manager (Execution Order) ---");
         var displayList = new List<ISystem>(_systems);
         displayList.Sort((a, b) => a.Priority.CompareTo(b.Priority));
@@ -72,16 +84,5 @@ public class SystemManager(World world) : IDisposable
             sb.AppendLine($"[{system.Priority}] {system.GetType().Name}");
 
         return sb.ToString();
-    }
-
-    public void Dispose()
-    {
-        foreach (var system in _systems)
-            if (system is IDisposable disposableSystem)
-                disposableSystem.Dispose();
-
-        _systems.Clear();
-        _addedSystems.Clear();
-        _isDirty = false;
     }
 }

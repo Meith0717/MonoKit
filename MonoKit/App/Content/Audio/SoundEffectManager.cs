@@ -1,7 +1,8 @@
-// SoundEffectManager.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+// MonoKit - SoundEffectManager.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 using System;
 using System.Collections.Generic;
@@ -16,10 +17,10 @@ public sealed class SoundEffectManager(
     int maxInstances = 10
 )
 {
-    private readonly Dictionary<string, SoundEffectInstance[]> _instances = new();
     private readonly string _categoryPrefix = category.EndsWith("/") ? category : category + "/";
-    private float _volume = 1f;
+    private readonly Dictionary<string, SoundEffectInstance[]> _instances = new();
     private bool _isDisposed;
+    private float _volume = 1f;
 
     public string Category => _categoryPrefix.TrimEnd('/');
 

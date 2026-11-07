@@ -1,12 +1,13 @@
-// Entity.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+// MonoKit - Entity.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 namespace MonoKit.GameRuntime.ArchetypeEcs.Entities;
 
 public readonly record struct Entity(int Id, int Generation)
 {
-    public readonly int Id = Id;
     public readonly int Generation = Generation;
+    public readonly int Id = Id;
 }

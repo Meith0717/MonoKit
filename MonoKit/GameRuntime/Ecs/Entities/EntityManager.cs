@@ -1,7 +1,8 @@
-// EntityManager.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+// MonoKit - EntityManager.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 using System;
 using System.Collections.Generic;
@@ -15,11 +16,19 @@ public readonly record struct Entity(int Id)
 
 public sealed class EntityManager : IDisposable
 {
-    private int _nextId = 0;
-    private readonly Stack<int> _freeIds = new();
     private readonly List<bool> _alive = new();
+    private readonly Stack<int> _freeIds = new();
+    private int _nextId;
 
     public int Count { get; private set; }
+
+    public void Dispose()
+    {
+        _nextId = 0;
+        _alive.Clear();
+        _freeIds.Clear();
+        Count = 0;
+    }
 
     public Entity Create()
     {
@@ -34,6 +43,7 @@ public sealed class EntityManager : IDisposable
             id = _nextId++;
             _alive.Add(true);
         }
+
         Count++;
         return new Entity(id);
     }
@@ -55,13 +65,5 @@ public sealed class EntityManager : IDisposable
     public bool IsAlive(Entity entity)
     {
         return entity.Id >= 0 && entity.Id < _alive.Count && _alive[entity.Id];
-    }
-
-    public void Dispose()
-    {
-        _nextId = 0;
-        _alive.Clear();
-        _freeIds.Clear();
-        Count = 0;
     }
 }

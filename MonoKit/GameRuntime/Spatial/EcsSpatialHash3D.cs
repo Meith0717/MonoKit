@@ -1,7 +1,8 @@
-// EcsSpatialHash3D.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+// MonoKit - EcsSpatialHash3D.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -12,16 +13,11 @@ namespace MonoKit.GameRuntime.Spatial;
 
 public sealed class EcsSpatialHash3D(float cellSize, int capacity = 1024)
 {
-    private struct Entry(Entity entity, Vector3 position)
-    {
-        public readonly Entity Entity = entity;
-        public readonly Vector3 Position = position;
-    }
-
-    private readonly Stack<List<Entry>> _listCache = new(capacity);
+    public readonly float CellSize = cellSize;
     private readonly Dictionary<long, List<Entry>> _grids = new(capacity);
     private readonly float _inverseCellSize = 1f / cellSize;
-    public readonly float CellSize = cellSize;
+
+    private readonly Stack<List<Entry>> _listCache = new(capacity);
     public List<Vector3> ActiveGridPositions { get; } = new(capacity);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -36,12 +32,16 @@ public sealed class EcsSpatialHash3D(float cellSize, int capacity = 1024)
                 result |= ((long)(y >> i) & 1) << (3 * i + 1);
                 result |= ((long)(z >> i) & 1) << (3 * i + 2);
             }
+
             return result;
         }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    private int ToCell(float value) => (int)float.Floor(value * _inverseCellSize);
+    private int ToCell(float value)
+    {
+        return (int)float.Floor(value * _inverseCellSize);
+    }
 
     public void Clear()
     {
@@ -50,6 +50,7 @@ public sealed class EcsSpatialHash3D(float cellSize, int capacity = 1024)
             kvp.Value.Clear();
             _listCache.Push(kvp.Value);
         }
+
         _grids.Clear();
         ActiveGridPositions.Clear();
     }
@@ -145,6 +146,13 @@ public sealed class EcsSpatialHash3D(float cellSize, int capacity = 1024)
                 hit = true;
             }
         }
+
         return hit;
+    }
+
+    private struct Entry(Entity entity, Vector3 position)
+    {
+        public readonly Entity Entity = entity;
+        public readonly Vector3 Position = position;
     }
 }

@@ -1,19 +1,18 @@
-﻿// IPostProcessingEffect.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+﻿// MonoKit - IPostProcessingEffect.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
-using System;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace MonoKit.App.Rendering;
 
 /// <summary>
-/// A post-processing effect applied to a rendered screen. Implementations chain
-/// passes through <see cref="PostProcessingRunner.Pass"/>; the returned target is
-/// owned by the runner and stays valid until the runner's next
-/// <see cref="PostProcessingRunner.BeginFrame"/> call.
+///     A post-processing effect applied to a rendered screen. Implementations chain
+///     passes through <see cref="PostProcessingRunner.Pass" />; the returned target is
+///     owned by the runner and stays valid until the runner's next
+///     <see cref="PostProcessingRunner.BeginFrame" /> call.
 /// </summary>
 public interface IPostProcessingEffect
 {

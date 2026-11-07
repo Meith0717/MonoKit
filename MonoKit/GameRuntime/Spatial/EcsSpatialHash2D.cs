@@ -1,7 +1,8 @@
-// EcsSpatialHash2D.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+// MonoKit - EcsSpatialHash2D.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
@@ -13,9 +14,9 @@ namespace MonoKit.GameRuntime.Spatial;
 
 public class EcsSpatialHash2D(int cellSize)
 {
-    private readonly Dictionary<(int, int), List<Entity>> _grids = new();
-    private readonly Dictionary<Entity, List<(int, int)>> _entityHashes = new();
     public readonly int CellSize = cellSize;
+    private readonly Dictionary<Entity, List<(int, int)>> _entityHashes = new();
+    private readonly Dictionary<(int, int), List<Entity>> _grids = new();
 
     public void Clear()
     {
@@ -36,10 +37,13 @@ public class EcsSpatialHash2D(int cellSize)
                 if (cell.Count == 0)
                     _grids.Remove(hash);
             }
+
             oldHashes.Clear();
         }
         else
+        {
             _entityHashes[entity] = [];
+        }
 
         var bottomRight = position + new Vector2(width, height);
         var start = Vector2.Floor(position / CellSize);
@@ -82,10 +86,8 @@ public class EcsSpatialHash2D(int cellSize)
 
         for (var x = startX; x < endX; x++)
         for (var y = startY; y < endY; y++)
-        {
             if (_grids.TryGetValue((x, y), out var cell))
                 results.AddRange(cell);
-        }
     }
 
     public void GetInRectangle(RectangleF searchRectangle, List<Entity> results)

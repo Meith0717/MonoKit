@@ -1,7 +1,8 @@
-﻿// GameObjectFactory.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+﻿// MonoKit - GameObjectFactory.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 using MonoKit.App.Content;
 

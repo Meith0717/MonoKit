@@ -1,7 +1,8 @@
-﻿// UiButton.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+﻿// MonoKit - UiButton.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 using System;
 using System.Linq;
@@ -12,7 +13,7 @@ using MonoKit.App.Input;
 
 namespace MonoKit.App.Ui;
 
-public struct ButtonStyle() { }
+public struct ButtonStyle { }
 
 public interface IButton
 {
@@ -23,11 +24,11 @@ public interface IButton
 
 public static class UiButton
 {
-    private class ButtonBehaviour()
+    private class ButtonBehaviour
     {
+        public bool IsHovered;
         private bool _isPressed;
         private bool _wasHovered;
-        public bool IsHovered;
 
         public void Update(
             InputHandler inputHandler,
@@ -61,9 +62,9 @@ public static class UiButton
         public Color TextureHoverColor { get; set; } = Color.MonoGameOrange;
         public Color TextureDisableColor { get; set; } = Color.DarkGray;
         public UiText UiText { get; init; }
+        public Action OnHoverAction { get; set; }
         public bool Disable { get; set; }
         public Action OnClickAction { get; set; }
-        public Action OnHoverAction { get; set; }
 
         public void OverrideColor(params Color[] color)
         {
@@ -115,13 +116,15 @@ public static class UiButton
         public Color TextHoverColor { get; set; } = Color.MonoGameOrange;
         public Color TextDisableColor { get; set; } = Color.DarkGray;
         public UiText UiText { get; init; }
+
         public float Scale
         {
             set => UiText.Scale = value;
         }
+
+        public Action OnHoverAction { get; set; }
         public bool Disable { get; set; }
         public Action OnClickAction { get; set; }
-        public Action OnHoverAction { get; set; }
 
         public void OverrideColor(params Color[] color)
         {

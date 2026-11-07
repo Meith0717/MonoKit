@@ -1,12 +1,14 @@
-// World.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+// MonoKit - World.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 #nullable enable
 
 using System;
 using System.Collections.Generic;
+using System.Text;
 using MonoKit.GameRuntime.ArchetypeEcs.Archetypes;
 using MonoKit.GameRuntime.ArchetypeEcs.Entities;
 using MonoKit.GameRuntime.ArchetypeEcs.SpatialQueries;
@@ -15,13 +17,16 @@ using MonoKit.GameRuntime.ArchetypeEcs.Systems;
 namespace MonoKit.GameRuntime.ArchetypeEcs;
 
 public delegate void RefAction<T1>(Entity entity, ref T1 component1);
+
 public delegate void RefAction<T1, T2>(Entity entity, ref T1 component1, ref T2 component2);
+
 public delegate void RefAction<T1, T2, T3>(
     Entity entity,
     ref T1 component1,
     ref T2 component2,
     ref T3 component3
 );
+
 public delegate void RefAction<T1, T2, T3, T4>(
     Entity entity,
     ref T1 component1,
@@ -32,37 +37,41 @@ public delegate void RefAction<T1, T2, T3, T4>(
 
 public sealed class World : IDisposable
 {
+    internal readonly ArchetypeManager ArchetypeManager = new();
+
+    private readonly List<Command> _commands = [];
+    private readonly EntityManager _entityManager = new();
+    private readonly EntityRecords _entityRecords = new();
+
+    private readonly Dictionary<Type, object> _spatialContexts = new();
+
+    private readonly List<ISystem> _systems = [];
+    private int _iterationDepth;
+
     internal World()
     {
         ;
     }
 
-    private enum CommandKind
-    {
-        DestroyEntity,
-        AddComponents,
-        RemoveComponent,
-    }
-
-    private readonly struct Command(CommandKind kind, Entity entity, object? payload)
-    {
-        public readonly CommandKind Kind = kind;
-        public readonly Entity Entity = entity;
-        public readonly object? Payload = payload;
-    }
-
-    private readonly List<ISystem> _systems = [];
-    private readonly EntityManager _entityManager = new();
-    private readonly EntityRecords _entityRecords = new();
-    internal readonly ArchetypeManager ArchetypeManager = new();
-
-    private readonly List<Command> _commands = [];
-    private int _iterationDepth;
-
-    private readonly Dictionary<Type, object> _spatialContexts = new();
-
     public int EntityCount => _entityManager.Count;
     public int ArchetypeCount => ArchetypeManager.ArchetypeCount;
+
+    public void Dispose()
+    {
+        foreach (var system in _systems)
+            system.Dispose();
+        _systems.Clear();
+
+        foreach (var context in _spatialContexts.Values)
+            ((IDisposable)context).Dispose();
+        _spatialContexts.Clear();
+
+        ArchetypeManager.Dispose();
+        _entityRecords.Dispose();
+        _entityManager.Dispose();
+        _commands.Clear();
+        _iterationDepth = 0;
+    }
 
     internal void AddSystem(ISystem system)
     {
@@ -129,7 +138,6 @@ public sealed class World : IDisposable
             _commands.Clear();
 
             foreach (var command in commands)
-            {
                 switch (command.Kind)
                 {
                     case CommandKind.DestroyEntity:
@@ -142,7 +150,6 @@ public sealed class World : IDisposable
                         RemoveComponentImmediate(command.Entity, (Type)command.Payload!);
                         break;
                 }
-            }
         }
     }
 
@@ -249,12 +256,10 @@ public sealed class World : IDisposable
             throw new ArgumentException("Entity does not exist");
 
         foreach (var component in components)
-        {
             if (oldArchetype.Contains(component.GetType()))
                 throw new ArgumentException(
                     $"Entity already has component {component.GetType().Name}"
                 );
-        }
 
         var oldComponentTypes = oldArchetype.Type.ComponentTypes;
         var newComponentTypes = new Type[oldComponentTypes.Length + components.Length];
@@ -315,10 +320,8 @@ public sealed class World : IDisposable
         var newComponentTypes = new Type[oldComponentTypes.Length - 1];
         var writeIndex = 0;
         for (var i = 0; i < oldComponentTypes.Length; i++)
-        {
             if (oldComponentTypes[i] != componentType)
                 newComponentTypes[writeIndex++] = oldComponentTypes[i];
-        }
 
         var newArchetype =
             newComponentTypes.Length == 0
@@ -510,23 +513,6 @@ public sealed class World : IDisposable
         }
     }
 
-    public void Dispose()
-    {
-        foreach (var system in _systems)
-            system.Dispose();
-        _systems.Clear();
-
-        foreach (var context in _spatialContexts.Values)
-            ((IDisposable)context).Dispose();
-        _spatialContexts.Clear();
-
-        ArchetypeManager.Dispose();
-        _entityRecords.Dispose();
-        _entityManager.Dispose();
-        _commands.Clear();
-        _iterationDepth = 0;
-    }
-
     public SpatialQueryContext<TPos> SpatialQueries<TPos>()
         where TPos : struct
     {
@@ -540,7 +526,7 @@ public sealed class World : IDisposable
 
     public override string ToString()
     {
-        var sb = new System.Text.StringBuilder();
+        var sb = new StringBuilder();
         sb.AppendLine("=== AECS WORLD ===");
         sb.AppendLine($"Entities: {_entityManager.Count}");
         sb.AppendLine($"Archetypes: {ArchetypeManager.ArchetypeCount}");
@@ -554,8 +540,24 @@ public sealed class World : IDisposable
                     sb.Append(", ");
                 sb.Append(type.ComponentTypes[i].Name);
             }
+
             sb.Append($"): {archetype.RowCount} entities");
         }
+
         return sb.ToString();
+    }
+
+    private enum CommandKind
+    {
+        DestroyEntity,
+        AddComponents,
+        RemoveComponent,
+    }
+
+    private readonly struct Command(CommandKind kind, Entity entity, object? payload)
+    {
+        public readonly CommandKind Kind = kind;
+        public readonly Entity Entity = entity;
+        public readonly object? Payload = payload;
     }
 }

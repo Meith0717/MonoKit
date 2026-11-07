@@ -1,7 +1,8 @@
-﻿// KeyboardListener.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+﻿// MonoKit - KeyboardListener.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 using System.Collections;
 using System.Collections.Generic;
@@ -13,6 +14,7 @@ namespace MonoKit.App.Input.Listeners;
 public class KeyboardListener(Dictionary<(Keys, InputEventType), byte> bindings) : IInputDevice
 {
     private readonly List<(Keys, InputEventType)> _pressedKeyStates = new();
+
     private Keys[] _currentPressedKeys,
         _previousPressedKeys = [];
 

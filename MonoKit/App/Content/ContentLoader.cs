@@ -1,7 +1,8 @@
-// ContentLoader.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+// MonoKit - ContentLoader.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 using System;
 using System.Collections.Generic;
@@ -13,20 +14,24 @@ namespace MonoKit.App.Content;
 
 public class ContentLoader
 {
+    private readonly ContentManager _contentManager;
     private readonly List<Func<ContentProvider, string>> _loadActions = [];
 
     private ContentProvider _contentProvider;
-    private bool _isIncrementalMode = false;
-    private int _loadedCount = 0;
-    private readonly ContentManager _contentManager;
+    private bool _isIncrementalMode;
+    private int _loadedCount;
 
     private ContentLoader(ContentManager contentManager)
     {
         _contentManager = contentManager;
     }
 
-    public static ContentLoader Create(ContentManager contentManager) =>
-        new ContentLoader(contentManager);
+    private bool IsComplete => _loadedCount >= _loadActions.Count;
+
+    public static ContentLoader Create(ContentManager contentManager)
+    {
+        return new ContentLoader(contentManager);
+    }
 
     public ContentLoader RegisterContentDirectory<T>(
         string contentDirectory,
@@ -68,9 +73,7 @@ public class ContentLoader
 
         _loadedCount = 0;
         while (_loadedCount < _loadActions.Count)
-        {
             LoadNextInternal(contentProvider);
-        }
     }
 
     public ContentLoader BeginIncremental(ContentProvider contentProvider)
@@ -127,6 +130,4 @@ public class ContentLoader
 
         return (filePath, (float)_loadedCount / _loadActions.Count);
     }
-
-    private bool IsComplete => _loadedCount >= _loadActions.Count;
 }

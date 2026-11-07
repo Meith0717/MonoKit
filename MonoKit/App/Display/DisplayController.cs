@@ -1,7 +1,8 @@
-﻿// DisplayController.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+﻿// MonoKit - DisplayController.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 using System;
 using Microsoft.Xna.Framework;
@@ -10,22 +11,22 @@ using Microsoft.Xna.Framework.Graphics;
 namespace MonoKit.App.Display;
 
 /// <summary>
-/// Manages the game window: display mode, backbuffer resolution, refresh rate/vsync,
-/// and the scale from a virtual resolution to the current viewport.
+///     Manages the game window: display mode, backbuffer resolution, refresh rate/vsync,
+///     and the scale from a virtual resolution to the current viewport.
 /// </summary>
 public class DisplayController : IDisposable
 {
     private readonly Game _game;
     private readonly GraphicsDeviceManager _graphicsDeviceManager;
-    private readonly GameWindow _window;
-    private readonly float _virtualWidth;
     private readonly float _virtualHeight;
+    private readonly float _virtualWidth;
+    private readonly GameWindow _window;
     private int _oldHeight;
     private int _oldWidth;
     private bool _resolutionWasResized;
 
-    /// <param name="virtualWidth">Virtual resolution width used for <see cref="ViewportScale"/>.</param>
-    /// <param name="virtualHeight">Virtual resolution height used for <see cref="ViewportScale"/>.</param>
+    /// <param name="virtualWidth">Virtual resolution width used for <see cref="ViewportScale" />.</param>
+    /// <param name="virtualHeight">Virtual resolution height used for <see cref="ViewportScale" />.</param>
     public DisplayController(
         Game game,
         GraphicsDeviceManager graphicsManager,
@@ -45,20 +46,6 @@ public class DisplayController : IDisposable
         _oldWidth = _window.ClientBounds.Width;
         _oldHeight = _window.ClientBounds.Height;
         UpdateViewportScale();
-    }
-
-    private void OnClientSizeChanged(object sender, EventArgs e)
-    {
-        _oldWidth = _window.ClientBounds.Width;
-        _oldHeight = _window.ClientBounds.Height;
-        UpdateViewportScale();
-        _resolutionWasResized = true;
-    }
-
-    private void UpdateViewportScale()
-    {
-        var viewport = _graphicsDeviceManager.GraphicsDevice.Viewport.Bounds.Size;
-        ViewportScale = float.Min(viewport.X / _virtualWidth, viewport.Y / _virtualHeight);
     }
 
     /// <summary>Scale factor from the virtual resolution to the current viewport.</summary>
@@ -81,7 +68,27 @@ public class DisplayController : IDisposable
             GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height
         );
 
-    /// <summary>Sets the target refresh rate in Hz; when <paramref name="vSync"/> is on, the rate is ignored.</summary>
+    /// <summary>Unsubscribes from the window's size-changed event.</summary>
+    public void Dispose()
+    {
+        _window.ClientSizeChanged -= OnClientSizeChanged;
+    }
+
+    private void OnClientSizeChanged(object sender, EventArgs e)
+    {
+        _oldWidth = _window.ClientBounds.Width;
+        _oldHeight = _window.ClientBounds.Height;
+        UpdateViewportScale();
+        _resolutionWasResized = true;
+    }
+
+    private void UpdateViewportScale()
+    {
+        var viewport = _graphicsDeviceManager.GraphicsDevice.Viewport.Bounds.Size;
+        ViewportScale = float.Min(viewport.X / _virtualWidth, viewport.Y / _virtualHeight);
+    }
+
+    /// <summary>Sets the target refresh rate in Hz; when <paramref name="vSync" /> is on, the rate is ignored.</summary>
     public void ApplyRefreshRate(int value, bool vSync)
     {
         if (value <= 0)
@@ -148,11 +155,5 @@ public class DisplayController : IDisposable
 
         _graphicsDeviceManager.IsFullScreen = false;
         _window.AllowUserResizing = true;
-    }
-
-    /// <summary>Unsubscribes from the window's size-changed event.</summary>
-    public void Dispose()
-    {
-        _window.ClientSizeChanged -= OnClientSizeChanged;
     }
 }

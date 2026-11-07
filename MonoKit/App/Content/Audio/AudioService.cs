@@ -1,7 +1,8 @@
-// AudioService.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+// MonoKit - AudioService.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 using System;
 using System.Collections.Generic;
@@ -11,8 +12,30 @@ namespace MonoKit.App.Content.Audio;
 public class AudioService(ContentProvider contentProvider) : IDisposable
 {
     private readonly Dictionary<string, SoundEffectManager> _sfxManagers = new();
-    private MusicManager _musicManager;
     private bool _isDisposed;
+    private MusicManager _musicManager;
+
+    public MusicManager Music
+    {
+        get
+        {
+            _musicManager ??= new MusicManager(contentProvider);
+            return _musicManager;
+        }
+    }
+
+    public void Dispose()
+    {
+        if (_isDisposed)
+            return;
+        StopAll();
+        foreach (var manager in _sfxManagers.Values)
+            manager.Dispose();
+        _sfxManagers.Clear();
+        _musicManager = null;
+        _isDisposed = true;
+        GC.SuppressFinalize(this);
+    }
 
     public SoundEffectManager GetOrCreateSfxManager(string category, int maxInstances = 10)
     {
@@ -22,15 +45,6 @@ public class AudioService(ContentProvider contentProvider) : IDisposable
         manager = new SoundEffectManager(contentProvider, category, maxInstances);
         _sfxManagers[category] = manager;
         return manager;
-    }
-
-    public MusicManager Music
-    {
-        get
-        {
-            _musicManager ??= new MusicManager(contentProvider);
-            return _musicManager;
-        }
     }
 
     public void PauseAll()
@@ -55,18 +69,5 @@ public class AudioService(ContentProvider contentProvider) : IDisposable
     {
         foreach (var manager in _sfxManagers.Values)
             manager.Volume = volume;
-    }
-
-    public void Dispose()
-    {
-        if (_isDisposed)
-            return;
-        StopAll();
-        foreach (var manager in _sfxManagers.Values)
-            manager.Dispose();
-        _sfxManagers.Clear();
-        _musicManager = null;
-        _isDisposed = true;
-        GC.SuppressFinalize(this);
     }
 }

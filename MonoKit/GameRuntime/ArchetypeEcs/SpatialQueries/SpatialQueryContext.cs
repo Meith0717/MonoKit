@@ -1,7 +1,8 @@
-// SpatialQueryContext.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+// MonoKit - SpatialQueryContext.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 #nullable enable
 
@@ -15,25 +16,39 @@ using MonoKit.GameRuntime.ArchetypeEcs.Entities;
 namespace MonoKit.GameRuntime.ArchetypeEcs.SpatialQueries;
 
 /// <summary>
-/// Spatial neighbor queries over entities holding a <typeparamref name="TPos"/> component.
-/// Call <see cref="BeginFrame"/> once per frame before any query; all query methods are
-/// valid only until the next <see cref="BeginFrame"/> call. Neighbor results always
-/// include the query entity itself (distance 0 passes the radius test). For symmetric
-/// pair interactions, process only <c>n &gt; i</c> (or <c>n &lt; i</c>) to visit each pair once.
+///     Spatial neighbor queries over entities holding a <typeparamref name="TPos" /> component.
+///     Call <see cref="BeginFrame" /> once per frame before any query; all query methods are
+///     valid only until the next <see cref="BeginFrame" /> call. Neighbor results always
+///     include the query entity itself (distance 0 passes the radius test). For symmetric
+///     pair interactions, process only <c>n &gt; i</c> (or <c>n &lt; i</c>) to visit each pair once.
 /// </summary>
 public sealed class SpatialQueryContext<TPos> : IDisposable
     where TPos : struct
 {
-    private readonly SpatialEpoch _epoch = new();
     private readonly Dictionary<Type, object> _componentCaches = new();
-    private int[] _spatialIndexById = [];
-    private int[] _generationById = [];
+    private readonly SpatialEpoch _epoch = new();
     private readonly ConcurrentStack<List<int>> _scratchBuffers = new();
-    private SpatialSorter<TPos>? _sorter;
     private SpatialField<TPos>? _field;
+    private int[] _generationById = [];
+    private SpatialSorter<TPos>? _sorter;
+    private int[] _spatialIndexById = [];
 
-    private List<int> RentScratchBuffer() =>
-        !_scratchBuffers.TryPop(out var buffer) ? new List<int>(64) : buffer;
+    public SpatialField<TPos> Field => GetField();
+
+    public void Dispose()
+    {
+        _componentCaches.Clear();
+        _spatialIndexById = [];
+        _generationById = [];
+        _scratchBuffers.Clear();
+        _field = null;
+        _sorter = null;
+    }
+
+    private List<int> RentScratchBuffer()
+    {
+        return !_scratchBuffers.TryPop(out var buffer) ? new List<int>(64) : buffer;
+    }
 
     private void ReturnScratchBuffer(List<int> buffer)
     {
@@ -104,8 +119,6 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
         return _field is { } current && current.Version == field.Version;
     }
 
-    public SpatialField<TPos> Field => GetField();
-
     private SpatialField<TPos> GetField()
     {
         if (_field is not { } field)
@@ -141,7 +154,7 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
 
                 foreach (var n in neighbors)
                 {
-                    if (!cache1.TryGet(n, out T1 c1))
+                    if (!cache1.TryGet(n, out var c1))
                         continue;
                     action(entity, ref self, field.GetEntity(n), ref c1);
                 }
@@ -181,9 +194,9 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
 
                 foreach (var n in neighbors)
                 {
-                    if (!cache1.TryGet(n, out T1 c1))
+                    if (!cache1.TryGet(n, out var c1))
                         continue;
-                    if (!cache2.TryGet(n, out T2 c2))
+                    if (!cache2.TryGet(n, out var c2))
                         continue;
                     action(entity, ref self, field.GetEntity(n), ref c1, ref c2);
                 }
@@ -225,11 +238,11 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
 
                 foreach (var n in neighbors)
                 {
-                    if (!cache1.TryGet(n, out T1 c1))
+                    if (!cache1.TryGet(n, out var c1))
                         continue;
-                    if (!cache2.TryGet(n, out T2 c2))
+                    if (!cache2.TryGet(n, out var c2))
                         continue;
-                    if (!cache3.TryGet(n, out T3 c3))
+                    if (!cache3.TryGet(n, out var c3))
                         continue;
                     action(entity, ref self, field.GetEntity(n), ref c1, ref c2, ref c3);
                 }
@@ -273,13 +286,13 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
 
                 foreach (var n in neighbors)
                 {
-                    if (!cache1.TryGet(n, out T1 c1))
+                    if (!cache1.TryGet(n, out var c1))
                         continue;
-                    if (!cache2.TryGet(n, out T2 c2))
+                    if (!cache2.TryGet(n, out var c2))
                         continue;
-                    if (!cache3.TryGet(n, out T3 c3))
+                    if (!cache3.TryGet(n, out var c3))
                         continue;
-                    if (!cache4.TryGet(n, out T4 c4))
+                    if (!cache4.TryGet(n, out var c4))
                         continue;
                     action(entity, ref self, field.GetEntity(n), ref c1, ref c2, ref c3, ref c4);
                 }
@@ -319,7 +332,7 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
 
                     foreach (var n in neighbors)
                     {
-                        if (!cache1.TryGet(n, out T1 c1))
+                        if (!cache1.TryGet(n, out var c1))
                             continue;
                         action(entity, ref self, field.GetEntity(n), ref c1);
                     }
@@ -361,9 +374,9 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
 
                     foreach (var n in neighbors)
                     {
-                        if (!cache1.TryGet(n, out T1 c1))
+                        if (!cache1.TryGet(n, out var c1))
                             continue;
-                        if (!cache2.TryGet(n, out T2 c2))
+                        if (!cache2.TryGet(n, out var c2))
                             continue;
                         action(entity, ref self, field.GetEntity(n), ref c1, ref c2);
                     }
@@ -407,11 +420,11 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
 
                     foreach (var n in neighbors)
                     {
-                        if (!cache1.TryGet(n, out T1 c1))
+                        if (!cache1.TryGet(n, out var c1))
                             continue;
-                        if (!cache2.TryGet(n, out T2 c2))
+                        if (!cache2.TryGet(n, out var c2))
                             continue;
-                        if (!cache3.TryGet(n, out T3 c3))
+                        if (!cache3.TryGet(n, out var c3))
                             continue;
                         action(entity, ref self, field.GetEntity(n), ref c1, ref c2, ref c3);
                     }
@@ -457,13 +470,13 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
 
                     foreach (var n in neighbors)
                     {
-                        if (!cache1.TryGet(n, out T1 c1))
+                        if (!cache1.TryGet(n, out var c1))
                             continue;
-                        if (!cache2.TryGet(n, out T2 c2))
+                        if (!cache2.TryGet(n, out var c2))
                             continue;
-                        if (!cache3.TryGet(n, out T3 c3))
+                        if (!cache3.TryGet(n, out var c3))
                             continue;
-                        if (!cache4.TryGet(n, out T4 c4))
+                        if (!cache4.TryGet(n, out var c4))
                             continue;
                         action(
                             entity,
@@ -499,10 +512,8 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
             field.GetNeighbors(index, radius, neighbors);
 
             foreach (var n in neighbors)
-            {
-                if (cache1.TryGet(n, out T1 c1))
+                if (cache1.TryGet(n, out var c1))
                     action(field.GetEntity(n), ref c1);
-            }
         }
         finally
         {
@@ -533,9 +544,9 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
 
             foreach (var n in neighbors)
             {
-                if (!cache1.TryGet(n, out T1 c1))
+                if (!cache1.TryGet(n, out var c1))
                     continue;
-                if (!cache2.TryGet(n, out T2 c2))
+                if (!cache2.TryGet(n, out var c2))
                     continue;
                 action(field.GetEntity(n), ref c1, ref c2);
             }
@@ -571,11 +582,11 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
 
             foreach (var n in neighbors)
             {
-                if (!cache1.TryGet(n, out T1 c1))
+                if (!cache1.TryGet(n, out var c1))
                     continue;
-                if (!cache2.TryGet(n, out T2 c2))
+                if (!cache2.TryGet(n, out var c2))
                     continue;
-                if (!cache3.TryGet(n, out T3 c3))
+                if (!cache3.TryGet(n, out var c3))
                     continue;
                 action(field.GetEntity(n), ref c1, ref c2, ref c3);
             }
@@ -613,13 +624,13 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
 
             foreach (var n in neighbors)
             {
-                if (!cache1.TryGet(n, out T1 c1))
+                if (!cache1.TryGet(n, out var c1))
                     continue;
-                if (!cache2.TryGet(n, out T2 c2))
+                if (!cache2.TryGet(n, out var c2))
                     continue;
-                if (!cache3.TryGet(n, out T3 c3))
+                if (!cache3.TryGet(n, out var c3))
                     continue;
-                if (!cache4.TryGet(n, out T4 c4))
+                if (!cache4.TryGet(n, out var c4))
                     continue;
                 action(field.GetEntity(n), ref c1, ref c2, ref c3, ref c4);
             }
@@ -640,16 +651,6 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
         _componentCaches[typeof(T)] = newCache;
         return newCache;
     }
-
-    public void Dispose()
-    {
-        _componentCaches.Clear();
-        _spatialIndexById = [];
-        _generationById = [];
-        _scratchBuffers.Clear();
-        _field = null;
-        _sorter = null;
-    }
 }
 
 public delegate void RefSelfNeighborAction<TSelf, T1>(
@@ -658,6 +659,7 @@ public delegate void RefSelfNeighborAction<TSelf, T1>(
     Entity neighbor,
     ref T1 nComponent1
 );
+
 public delegate void RefSelfNeighborAction<TSelf, T1, T2>(
     Entity entity,
     ref TSelf selfComponent,
@@ -665,6 +667,7 @@ public delegate void RefSelfNeighborAction<TSelf, T1, T2>(
     ref T1 nComponent1,
     ref T2 nComponent2
 );
+
 public delegate void RefSelfNeighborAction<TSelf, T1, T2, T3>(
     Entity entity,
     ref TSelf selfComponent,
@@ -673,6 +676,7 @@ public delegate void RefSelfNeighborAction<TSelf, T1, T2, T3>(
     ref T2 nComponent2,
     ref T3 nComponent3
 );
+
 public delegate void RefSelfNeighborAction<TSelf, T1, T2, T3, T4>(
     Entity entity,
     ref TSelf selfComponent,
@@ -684,17 +688,20 @@ public delegate void RefSelfNeighborAction<TSelf, T1, T2, T3, T4>(
 );
 
 public delegate void RefEntityNeighborAction<T1>(Entity neighbor, ref T1 nComponent1);
+
 public delegate void RefEntityNeighborAction<T1, T2>(
     Entity neighbor,
     ref T1 nComponent1,
     ref T2 nComponent2
 );
+
 public delegate void RefEntityNeighborAction<T1, T2, T3>(
     Entity neighbor,
     ref T1 nComponent1,
     ref T2 nComponent2,
     ref T3 nComponent3
 );
+
 public delegate void RefEntityNeighborAction<T1, T2, T3, T4>(
     Entity neighbor,
     ref T1 nComponent1,

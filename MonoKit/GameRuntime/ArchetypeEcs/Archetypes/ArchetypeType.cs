@@ -1,7 +1,8 @@
-// ArchetypeType.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+// MonoKit - ArchetypeType.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 using System;
 using System.Linq;
@@ -18,9 +19,15 @@ internal readonly struct ArchetypeType : IEquatable<ArchetypeType>
         ComponentTypes = [.. componentTypes.OrderBy(t => t.FullName, StringComparer.Ordinal)];
     }
 
-    public bool Equals(ArchetypeType other) => ComponentTypes.SequenceEqual(other.ComponentTypes);
+    public bool Equals(ArchetypeType other)
+    {
+        return ComponentTypes.SequenceEqual(other.ComponentTypes);
+    }
 
-    public override bool Equals(object obj) => obj is ArchetypeType other && Equals(other);
+    public override bool Equals(object obj)
+    {
+        return obj is ArchetypeType other && Equals(other);
+    }
 
     public override int GetHashCode()
     {
@@ -30,7 +37,13 @@ internal readonly struct ArchetypeType : IEquatable<ArchetypeType>
         return hash.ToHashCode();
     }
 
-    public static bool operator ==(ArchetypeType left, ArchetypeType right) => left.Equals(right);
+    public static bool operator ==(ArchetypeType left, ArchetypeType right)
+    {
+        return left.Equals(right);
+    }
 
-    public static bool operator !=(ArchetypeType left, ArchetypeType right) => !(left == right);
+    public static bool operator !=(ArchetypeType left, ArchetypeType right)
+    {
+        return !(left == right);
+    }
 }

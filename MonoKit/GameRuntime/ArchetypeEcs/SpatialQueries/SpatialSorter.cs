@@ -1,7 +1,8 @@
-// SpatialSorter.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+// MonoKit - SpatialSorter.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 #nullable enable
 
@@ -16,13 +17,13 @@ namespace MonoKit.GameRuntime.ArchetypeEcs.SpatialQueries;
 public sealed class SpatialSorter<TPos>(float cellSize, Func<TPos, Vector3> getPosition)
     where TPos : struct
 {
-    private readonly RowGrid3D<TPos> _grid = new(cellSize);
     private readonly List<Archetype> _archetypes = [];
-    private TPos[] _positions = [];
-    private Vector3[] _vecPositions = [];
+    private readonly RowGrid3D<TPos> _grid = new(cellSize);
     private int[] _archetypeIndices = [];
-    private int[] _rows = [];
     private Entity[] _entityIds = [];
+    private TPos[] _positions = [];
+    private int[] _rows = [];
+    private Vector3[] _vecPositions = [];
 
     internal float CellSize => _grid.CellSize;
 
@@ -100,14 +101,16 @@ public sealed class SpatialEpoch
 {
     internal int Current;
 
-    internal void Next() => Current++;
+    internal void Next()
+    {
+        Current++;
+    }
 }
 
 public readonly struct SpatialField<TPos>
     where TPos : struct
 {
     private readonly Archetype[] _archetypes;
-    private readonly TPos[] _positions;
     private readonly int[] _archetypeIndices;
     private readonly int[] _rows;
     private readonly Entity[] _entityIds;
@@ -130,7 +133,7 @@ public readonly struct SpatialField<TPos>
     )
     {
         _archetypes = archetypes;
-        _positions = positions;
+        Positions = positions;
         _archetypeIndices = archetypeIndices;
         _rows = rows;
         _entityIds = entityIds;
@@ -140,27 +143,35 @@ public readonly struct SpatialField<TPos>
         _getPosition = getPosition;
     }
 
-    public TPos[] Positions => _positions;
+    public TPos[] Positions { get; }
 
-    public TPos GetPosition(int index) => _positions[index];
+    public TPos GetPosition(int index)
+    {
+        return Positions[index];
+    }
 
-    public Entity GetEntity(int index) => _entityIds[index];
+    public Entity GetEntity(int index)
+    {
+        return _entityIds[index];
+    }
 
-    public void GetNeighbors(int index, float radius, List<int> results) =>
-        _grid.GetInRadius(_getPosition(_positions[index]), radius, results);
+    public void GetNeighbors(int index, float radius, List<int> results)
+    {
+        _grid.GetInRadius(_getPosition(Positions[index]), radius, results);
+    }
 
-    public void GetNeighbors(Vector3 position, float radius, List<int> results) =>
+    public void GetNeighbors(Vector3 position, float radius, List<int> results)
+    {
         _grid.GetInRadius(position, radius, results);
+    }
 
     public ComponentCache<T> Cache<T>(SpatialEpoch epoch)
         where T : struct
     {
         var columns = new T[_archetypes.Length][];
         for (var i = 0; i < _archetypes.Length; i++)
-        {
             if (_archetypes[i].TryGetColumn(typeof(T), out var column))
                 columns[i] = (T[])column;
-        }
         return new ComponentCache<T>(columns, _archetypeIndices, _rows, epoch, epoch.Current);
     }
 }
@@ -212,6 +223,7 @@ public readonly struct ComponentCache<T>
             value = default;
             return false;
         }
+
         value = column[_rows[index]];
         return true;
     }

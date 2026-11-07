@@ -1,7 +1,8 @@
-﻿// ContentContainer.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+﻿// MonoKit - ContentContainer.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 using System.Collections;
 using System.Collections.Generic;
@@ -17,6 +18,17 @@ public class ContentContainer<T> : IEnumerable<(int, string, T)>
 
     public IReadOnlyCollection<T> Content => _content.AsReadOnly();
 
+    public IEnumerator<(int, string, T)> GetEnumerator()
+    {
+        foreach (var (key, index) in _nameToId)
+            yield return (index, key, _content[index]);
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
+
     public T Get(string key)
     {
         if (_nameToId.TryGetValue(key, out var index))
@@ -31,9 +43,15 @@ public class ContentContainer<T> : IEnumerable<(int, string, T)>
         return null;
     }
 
-    public T Get(int id) => id >= 0 && id < _content.Count ? _content[id] : default;
+    public T Get(int id)
+    {
+        return id >= 0 && id < _content.Count ? _content[id] : default;
+    }
 
-    public int GetId(string key) => _nameToId.GetValueOrDefault(key, -1);
+    public int GetId(string key)
+    {
+        return _nameToId.GetValueOrDefault(key, -1);
+    }
 
     public ContentContainer<T2> Cast<T2>()
         where T2 : class
@@ -41,23 +59,11 @@ public class ContentContainer<T> : IEnumerable<(int, string, T)>
         var result = new ContentContainer<T2>();
 
         foreach (var (id, name, value) in this)
-        {
             if (value is T2 casted)
                 result.Add(name, casted);
-        }
 
         return result;
     }
-
-    public IEnumerator<(int, string, T)> GetEnumerator()
-    {
-        foreach (var (key, index) in _nameToId)
-        {
-            yield return (index, key, _content[index]);
-        }
-    }
-
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     public void Add(string name, T content)
     {

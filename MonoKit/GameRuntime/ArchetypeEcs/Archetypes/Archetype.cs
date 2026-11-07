@@ -1,7 +1,8 @@
-// Archetype.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+// MonoKit - Archetype.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 using System;
 using System.Collections.Generic;
@@ -13,13 +14,10 @@ namespace MonoKit.GameRuntime.ArchetypeEcs.Archetypes;
 internal sealed class Archetype : IDisposable
 {
     private const int InitialCapacity = 16;
+    private readonly Dictionary<Type, int> _typeToColumnIndex;
+    private int _capacity;
     private object[] _columns;
     private Entity[] _entityIds;
-    private int _capacity;
-    private readonly Dictionary<Type, int> _typeToColumnIndex;
-
-    internal ArchetypeType Type { get; }
-    internal int RowCount { get; private set; }
 
     internal Archetype(ArchetypeType type)
     {
@@ -37,6 +35,19 @@ internal sealed class Archetype : IDisposable
             _columns[i] = Array.CreateInstance(componentType, InitialCapacity);
             _typeToColumnIndex[componentType] = i;
         }
+    }
+
+    internal ArchetypeType Type { get; }
+    internal int RowCount { get; private set; }
+
+    public void Dispose()
+    {
+        foreach (var t in _columns)
+            Array.Clear((Array)t, 0, _capacity);
+        _columns = null!;
+        _entityIds = null!;
+        RowCount = 0;
+        _capacity = 0;
     }
 
     private void EnsureCapacity(int targetRow)
@@ -83,6 +94,7 @@ internal sealed class Archetype : IDisposable
                 );
             ((Array)_columns[columnIndex]).SetValue(components[i], RowCount);
         }
+
         RowCount++;
     }
 
@@ -100,14 +112,20 @@ internal sealed class Archetype : IDisposable
                 column.SetValue(lastValue, row);
             }
         }
+
         RowCount--;
         return movedEntity;
     }
 
-    internal Entity GetEntityAt(int row) => _entityIds[row];
+    internal Entity GetEntityAt(int row)
+    {
+        return _entityIds[row];
+    }
 
-    internal void ApplyEntityIdOrder(int[] order, int rowCount) =>
+    internal void ApplyEntityIdOrder(int[] order, int rowCount)
+    {
         RowOrderUtility.PermuteColumn(_entityIds, order, rowCount);
+    }
 
     internal bool TryGetColumn(Type componentType, out Array column)
     {
@@ -116,6 +134,7 @@ internal sealed class Archetype : IDisposable
             column = (Array)_columns[columnIndex];
             return true;
         }
+
         column = null!;
         return false;
     }
@@ -142,15 +161,5 @@ internal sealed class Archetype : IDisposable
         for (var i = 0; i < components.Length; i++)
             components[i] = ((Array)_columns[i]).GetValue(row)!;
         return components;
-    }
-
-    public void Dispose()
-    {
-        foreach (var t in _columns)
-            Array.Clear((Array)t, 0, _capacity);
-        _columns = null!;
-        _entityIds = null!;
-        RowCount = 0;
-        _capacity = 0;
     }
 }

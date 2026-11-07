@@ -1,7 +1,8 @@
-// GamepadListener.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+// MonoKit - GamepadListener.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 using System.Collections;
 using System.Collections.Generic;
@@ -11,8 +12,8 @@ using Microsoft.Xna.Framework.Input;
 namespace MonoKit.App.Input.Listeners;
 
 /// <summary>
-/// Maps gamepad button events of one player to action IDs.
-/// Emits Pressed on the press transition, Held while held, Released on release.
+///     Maps gamepad button events of one player to action IDs.
+///     Emits Pressed on the press transition, Held while held, Released on release.
 /// </summary>
 public class GamepadListener(
     Dictionary<(Buttons, InputEventType), byte> bindings,

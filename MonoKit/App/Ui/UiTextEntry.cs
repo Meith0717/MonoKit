@@ -1,7 +1,8 @@
-// UiTextEntry.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+// MonoKit - UiTextEntry.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 using System;
 using Microsoft.Xna.Framework;
@@ -13,22 +14,29 @@ using MonoKit.App.Input;
 namespace MonoKit.App.Ui;
 
 /// <summary>
-/// A text entry field for the UI system.
-/// Supports click-to-focus, cursor navigation, selection, backspace, delete.
+///     A text entry field for the UI system.
+///     Supports click-to-focus, cursor navigation, selection, backspace, delete.
 /// </summary>
 public sealed class UiTextEntry : UiElement
 {
     private readonly SpriteFont _font;
-    private string _text = string.Empty;
-    private string _placeholder = string.Empty;
-    private bool _isFocused;
-    private bool _showCursor;
     private int _cursorPosition;
-    private int _selectionStart = -1;
-    private int _selectionLength;
+    private bool _isFocused;
+    private string _placeholder = string.Empty;
 
     // Track previous keyboard state for edge detection
     private KeyboardState _previousKeyboardState;
+    private int _selectionLength;
+    private int _selectionStart = -1;
+    private bool _showCursor;
+    private string _text = string.Empty;
+
+    public UiTextEntry(SpriteFont spriteFont)
+    {
+        _font = spriteFont;
+        _previousKeyboardState = Keyboard.GetState();
+        UpdateSize();
+    }
 
     public string Text
     {
@@ -54,20 +62,13 @@ public sealed class UiTextEntry : UiElement
     public float Scale { get; set; } = 1f;
     public Color Color { get; set; } = Color.White;
     public Color PlaceholderColor { get; set; } = Color.DimGray;
-    public Color BgColor { get; set; } = new Color(40, 40, 40, 200);
-    public Color FocusedBgColor { get; set; } = new Color(60, 60, 60, 220);
+    public Color BgColor { get; set; } = new(40, 40, 40, 200);
+    public Color FocusedBgColor { get; set; } = new(60, 60, 60, 220);
     public Color CursorColor { get; set; } = Color.White;
     public int Padding { get; set; } = 5;
 
     public bool IsPassword { get; set; }
     public char PasswordChar { get; set; } = '*';
-
-    public UiTextEntry(SpriteFont spriteFont)
-    {
-        _font = spriteFont;
-        _previousKeyboardState = Keyboard.GetState();
-        UpdateSize();
-    }
 
     public override void ApplyScale(Rectangle root, float uiScale)
     {
@@ -108,21 +109,15 @@ public sealed class UiTextEntry : UiElement
 
             // Check for Enter (unfocus)
             if (IsKeyPressed(Keys.Enter, keyboardState, _previousKeyboardState))
-            {
                 _isFocused = false;
-            }
 
             // Check for Backspace
             if (IsKeyPressed(Keys.Back, keyboardState, _previousKeyboardState))
-            {
                 HandleBackspace();
-            }
 
             // Check for Delete
             if (IsKeyPressed(Keys.Delete, keyboardState, _previousKeyboardState))
-            {
                 HandleDelete();
-            }
 
             // Check for Left arrow
             if (IsKeyPressed(Keys.Left, keyboardState, _previousKeyboardState))
@@ -210,9 +205,7 @@ public sealed class UiTextEntry : UiElement
 
             // Check for Escape (unfocus without changing text)
             if (IsKeyPressed(Keys.Escape, keyboardState, _previousKeyboardState))
-            {
                 _isFocused = false;
-            }
 
             // Handle character input
             HandleCharacterInput(keyboardState, _previousKeyboardState);
@@ -244,6 +237,7 @@ public sealed class UiTextEntry : UiElement
             _text = _text.Remove(_cursorPosition - 1, 1);
             _cursorPosition--;
         }
+
         UpdateSize();
     }
 
@@ -260,6 +254,7 @@ public sealed class UiTextEntry : UiElement
         {
             _text = _text.Remove(_cursorPosition, 1);
         }
+
         UpdateSize();
     }
 
@@ -291,6 +286,7 @@ public sealed class UiTextEntry : UiElement
                     _selectionLength = 0;
                     _selectionStart = -1;
                 }
+
                 _text = _text.Insert(_cursorPosition, character.ToString());
                 _cursorPosition++;
                 UpdateSize();
@@ -413,9 +409,7 @@ public sealed class UiTextEntry : UiElement
         var textColor = string.IsNullOrEmpty(_text) ? PlaceholderColor : Color;
 
         if (IsPassword && !string.IsNullOrEmpty(_text))
-        {
             displayText = new string(PasswordChar, _text.Length);
-        }
 
         var position = Bounds.Location.ToVector2();
         position.X += Padding;
@@ -481,9 +475,7 @@ public sealed class UiTextEntry : UiElement
     {
         var displayText = string.IsNullOrEmpty(_text) ? _placeholder : _text;
         if (IsPassword && !string.IsNullOrEmpty(_text))
-        {
             displayText = new string(PasswordChar, _text.Length);
-        }
 
         var textDimension = _font.MeasureString(displayText);
         Width = (int)(textDimension.X * Scale) + Padding * 2;
@@ -501,10 +493,9 @@ public sealed class UiTextEntry : UiElement
             var substring = displayText.Substring(0, i);
             var width = _font.MeasureString(substring).X * UiScale * Scale;
             if (width > x)
-            {
                 return MathHelper.Clamp(i - 1, 0, _text.Length);
-            }
         }
+
         return _text.Length;
     }
 }

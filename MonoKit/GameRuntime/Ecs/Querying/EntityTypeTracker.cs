@@ -1,7 +1,8 @@
-// EntityTypeTracker.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+// MonoKit - EntityTypeTracker.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 using System;
 using System.Collections.Generic;
@@ -11,8 +12,19 @@ namespace MonoKit.GameRuntime.Ecs.Querying;
 
 public class EntityTypeTracker : IDisposable
 {
-    private readonly Dictionary<Type, HashSet<Entity>> _typeToEntities = new();
     private readonly Dictionary<Entity, HashSet<Type>> _entityToTypes = new();
+    private readonly Dictionary<Type, HashSet<Entity>> _typeToEntities = new();
+
+    public void Dispose()
+    {
+        foreach (var entities in _typeToEntities.Values)
+            entities.Clear();
+        _typeToEntities.Clear();
+
+        foreach (var types in _entityToTypes.Values)
+            types.Clear();
+        _entityToTypes.Clear();
+    }
 
     public void TrackEntity(Entity entity)
     {
@@ -44,10 +56,8 @@ public class EntityTypeTracker : IDisposable
         if (_entityToTypes.TryGetValue(entity, out var types))
         {
             foreach (var type in types)
-            {
                 if (_typeToEntities.TryGetValue(type, out var entities))
                     entities.Remove(entity);
-            }
             _entityToTypes.Remove(entity);
         }
     }
@@ -78,10 +88,8 @@ public class EntityTypeTracker : IDisposable
     {
         var result = new List<Entity>(smaller.Count);
         foreach (var entity in smaller)
-        {
             if (larger.Contains(entity))
                 result.Add(entity);
-        }
         return result;
     }
 
@@ -156,10 +164,8 @@ public class EntityTypeTracker : IDisposable
     {
         var result = new List<Entity>(smallest.Count);
         foreach (var entity in smallest)
-        {
             if (other1.Contains(entity) && other2.Contains(entity))
                 result.Add(entity);
-        }
         return result;
     }
 
@@ -221,10 +227,8 @@ public class EntityTypeTracker : IDisposable
     {
         var result = new List<Entity>(smallest.Count);
         foreach (var entity in smallest)
-        {
             if (other1.Contains(entity) && other2.Contains(entity) && other3.Contains(entity))
                 result.Add(entity);
-        }
         return result;
     }
 
@@ -248,10 +252,8 @@ public class EntityTypeTracker : IDisposable
         // Collect all other sets
         var otherSets = new List<HashSet<Entity>>(types.Length - 1);
         foreach (var type in types)
-        {
             if (_typeToEntities.TryGetValue(type, out var set) && set != smallest)
                 otherSets.Add(set);
-        }
 
         return FilterMany(smallest, otherSets);
     }
@@ -263,16 +265,16 @@ public class EntityTypeTracker : IDisposable
         {
             var hasAll = true;
             foreach (var other in others)
-            {
                 if (!other.Contains(entity))
                 {
                     hasAll = false;
                     break;
                 }
-            }
+
             if (hasAll)
                 result.Add(entity);
         }
+
         return result;
     }
 
@@ -336,6 +338,7 @@ public class EntityTypeTracker : IDisposable
             if (larger.Contains(entity))
                 buffer[count++] = entity;
         }
+
         return buffer[..count];
     }
 
@@ -363,6 +366,7 @@ public class EntityTypeTracker : IDisposable
             if (other1.Contains(entity) && other2.Contains(entity))
                 buffer[count++] = entity;
         }
+
         return buffer[..count];
     }
 
@@ -404,21 +408,7 @@ public class EntityTypeTracker : IDisposable
             )
                 buffer[count++] = entity;
         }
+
         return buffer[..count];
-    }
-
-    public void Dispose()
-    {
-        foreach (var entities in _typeToEntities.Values)
-        {
-            entities.Clear();
-        }
-        _typeToEntities.Clear();
-
-        foreach (var types in _entityToTypes.Values)
-        {
-            types.Clear();
-        }
-        _entityToTypes.Clear();
     }
 }

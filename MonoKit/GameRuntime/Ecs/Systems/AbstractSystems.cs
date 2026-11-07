@@ -1,7 +1,8 @@
-// AbstractSystems.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+// MonoKit - AbstractSystems.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 using System;
 using MonoKit.App.Input;
@@ -17,9 +18,9 @@ namespace MonoKit.GameRuntime.Ecs.Systems;
 public abstract class System<T1>(int priority) : ISystem
     where T1 : struct
 {
-    protected ComponentPool<T1> Pool1 { get; private set; }
-    private EntityTypeTracker _tracker;
     private Entity[] _buffer = new Entity[128];
+    private EntityTypeTracker _tracker;
+    protected ComponentPool<T1> Pool1 { get; private set; }
 
     public int Priority => priority;
 
@@ -29,10 +30,6 @@ public abstract class System<T1>(int priority) : ISystem
         _tracker = world.TypeTracker;
         OnInitialize(world);
     }
-
-    protected abstract void OnInitialize(World world);
-
-    protected virtual void OnUpdateStart(double elapsedMs, World world) { }
 
     public void Update(
         double elapsedMs,
@@ -57,6 +54,10 @@ public abstract class System<T1>(int priority) : ISystem
         }
     }
 
+    protected abstract void OnInitialize(World world);
+
+    protected virtual void OnUpdateStart(double elapsedMs, World world) { }
+
     protected abstract void ProcessEntity(
         Entity entity,
         ref T1 c1,
@@ -71,10 +72,10 @@ public abstract class System<T1, T2>(int priority) : ISystem
     where T1 : struct
     where T2 : struct
 {
+    private Entity[] _buffer = new Entity[128];
+    private EntityTypeTracker _tracker;
     protected ComponentPool<T1> Pool1 { get; private set; }
     protected ComponentPool<T2> Pool2 { get; private set; }
-    private EntityTypeTracker _tracker;
-    private Entity[] _buffer = new Entity[128];
 
     public int Priority => priority;
 
@@ -85,10 +86,6 @@ public abstract class System<T1, T2>(int priority) : ISystem
         _tracker = world.TypeTracker;
         OnInitialize(world);
     }
-
-    protected abstract void OnInitialize(World world);
-
-    protected virtual void OnUpdateStart(double elapsedMs, World world) { }
 
     public void Update(
         double elapsedMs,
@@ -121,6 +118,10 @@ public abstract class System<T1, T2>(int priority) : ISystem
         }
     }
 
+    protected abstract void OnInitialize(World world);
+
+    protected virtual void OnUpdateStart(double elapsedMs, World world) { }
+
     protected abstract void ProcessEntity(
         Entity entity,
         ref T1 c1,
@@ -137,11 +138,11 @@ public abstract class System<T1, T2, T3>(int priority) : ISystem
     where T2 : struct
     where T3 : struct
 {
+    private Entity[] _buffer = new Entity[128];
+    private EntityTypeTracker _tracker;
     protected ComponentPool<T1> Pool1 { get; private set; }
     protected ComponentPool<T2> Pool2 { get; private set; }
     protected ComponentPool<T3> Pool3 { get; private set; }
-    private EntityTypeTracker _tracker;
-    private Entity[] _buffer = new Entity[128];
 
     public int Priority => priority;
 
@@ -153,10 +154,6 @@ public abstract class System<T1, T2, T3>(int priority) : ISystem
         _tracker = world.TypeTracker;
         OnInitialize(world);
     }
-
-    protected abstract void OnInitialize(World world);
-
-    protected virtual void OnUpdateStart(double elapsedMs, World world) { }
 
     public void Update(
         double elapsedMs,
@@ -190,6 +187,10 @@ public abstract class System<T1, T2, T3>(int priority) : ISystem
         }
     }
 
+    protected abstract void OnInitialize(World world);
+
+    protected virtual void OnUpdateStart(double elapsedMs, World world) { }
+
     protected abstract void ProcessEntity(
         Entity entity,
         ref T1 c1,
@@ -208,12 +209,12 @@ public abstract class System<T1, T2, T3, T4>(int priority) : ISystem
     where T3 : struct
     where T4 : struct
 {
+    private Entity[] _buffer = new Entity[128];
+    private EntityTypeTracker _tracker;
     protected ComponentPool<T1> Pool1 { get; private set; }
     protected ComponentPool<T2> Pool2 { get; private set; }
     protected ComponentPool<T3> Pool3 { get; private set; }
     protected ComponentPool<T4> Pool4 { get; private set; }
-    private EntityTypeTracker _tracker;
-    private Entity[] _buffer = new Entity[128];
 
     public int Priority => priority;
 
@@ -226,10 +227,6 @@ public abstract class System<T1, T2, T3, T4>(int priority) : ISystem
         _tracker = world.TypeTracker;
         OnInitialize(world);
     }
-
-    protected abstract void OnInitialize(World world);
-
-    protected virtual void OnUpdateStart(double elapsedMs, World world) { }
 
     public void Update(
         double elapsedMs,
@@ -263,6 +260,10 @@ public abstract class System<T1, T2, T3, T4>(int priority) : ISystem
             );
         }
     }
+
+    protected abstract void OnInitialize(World world);
+
+    protected virtual void OnUpdateStart(double elapsedMs, World world) { }
 
     protected abstract void ProcessEntity(
         Entity entity,

@@ -1,7 +1,8 @@
-﻿// UiElement.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+﻿// MonoKit - UiElement.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 using System;
 using Microsoft.Xna.Framework;
@@ -47,15 +48,15 @@ public abstract class UiElement : IDisposable
     public FillScale FillScale = FillScale.None;
 
     public int? HSpace = null;
-    public int? VSpace = null;
+    public int? Height = null;
 
     public float RelHeight = .1f;
     public float RelWidth = .1f;
-    public int? Width = null;
-    public int? Height = null;
 
     public float RelX = 0;
     public float RelY = 0;
+    public int? VSpace = null;
+    public int? Width = null;
     public float? X = null;
     public float? Y = null;
 

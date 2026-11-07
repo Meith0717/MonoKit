@@ -1,7 +1,8 @@
-﻿// UiSprite.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+﻿// MonoKit - UiSprite.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;

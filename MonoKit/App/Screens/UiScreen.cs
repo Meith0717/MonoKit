@@ -1,7 +1,8 @@
-// UiScreen.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+// MonoKit - UiScreen.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 using System;
 using Microsoft.Xna.Framework;
@@ -11,7 +12,10 @@ using MonoKit.App.Ui;
 
 namespace MonoKit.App.Screens;
 
-/// <summary>Base class for UI-driven screens: owns a full-viewport root <see cref="UiFrame"/> that receives update, draw and resize.</summary>
+/// <summary>
+///     Base class for UI-driven screens: owns a full-viewport root <see cref="UiFrame" /> that receives update, draw
+///     and resize.
+/// </summary>
 public abstract class UiScreen(GameServiceContainer appServices) : IScreen
 {
     /// <summary>Root of the screen's UI tree.</summary>
@@ -39,7 +43,7 @@ public abstract class UiScreen(GameServiceContainer appServices) : IScreen
         UiRoot.Update(inputHandler, _graphicsDevice.Viewport.Bounds, uiScale);
     }
 
-    /// <summary>Draws the UI tree. Override to additionally draw 3D content via <paramref name="graphicsDevice"/>.</summary>
+    /// <summary>Draws the UI tree. Override to additionally draw 3D content via <paramref name="graphicsDevice" />.</summary>
     public virtual void Draw(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice)
     {
         spriteBatch.Begin();

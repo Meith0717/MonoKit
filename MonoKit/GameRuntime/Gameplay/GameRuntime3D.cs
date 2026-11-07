@@ -1,7 +1,8 @@
-﻿// GameRuntime3D.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+﻿// MonoKit - GameRuntime3D.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 using System;
 using Microsoft.Xna.Framework;
@@ -16,9 +17,9 @@ namespace MonoKit.GameRuntime.Gameplay;
 
 public class GameRuntime3D : IDisposable
 {
-    private readonly World _world;
-    private readonly Camera3D _camera;
     public readonly RuntimeContainer Services = new();
+    private readonly Camera3D _camera;
+    private readonly World _world;
 
     public GameRuntime3D(GraphicsDevice graphicsDevice, float spatialHashingCellSize)
     {
@@ -34,15 +35,15 @@ public class GameRuntime3D : IDisposable
         _world.Systems.Add(new LifetimeSystem());
     }
 
-    public void Update(double elapsedMilliseconds, InputHandler inputHandler)
-    {
-        _world.Update(elapsedMilliseconds, Services, inputHandler);
-        _camera.Update(elapsedMilliseconds, inputHandler);
-    }
-
     public void Dispose()
     {
         _world.Dispose();
         GC.SuppressFinalize(this);
+    }
+
+    public void Update(double elapsedMilliseconds, InputHandler inputHandler)
+    {
+        _world.Update(elapsedMilliseconds, Services, inputHandler);
+        _camera.Update(elapsedMilliseconds, inputHandler);
     }
 }

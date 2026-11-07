@@ -1,11 +1,12 @@
-// WindowMode.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+// MonoKit - WindowMode.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 namespace MonoKit.App.Display;
 
-/// <summary>Window display mode, applied via <see cref="DisplayController.ApplyMode"/>.</summary>
+/// <summary>Window display mode, applied via <see cref="DisplayController.ApplyMode" />.</summary>
 public enum WindowMode
 {
     /// <summary>Exclusive fullscreen at the monitor's native resolution.</summary>

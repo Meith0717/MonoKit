@@ -1,7 +1,8 @@
-// EntityManager.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+// MonoKit - EntityManager.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 using System.Collections.Generic;
 
@@ -9,10 +10,10 @@ namespace MonoKit.GameRuntime.ArchetypeEcs.Entities;
 
 internal class EntityManager
 {
-    private int _nextId = 0;
+    private readonly List<bool> _alive = new();
     private readonly Stack<int> _freeIds = new();
     private readonly List<int> _generations = new();
-    private readonly List<bool> _alive = new();
+    private int _nextId;
 
     internal int Count { get; private set; }
 
@@ -30,6 +31,7 @@ internal class EntityManager
             _alive.Add(true);
             _generations.Add(0);
         }
+
         Count++;
         return new Entity(id, _generations[id]);
     }

@@ -1,10 +1,12 @@
-// ComponentManager.cs
-// Copyright (c) 2023-2026 Thierry Meiers
+// MonoKit - ComponentManager.cs
+// Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
-// Portions generated or assisted by AI.
+// AI-assisted development using Mistral Vibe Code;
+// all output reviewed and adapted by the author.
 
 using System;
 using System.Collections.Generic;
+using System.Text;
 using MonoKit.GameRuntime.Ecs.Entities;
 
 namespace MonoKit.GameRuntime.Ecs.Components;
@@ -12,6 +14,17 @@ namespace MonoKit.GameRuntime.Ecs.Components;
 public class ComponentManager : IDisposable
 {
     private readonly Dictionary<Type, object> _pools = [];
+
+    public void Dispose()
+    {
+        foreach (var kvp in _pools)
+            if (kvp.Value is IDisposable disposablePool)
+                disposablePool.Dispose();
+
+        _pools.Clear();
+        OnComponentAdded = null;
+        OnComponentRemoved = null;
+    }
 
     public event Action<Entity, Type> OnComponentAdded;
     public event Action<Entity, Type> OnComponentRemoved;
@@ -83,7 +96,7 @@ public class ComponentManager : IDisposable
 
     public override string ToString()
     {
-        var sb = new System.Text.StringBuilder();
+        var sb = new StringBuilder();
         sb.AppendLine("--- Component Pools ---");
         foreach (var entry in _pools)
         {
@@ -93,20 +106,7 @@ public class ComponentManager : IDisposable
             foreach (var (entityId, denseIndex, hash) in pool.GetMappings())
                 sb.AppendLine($"  Entity {entityId:D3} -> DenseIndex {denseIndex:D3} (#{hash})");
         }
-        return sb.ToString();
-    }
 
-    public void Dispose()
-    {
-        foreach (var kvp in _pools)
-        {
-            if (kvp.Value is IDisposable disposablePool)
-            {
-                disposablePool.Dispose();
-            }
-        }
-        _pools.Clear();
-        OnComponentAdded = null;
-        OnComponentRemoved = null;
+        return sb.ToString();
     }
 }
