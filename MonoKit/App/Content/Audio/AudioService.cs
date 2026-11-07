@@ -1,4 +1,4 @@
-// MonoKit - AudioService.cs
+// AppHost - AudioService.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -6,20 +6,29 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework.Audio;
 
 namespace MonoKit.App.Content.Audio;
 
-public class AudioService(ContentProvider contentProvider) : IDisposable
+public class AudioService : IDisposable
 {
     private readonly Dictionary<string, SoundEffectManager> _sfxManagers = new();
+    private ContentProvider _contentProvider;
     private bool _isDisposed;
     private MusicManager _musicManager;
+
+    public void Initialize(ContentProvider contentProvider)
+    {
+        if (_contentProvider != null)
+            throw new InvalidOperationException("Audio service has already been initialized");
+        _contentProvider = contentProvider;
+    }
 
     public MusicManager Music
     {
         get
         {
-            _musicManager ??= new MusicManager(contentProvider);
+            _musicManager ??= new MusicManager(_contentProvider);
             return _musicManager;
         }
     }
@@ -42,7 +51,7 @@ public class AudioService(ContentProvider contentProvider) : IDisposable
         if (_sfxManagers.TryGetValue(category, out var manager))
             return manager;
 
-        manager = new SoundEffectManager(contentProvider, category, maxInstances);
+        manager = new SoundEffectManager(_contentProvider, category, maxInstances);
         _sfxManagers[category] = manager;
         return manager;
     }

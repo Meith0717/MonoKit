@@ -1,4 +1,4 @@
-// MonoKit.Test - PathServiceTests.cs
+// AppHost.Test - PathServiceTests.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -10,7 +10,7 @@ namespace MonoKit.Test;
 
 public class PathServiceTests
 {
-    private enum TestPath
+    private enum TestPath : byte
     {
         Saves,
     }
@@ -24,11 +24,11 @@ public class PathServiceTests
         var root = NewTempRoot();
         try
         {
-            var paths = new PathService<TestPath>(root);
-            paths.RegisterPath(TestPath.Saves, "saves");
+            var paths = new PathService(root);
+            paths.RegisterPath((byte)TestPath.Saves, "saves");
 
             var expected = Path.Combine(root, "saves");
-            Assert.Equal(expected, paths.GetPath(TestPath.Saves));
+            Assert.Equal(expected, paths.GetPath((byte)TestPath.Saves));
             Assert.True(Directory.Exists(expected));
         }
         finally
@@ -44,9 +44,9 @@ public class PathServiceTests
         var root = NewTempRoot();
         try
         {
-            var paths = new PathService<TestPath>(root);
+            var paths = new PathService(root);
             Assert.Throws<InvalidOperationException>(() =>
-                paths.GetFilePath(TestPath.Saves, "a.txt")
+                paths.GetFilePath((byte)TestPath.Saves, "a.txt")
             );
         }
         finally

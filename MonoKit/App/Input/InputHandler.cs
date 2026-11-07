@@ -1,4 +1,4 @@
-﻿// MonoKit - InputHandler.cs
+﻿// AppHost - InputHandler.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -45,7 +45,7 @@ public class InputHandler
     }
 
     /// <summary>Consumes the action flag; returns true if it was set.</summary>
-    public bool ConsumeAction(byte actionID)
+    private bool ConsumeAction(byte actionID)
     {
         var contains = _actionsFlags[actionID];
         _actionsFlags[actionID] = false;

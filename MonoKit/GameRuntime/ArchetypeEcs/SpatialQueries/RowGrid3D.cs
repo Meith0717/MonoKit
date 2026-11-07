@@ -1,4 +1,4 @@
-// MonoKit - RowGrid3D.cs
+// AppHost - RowGrid3D.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;

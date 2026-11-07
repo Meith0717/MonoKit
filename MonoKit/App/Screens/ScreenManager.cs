@@ -1,4 +1,4 @@
-// MonoKit - ScreenManager.cs
+// AppHost - ScreenManager.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -20,11 +20,9 @@ namespace MonoKit.App.Screens;
 /// </summary>
 public class ScreenManager(Game game)
 {
-    private readonly GraphicsDevice _graphicsDevice = game.GraphicsDevice;
     private readonly ConcurrentQueue<Action<float>> _pendingActions = new();
-    private readonly PostProcessingRunner _postProcessingRunner = new(game.GraphicsDevice);
+    private readonly PostProcessingRunner _postProcessingRunner = new();
     private readonly Stack<IScreen> _screens = new();
-    private readonly List<IScreen> _visibleChain = []; // Reused every frame.
     private RenderTarget2D _lowerComposite;
     private RenderTarget2D _screenScratch;
 
@@ -83,8 +81,10 @@ public class ScreenManager(Game game)
         }
     }
 
+    private readonly List<IScreen> _visibleChain = [];
+
     /// <summary>Draws the visible screen chain: lower screens composited (optionally with the effect), top screen last.</summary>
-    public void Draw(SpriteBatch spriteBatch)
+    public void Draw(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice)
     {
         _postProcessingRunner.BeginFrame();
 
@@ -114,34 +114,39 @@ public class ScreenManager(Game game)
         // Fast path: nothing below the top screen, no compositing needed.
         if (_visibleChain.Count == 0)
         {
-            _graphicsDevice.SetRenderTarget(null);
-            _graphicsDevice.Clear(Color.Black);
-            RenderScreen(spriteBatch, top);
+            graphicsDevice.SetRenderTarget(null);
+            graphicsDevice.Clear(Color.Black);
+            RenderScreen(spriteBatch, graphicsDevice, top);
             return;
         }
 
         // 1. Render the lower chain into the composite target, bottom-most
         //    screen first, so blending order is preserved.
-        var composite = GetOrCreateComposite();
-        _graphicsDevice.SetRenderTarget(composite);
-        _graphicsDevice.Clear(Color.Transparent);
+        var composite = GetOrCreateComposite(graphicsDevice);
+        graphicsDevice.SetRenderTarget(composite);
+        graphicsDevice.Clear(Color.Transparent);
         for (var i = _visibleChain.Count - 1; i >= 0; i--)
-            RenderScreen(spriteBatch, _visibleChain[i]);
+            RenderScreen(spriteBatch, graphicsDevice, _visibleChain[i]);
 
         // 2. Apply the manager-wide effect (for example a blur). The result
         //    goes into a local; the field is never reassigned.
         if (EffectEnabled && PostProcessingEffect is not null)
-            composite = PostProcessingEffect.Apply(spriteBatch, _postProcessingRunner, composite);
+            composite = PostProcessingEffect.Apply(
+                spriteBatch,
+                graphicsDevice,
+                _postProcessingRunner,
+                composite
+            );
 
         // 3. Composite to the back buffer.
-        _graphicsDevice.SetRenderTarget(null);
-        _graphicsDevice.Clear(Color.Black);
+        graphicsDevice.SetRenderTarget(null);
+        graphicsDevice.Clear(Color.Black);
         spriteBatch.Begin();
         spriteBatch.Draw(composite, Vector2.Zero, Color.White);
         spriteBatch.End();
 
         // 4. Top screen last and unblurred, straight to the back buffer.
-        RenderScreen(spriteBatch, top);
+        RenderScreen(spriteBatch, graphicsDevice, top);
     }
 
     /// <summary>
@@ -150,37 +155,42 @@ public class ScreenManager(Game game)
     ///     the shared scratch target first, their effect is applied, and the
     ///     result is composited back onto the previous binding.
     /// </summary>
-    private void RenderScreen(SpriteBatch spriteBatch, IScreen screen)
+    private void RenderScreen(
+        SpriteBatch spriteBatch,
+        GraphicsDevice graphicsDevice,
+        IScreen screen
+    )
     {
         if (screen is not IPostProcessedScreen processed)
         {
-            screen.Draw(spriteBatch, _graphicsDevice);
+            screen.Draw(spriteBatch, graphicsDevice);
             return;
         }
 
-        var previousBindings = _graphicsDevice.GetRenderTargets();
-        var scratch = GetOrCreateScreenScratch();
+        var previousBindings = graphicsDevice.GetRenderTargets();
+        var scratch = GetOrCreateScreenScratch(graphicsDevice);
 
-        _graphicsDevice.SetRenderTarget(scratch);
-        _graphicsDevice.Clear(Color.Transparent);
-        screen.Draw(spriteBatch, _graphicsDevice);
+        graphicsDevice.SetRenderTarget(scratch);
+        graphicsDevice.Clear(Color.Transparent);
+        screen.Draw(spriteBatch, graphicsDevice);
 
         var result = processed.PostProcessingEffect.Apply(
             spriteBatch,
+            graphicsDevice,
             _postProcessingRunner,
             scratch
         );
 
-        _graphicsDevice.SetRenderTargets(previousBindings);
+        graphicsDevice.SetRenderTargets(previousBindings);
         spriteBatch.Begin();
         spriteBatch.Draw(result, Vector2.Zero, Color.White);
         spriteBatch.End();
     }
 
-    private RenderTarget2D GetOrCreateScreenScratch()
+    private RenderTarget2D GetOrCreateScreenScratch(GraphicsDevice graphicsDevice)
     {
-        var width = _graphicsDevice.Viewport.Width;
-        var height = _graphicsDevice.Viewport.Height;
+        var width = graphicsDevice.Viewport.Width;
+        var height = graphicsDevice.Viewport.Height;
         if (
             _screenScratch is null
             || _screenScratch.Width != width
@@ -191,7 +201,7 @@ public class ScreenManager(Game game)
             // Depth buffer, because 3D screens (for example the game screen
             // with the glow pipeline) draw directly into this target.
             _screenScratch = new RenderTarget2D(
-                _graphicsDevice,
+                graphicsDevice,
                 width,
                 height,
                 false,
@@ -203,10 +213,10 @@ public class ScreenManager(Game game)
         return _screenScratch;
     }
 
-    private RenderTarget2D GetOrCreateComposite()
+    private RenderTarget2D GetOrCreateComposite(GraphicsDevice graphicsDevice)
     {
-        var width = _graphicsDevice.Viewport.Width;
-        var height = _graphicsDevice.Viewport.Height;
+        var width = graphicsDevice.Viewport.Width;
+        var height = graphicsDevice.Viewport.Height;
         if (
             _lowerComposite is null
             || _lowerComposite.Width != width
@@ -218,7 +228,7 @@ public class ScreenManager(Game game)
             // target through the GraphicsDevice. SpriteBatch defaults to
             // DepthStencilState.None, so 2D screens are not affected.
             _lowerComposite = new RenderTarget2D(
-                _graphicsDevice,
+                graphicsDevice,
                 width,
                 height,
                 false,
@@ -243,13 +253,13 @@ public class ScreenManager(Game game)
 
     // Render targets recreate themselves lazily in Draw, so this method only
     // has to inform the screens and the runner about the new size.
-    public void OnResolutionChanged(float uiScale)
+    public void OnResolutionChanged(float uiScale, GraphicsDevice graphicsDevice)
     {
         foreach (var screen in _screens)
             screen.OnResolutionChanged(uiScale);
         _postProcessingRunner.ApplyResolution(
-            _graphicsDevice.Viewport.Width,
-            _graphicsDevice.Viewport.Height
+            graphicsDevice.Viewport.Width,
+            graphicsDevice.Viewport.Height
         );
     }
 }

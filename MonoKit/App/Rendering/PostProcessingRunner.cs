@@ -1,4 +1,4 @@
-// MonoKit - PostProcessingRunner.cs
+// AppHost - PostProcessingRunner.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -17,7 +17,7 @@ namespace MonoKit.App.Rendering;
 ///     frame via <see cref="BeginFrame" />, so a result returned by <see cref="Pass" />
 ///     stays valid until the next frame — regardless of pass count or nesting.
 /// </summary>
-public class PostProcessingRunner(GraphicsDevice graphicsDevice) : IDisposable
+public class PostProcessingRunner : IDisposable
 {
     private readonly List<RenderTarget2D> _pool = [];
     private readonly List<RenderTarget2D> _rented = [];
@@ -45,9 +45,14 @@ public class PostProcessingRunner(GraphicsDevice graphicsDevice) : IDisposable
     ///     rented target. The input is NOT recycled, so intermediate results can be
     ///     referenced (e.g. as shader textures) later in the same frame.
     /// </summary>
-    public RenderTarget2D Pass(Effect effect, SpriteBatch spriteBatch, RenderTarget2D input)
+    public RenderTarget2D Pass(
+        Effect effect,
+        SpriteBatch spriteBatch,
+        GraphicsDevice graphicsDevice,
+        RenderTarget2D input
+    )
     {
-        var destination = Rent();
+        var destination = Rent(graphicsDevice);
 
         graphicsDevice.SetRenderTarget(destination);
         graphicsDevice.Clear(Color.Transparent);
@@ -72,7 +77,7 @@ public class PostProcessingRunner(GraphicsDevice graphicsDevice) : IDisposable
         _rented.Clear();
     }
 
-    private RenderTarget2D Rent()
+    private RenderTarget2D Rent(GraphicsDevice graphicsDevice)
     {
         var width = graphicsDevice.Viewport.Width;
         var height = graphicsDevice.Viewport.Height;

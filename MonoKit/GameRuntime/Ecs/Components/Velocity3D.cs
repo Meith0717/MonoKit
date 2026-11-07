@@ -1,4 +1,4 @@
-// MonoKit - Velocity3D.cs
+// AppHost - Velocity3D.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;

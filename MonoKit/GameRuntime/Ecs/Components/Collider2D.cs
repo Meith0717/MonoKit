@@ -1,4 +1,4 @@
-// MonoKit - Collider2D.cs
+// AppHost - Collider2D.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;

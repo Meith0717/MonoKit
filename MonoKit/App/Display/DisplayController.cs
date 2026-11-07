@@ -1,4 +1,4 @@
-﻿// MonoKit - DisplayController.cs
+﻿// AppHost - DisplayController.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -38,6 +38,7 @@ public class DisplayController : IDisposable
         _graphicsDeviceManager = graphicsManager;
         _graphicsDeviceManager.ApplyChanges();
         _window = game.Window;
+        _window.AllowUserResizing = true;
         _virtualWidth = virtualWidth;
         _virtualHeight = virtualHeight;
 

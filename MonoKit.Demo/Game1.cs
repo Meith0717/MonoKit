@@ -1,23 +1,30 @@
-﻿// MonoKit.Demo - Game1.cs
+﻿// AppHost.Demo - Game1.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
 // all output reviewed and adapted by the author.
 
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using MonoKit.App;
+using MonoKit.App.Core.IO;
 
 namespace MonoKit.Demo;
 
 public class Game1 : Game
 {
-    private GraphicsDeviceManager _graphics;
+    private readonly AppHost _appHost;
     private SpriteBatch _spriteBatch;
 
     public Game1()
     {
-        _graphics = new GraphicsDeviceManager(this);
+        var graphics = new GraphicsDeviceManager(this);
+        _appHost = new AppHost(this, graphics)
+        {
+            PathService = new PathService("MonoKit.Demo", Environment.SpecialFolder.MyDocuments),
+        };
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
     }
@@ -26,6 +33,7 @@ public class Game1 : Game
     {
         // TODO: Add your initialization logic here
 
+        var graphicsDevice = GraphicsDevice;
         base.Initialize();
     }
 

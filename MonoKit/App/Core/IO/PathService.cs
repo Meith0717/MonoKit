@@ -1,4 +1,4 @@
-﻿// MonoKit - PathService.cs
+﻿// AppHost - PathService.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -11,14 +11,13 @@ using static System.Environment;
 
 namespace MonoKit.App.Core.IO;
 
-public class PathService<TPathId>
-    where TPathId : Enum
+public class PathService
 {
-    private readonly Dictionary<TPathId, string> _paths = new();
+    private readonly Dictionary<byte, string> _paths = new();
 
     public PathService(string rootPath = null, SpecialFolder? baseFolder = null)
     {
-        var folderName = rootPath ?? "MonoKit";
+        var folderName = rootPath ?? "AppHost";
 
         var basePath = baseFolder.HasValue
             ? Path.Combine(GetFolderPath(baseFolder.Value), folderName)
@@ -28,9 +27,10 @@ public class PathService<TPathId>
         FileUtils.CreateDirectory(RootPath);
     }
 
+    // ReSharper disable once MemberCanBePrivate.Global
     public string RootPath { get; }
 
-    public PathService<TPathId> RegisterPath(TPathId id, string relativePath)
+    public PathService RegisterPath(byte id, string relativePath)
     {
         var fullPath = Path.Combine(RootPath, relativePath);
         FileUtils.CreateDirectory(fullPath);
@@ -38,16 +38,15 @@ public class PathService<TPathId>
         return this;
     }
 
-    public string GetPath(TPathId id)
+    public string GetPath(byte id)
     {
-        return _paths.TryGetValue(id, out var path) ? path : null;
+        return _paths.GetValueOrDefault(id);
     }
 
-    public string GetFilePath(TPathId id, string fileName)
+    public string GetFilePath(byte id, string fileName)
     {
-        if (!_paths.TryGetValue(id, out var path))
-            throw new InvalidOperationException($"No path registered with id '{id}'.");
-
-        return Path.Combine(path, fileName);
+        return !_paths.TryGetValue(id, out var path)
+            ? throw new InvalidOperationException($"No path registered with id '{id}'.")
+            : Path.Combine(path, fileName);
     }
 }

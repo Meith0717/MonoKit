@@ -1,4 +1,4 @@
-﻿// MonoKit - IPostProcessingEffect.cs
+﻿// AppHost - IPostProcessingEffect.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -22,6 +22,7 @@ public interface IPostProcessingEffect
     /// <returns>The processed image, as a runner-owned render target.</returns>
     RenderTarget2D Apply(
         SpriteBatch spriteBatch,
+        GraphicsDevice graphicsDevice,
         PostProcessingRunner pipeline,
         RenderTarget2D input
     );

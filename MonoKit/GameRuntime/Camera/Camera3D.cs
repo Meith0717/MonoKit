@@ -1,4 +1,4 @@
-﻿// MonoKit - Camera3D.cs
+﻿// AppHost - Camera3D.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
