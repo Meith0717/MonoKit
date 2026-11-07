@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoKit", "MonoKit\MonoKit.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoKit.Demo", "MonoKit.Demo\MonoKit.Demo.csproj", "{1777C11F-274A-4D43-B036-6D30F79F96C5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoKit.Test", "MonoKit.Test\MonoKit.Test.csproj", "{CA91447E-AF9C-4C8D-B705-370D9DB03371}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{1777C11F-274A-4D43-B036-6D30F79F96C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1777C11F-274A-4D43-B036-6D30F79F96C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1777C11F-274A-4D43-B036-6D30F79F96C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CA91447E-AF9C-4C8D-B705-370D9DB03371}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA91447E-AF9C-4C8D-B705-370D9DB03371}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA91447E-AF9C-4C8D-B705-370D9DB03371}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA91447E-AF9C-4C8D-B705-370D9DB03371}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
