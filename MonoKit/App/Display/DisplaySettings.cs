@@ -8,16 +8,10 @@ namespace MonoKit.App.Display;
 
 /// <summary>
 ///     Display configuration applied to a <see cref="DisplayController" /> in one call
-///     via <see cref="DisplayController.ApplySettings" />. The virtual resolution is only
-///     used at construction time (viewport scale), the rest can be changed at runtime.
+///     via <see cref="DisplayController.ApplySettings" />. The virtual resolution is set
+///     separately via the constructor or <see cref="DisplayController.SetVirtualResolution" />.
 /// </summary>
-public readonly struct DisplaySettings(
-    WindowMode mode,
-    int refreshRate,
-    bool vSync,
-    float virtualWidth = 1920,
-    float virtualHeight = 1080
-)
+public readonly struct DisplaySettings(WindowMode mode, int refreshRate, bool vSync)
 {
     /// <summary>Windowed, borderless or fullscreen.</summary>
     public readonly WindowMode Mode = mode;
@@ -27,10 +21,4 @@ public readonly struct DisplaySettings(
 
     /// <summary>Synchronize with the vertical retrace.</summary>
     public readonly bool VSync = vSync;
-
-    /// <summary>Virtual resolution width used for <see cref="DisplayController.ViewportScale" />.</summary>
-    public readonly float VirtualWidth = virtualWidth;
-
-    /// <summary>Virtual resolution height used for <see cref="DisplayController.ViewportScale" />.</summary>
-    public readonly float VirtualHeight = virtualHeight;
 }

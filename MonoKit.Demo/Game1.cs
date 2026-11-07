@@ -7,7 +7,6 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using MonoKit.App;
 using MonoKit.App.Core.IO;
 
@@ -31,38 +30,32 @@ public class Game1 : Game
 
     protected override void Initialize()
     {
-        // TODO: Add your initialization logic here
-
-        var graphicsDevice = GraphicsDevice;
+        _appHost.Initialize(GraphicsDevice);
         base.Initialize();
     }
 
     protected override void LoadContent()
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
-
         // TODO: use this.Content to load your game content here
     }
 
     protected override void Update(GameTime gameTime)
     {
-        if (
-            GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed
-            || Keyboard.GetState().IsKeyDown(Keys.Escape)
-        )
-            Exit();
-
-        // TODO: Add your update logic here
-
+        _appHost.Update(gameTime, GraphicsDevice);
         base.Update(gameTime);
     }
 
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
-
-        // TODO: Add your drawing code here
-
+        _appHost.Draw(GraphicsDevice, _spriteBatch);
         base.Draw(gameTime);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        _appHost.Dispose();
+        base.Dispose(disposing);
     }
 }

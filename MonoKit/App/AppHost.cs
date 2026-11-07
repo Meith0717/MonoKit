@@ -9,7 +9,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoKit.App.Content;
 using MonoKit.App.Content.Audio;
-using MonoKit.App.Core.Diagnostics;
 using MonoKit.App.Core.IO;
 using MonoKit.App.Display;
 using MonoKit.App.Input;
@@ -21,6 +20,7 @@ namespace MonoKit.App;
 
 public class AppHost(Game game, GraphicsDeviceManager graphicsDeviceManager) : IDisposable
 {
+    private bool _wasInitialized;
     public readonly ContentProvider ContentProvider = new();
     public readonly AudioService AudioService = new();
     public readonly InputHandler InputHandler = new();
@@ -31,31 +31,51 @@ public class AppHost(Game game, GraphicsDeviceManager graphicsDeviceManager) : I
 
     public void Initialize(GraphicsDevice graphicsDevice)
     {
+        if (_wasInitialized)
+            return;
+
         AudioService.Initialize(ContentProvider);
 
         var services = game.Services;
-        services.AddService(PathService);
         services.AddService(ContentProvider);
         services.AddService(AudioService);
         services.AddService(InputHandler);
         services.AddService(DisplayController);
         services.AddService(ScreenManager);
+
+        if (PathService != null)
+            services.AddService(PathService);
+
+        DisplayController.ResolutionChanged += scale =>
+        {
+            ScreenManager.OnResolutionChanged(scale, graphicsDevice);
+        };
+
+        _wasInitialized = true;
     }
 
-    public void Update(GameTime gameTime)
+    public void Update(GameTime gameTime, GraphicsDevice graphicsDevice)
     {
+        if (!_wasInitialized)
+            throw new InvalidOperationException("AppHost has not been initialized.");
+
         var elapsedMs = gameTime.ElapsedGameTime.TotalMilliseconds;
+        DisplayController.UpdateViewportScale();
         InputHandler.Update(elapsedMs);
         ScreenManager.Update(elapsedMs, InputHandler, DisplayController.ViewportScale);
     }
 
     public void Draw(GraphicsDevice graphicsDevice, SpriteBatch spriteBatch)
     {
+        if (!_wasInitialized)
+            throw new InvalidOperationException("AppHost has not been initialized.");
+
         ScreenManager.Draw(spriteBatch, graphicsDevice);
     }
 
     public void Dispose()
     {
         AudioService.Dispose();
+        DisplayController.Dispose();
     }
 }
