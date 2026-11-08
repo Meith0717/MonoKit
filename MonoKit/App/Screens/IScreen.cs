@@ -14,10 +14,10 @@ namespace MonoKit.App.Screens;
 public interface IScreen : IDisposable
 {
     /// <summary>When true, screens below this one keep updating.</summary>
-    public bool UpdateBelow { get; init; }
+    public bool UpdateBelow { get; }
 
     /// <summary>When true, screens below this one remain part of the rendered chain.</summary>
-    public bool DrawBelow { get; init; }
+    public bool DrawBelow { get; }
 
     /// <summary>Called once when the screen is pushed onto the stack.</summary>
     public void Initialize();

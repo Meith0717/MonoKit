@@ -27,6 +27,9 @@ public class UiFrame : UiContainer
     {
         _texture = texture;
         _textureScale = scale;
+        // An attached background texture is meant to be visible; don't keep a transparent tint.
+        if (_color == Color.Transparent)
+            _color = Color.White;
         return this;
     }
 

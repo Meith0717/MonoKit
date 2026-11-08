@@ -51,6 +51,7 @@ public class AppHost(Game game, GraphicsDeviceManager graphicsDeviceManager) : I
         AudioService.Initialize(ContentProvider);
 
         var services = game.Services;
+        services.AddService(graphicsDevice);
         services.AddService(ContentProvider);
         services.AddService(AudioService);
         services.AddService(InputHandler);

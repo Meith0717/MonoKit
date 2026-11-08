@@ -97,18 +97,21 @@ public class ScreenManager(Game game)
         // including the first one with DrawBelow = false. Everything below
         // that screen is hidden and is not rendered at all.
         _visibleChain.Clear();
-        var skipTop = true;
-        foreach (var screen in _screens)
+        if (top.DrawBelow)
         {
-            if (skipTop)
+            var skipTop = true;
+            foreach (var screen in _screens)
             {
-                skipTop = false;
-                continue;
-            }
+                if (skipTop)
+                {
+                    skipTop = false;
+                    continue;
+                }
 
-            _visibleChain.Add(screen);
-            if (!screen.DrawBelow)
-                break;
+                _visibleChain.Add(screen);
+                if (!screen.DrawBelow)
+                    break;
+            }
         }
 
         // Fast path: nothing below the top screen, no compositing needed.
@@ -124,7 +127,7 @@ public class ScreenManager(Game game)
         //    screen first, so blending order is preserved.
         var composite = GetOrCreateComposite(graphicsDevice);
         graphicsDevice.SetRenderTarget(composite);
-        graphicsDevice.Clear(Color.Transparent);
+        graphicsDevice.Clear(Color.Black);
         for (var i = _visibleChain.Count - 1; i >= 0; i--)
             RenderScreen(spriteBatch, graphicsDevice, _visibleChain[i]);
 

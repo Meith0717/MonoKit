@@ -16,7 +16,11 @@ namespace MonoKit.App.Screens;
 ///     Base class for UI-driven screens: owns a full-viewport root <see cref="UiFrame" /> that receives update, draw
 ///     and resize.
 /// </summary>
-public abstract class UiScreen(GameServiceContainer appServices) : IScreen
+public abstract class UiScreen(
+    GameServiceContainer appServices,
+    bool updateBelow = false,
+    bool drawBelow = false
+) : IScreen
 {
     /// <summary>Root of the screen's UI tree.</summary>
     // ReSharper disable once MemberCanBePrivate.Global
@@ -31,8 +35,8 @@ public abstract class UiScreen(GameServiceContainer appServices) : IScreen
 
     private readonly GraphicsDevice _graphicsDevice = appServices.GetService<GraphicsDevice>();
 
-    public bool UpdateBelow { get; init; } = false;
-    public bool DrawBelow { get; init; } = false;
+    public bool UpdateBelow => updateBelow;
+    public bool DrawBelow => drawBelow;
 
     /// <summary>Called once on push; build the UI tree here.</summary>
     public abstract void Initialize();
@@ -57,8 +61,8 @@ public abstract class UiScreen(GameServiceContainer appServices) : IScreen
         UiRoot.ApplyScale(_graphicsDevice.Viewport.Bounds, uiScale);
     }
 
-    /// <summary>Disposes the UI tree.</summary>
-    public void Dispose()
+    /// <summary>Disposes the UI tree. Override to release additional resources.</summary>
+    public virtual void Dispose()
     {
         UiRoot.Dispose();
         GC.SuppressFinalize(this);
