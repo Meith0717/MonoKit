@@ -32,7 +32,7 @@ public class UiSprite(Texture2D texture2D, float scale = 1, Color color = defaul
 
     protected override void Updater(InputHandler inputHandler) { }
 
-    protected override void Drawer(SpriteBatch spriteBatch)
+    protected override void Drawer(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice)
     {
         if (Texture2D == null)
             return;

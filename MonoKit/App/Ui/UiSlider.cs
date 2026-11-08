@@ -56,7 +56,7 @@ public sealed class UiSlider(bool interactive) : UiElement
         }
     }
 
-    protected override void Drawer(SpriteBatch spriteBatch)
+    protected override void Drawer(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice)
     {
         var rectangle = Bounds;
         spriteBatch.FillRectangle(rectangle, BgColor);

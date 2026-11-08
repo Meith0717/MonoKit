@@ -24,10 +24,6 @@ public enum Align
     NW,
     Center,
     None,
-    Left,
-    Right,
-    Top,
-    Bottom,
     CenterH,
     CenterV,
 }
@@ -50,7 +46,7 @@ public abstract class UiElement : IDisposable
     public int? HSpace = null;
 
     /// <summary>Explicit height in pixels; when null, derived from <see cref="RelHeight" /> or intrinsic size.</summary>
-    public int? Height { get; protected set; }
+    public int? Height { get; set; }
 
     public float RelHeight = .1f;
     public float RelWidth = .1f;
@@ -60,7 +56,7 @@ public abstract class UiElement : IDisposable
     public int? VSpace = null;
 
     /// <summary>Explicit width in pixels; when null, derived from <see cref="RelWidth" /> or intrinsic size.</summary>
-    public int? Width { get; protected set; }
+    public int? Width { get; set; }
 
     public float? X = null;
     public float? Y = null;
@@ -68,6 +64,9 @@ public abstract class UiElement : IDisposable
     public Rectangle Bounds { get; private set; }
     public bool IsDisposed { get; private set; }
     protected float UiScale { get; private set; }
+
+    /// <summary>Ancestor clip rectangle (set by clipping containers during Draw); null = no clip.</summary>
+    internal Rectangle? ClipRect;
 
     public virtual void Dispose()
     {
@@ -77,7 +76,7 @@ public abstract class UiElement : IDisposable
 
     protected abstract void Updater(InputHandler inputHandler);
 
-    protected abstract void Drawer(SpriteBatch spriteBatch);
+    protected abstract void Drawer(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice);
 
     /// <summary>
     ///     Computes the element's intrinsic <see cref="Width" />/<see cref="Height" /> before layout.
@@ -88,12 +87,16 @@ public abstract class UiElement : IDisposable
     public void Update(InputHandler inputHandler, Rectangle root, float uiScale)
     {
         ApplyScale(root, uiScale);
+        if (ClipRect is { } clip && !Bounds.Intersects(clip))
+            return; // clipped away: no input either
         Updater(inputHandler);
     }
 
-    public void Draw(SpriteBatch spriteBatch)
+    public void Draw(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice)
     {
-        Drawer(spriteBatch);
+        if (ClipRect is { } clip && !Bounds.Intersects(clip))
+            return; // culled by an ancestor's clip rect
+        Drawer(spriteBatch, graphicsDevice);
 #if DEBUG
         spriteBatch.DrawRectangle(Bounds, Color.DeepSkyBlue);
 #endif
@@ -221,19 +224,15 @@ public abstract class UiElement : IDisposable
             Align.NW => 0,
             Align.SW => 0,
             Align.W => 0,
-            Align.Left => 0,
             Align.N => (root.Width - width) / 2,
             Align.Center => (root.Width - width) / 2,
             Align.CenterH => (root.Width - width) / 2,
             Align.S => (root.Width - width) / 2,
             Align.NE => root.Width - width,
             Align.E => root.Width - width,
-            Align.Right => root.Width - width,
             Align.SE => root.Width - width,
             Align.CenterV => x,
             Align.None => x,
-            Align.Bottom => x,
-            Align.Top => x,
             _ => throw new NotImplementedException(),
         };
         y = align switch
@@ -241,19 +240,15 @@ public abstract class UiElement : IDisposable
             Align.NW => 0,
             Align.N => 0,
             Align.NE => 0,
-            Align.Top => 0,
             Align.E => (root.Height - height) / 2,
             Align.W => (root.Height - height) / 2,
             Align.Center => (root.Height - height) / 2,
             Align.CenterV => (root.Height - height) / 2,
             Align.SE => root.Height - height,
             Align.S => root.Height - height,
-            Align.Bottom => root.Height - height,
             Align.SW => root.Height - height,
             Align.CenterH => y,
             Align.None => y,
-            Align.Left => y,
-            Align.Right => y,
             _ => throw new NotImplementedException(),
         };
     }

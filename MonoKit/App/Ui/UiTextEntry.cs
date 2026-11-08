@@ -398,7 +398,7 @@ public sealed class UiTextEntry : UiElement
         };
     }
 
-    protected override void Drawer(SpriteBatch spriteBatch)
+    protected override void Drawer(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice)
     {
         // Draw background
         var bgColor = _isFocused ? FocusedBgColor : BgColor;

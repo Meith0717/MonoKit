@@ -89,10 +89,10 @@ public static class UiButton
                     : TextIdleColor;
         }
 
-        protected override void Drawer(SpriteBatch spriteBatch)
+        protected override void Drawer(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice)
         {
-            base.Drawer(spriteBatch);
-            UiText?.Draw(spriteBatch);
+            base.Drawer(spriteBatch, graphicsDevice);
+            UiText?.Draw(spriteBatch, graphicsDevice);
         }
 
         public override void ApplyScale(Rectangle root, float uiScale)
@@ -141,9 +141,9 @@ public static class UiButton
                 : TextIdleColor;
         }
 
-        protected override void Drawer(SpriteBatch spriteBatch)
+        protected override void Drawer(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice)
         {
-            UiText.Draw(spriteBatch);
+            UiText.Draw(spriteBatch, graphicsDevice);
         }
 
         public override void ApplyScale(Rectangle root, float uiScale)

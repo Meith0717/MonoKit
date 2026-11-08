@@ -38,7 +38,7 @@ public sealed class UiText(SpriteFont spriteFont, string text = null) : UiElemen
         Height = (int)float.Floor(textDimension.Y * _scale);
     }
 
-    protected override void Drawer(SpriteBatch spriteBatch)
+    protected override void Drawer(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice)
     {
         var position = Bounds.Location.ToVector2();
 

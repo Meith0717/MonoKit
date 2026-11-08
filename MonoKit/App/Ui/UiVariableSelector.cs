@@ -91,11 +91,11 @@ public sealed class UiVariableSelector<T> : UiElement
             );
     }
 
-    protected override void Drawer(SpriteBatch spriteBatch)
+    protected override void Drawer(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice)
     {
-        _arrowL.Draw(spriteBatch);
-        _arrowR.Draw(spriteBatch);
-        _text.Draw(spriteBatch);
+        _arrowL.Draw(spriteBatch, graphicsDevice);
+        _arrowR.Draw(spriteBatch, graphicsDevice);
+        _text.Draw(spriteBatch, graphicsDevice);
     }
 
     public override void ApplyScale(Rectangle root, float uiScale)

@@ -86,11 +86,11 @@ public sealed class UiTabView<ButtonType>(Color color) : UiElement
         _contentFrame.Update(inputHandler, Bounds, UiScale);
     }
 
-    protected override void Drawer(SpriteBatch spriteBatch)
+    protected override void Drawer(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice)
     {
         spriteBatch.FillRectangle(Bounds, color);
-        _contentFrame.Draw(spriteBatch);
-        _buttonBar.Draw(spriteBatch);
+        _contentFrame.Draw(spriteBatch, graphicsDevice);
+        _buttonBar.Draw(spriteBatch, graphicsDevice);
     }
 
     public override void ApplyScale(Rectangle root, float uiScale)

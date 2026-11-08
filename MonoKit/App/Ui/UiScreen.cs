@@ -46,8 +46,11 @@ public abstract class UiScreen(
     /// <summary>Draws the UI tree. Override to additionally draw 3D content via <paramref name="graphicsDevice" />.</summary>
     public virtual void Draw(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice)
     {
-        spriteBatch.Begin();
-        UiRoot.Draw(spriteBatch);
+        // ScissorTestEnable lets containers (e.g. UiWindow) clip children via GraphicsDevice.ScissorRectangle.
+        // Initialize the scissor rect to the full viewport so nothing is clipped by default.
+        graphicsDevice.ScissorRectangle = graphicsDevice.Viewport.Bounds;
+        spriteBatch.Begin(rasterizerState: new RasterizerState { ScissorTestEnable = true });
+        UiRoot.Draw(spriteBatch, graphicsDevice);
         spriteBatch.End();
     }
 
