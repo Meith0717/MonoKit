@@ -55,6 +55,7 @@ public sealed class UiTextEntry(SpriteFont spriteFont) : UiElement
     public bool IsPassword { get; set; }
     public char PasswordChar { get; set; } = '*';
 
+    /// <summary>Sizes the element to fit text or placeholder plus padding.</summary>
     protected override void MeasureSize()
     {
         var displayText = PasswordAware(_text.Length > 0 ? _text : _placeholder);
@@ -63,6 +64,7 @@ public sealed class UiTextEntry(SpriteFont spriteFont) : UiElement
         IntrinsicHeight = (int)(MathHelper.Max(textDimension.Y, _font.LineSpacing) * Scale) + Padding * 2;
     }
 
+    /// <summary>Handles focus on click and edits while focused.</summary>
     protected override void Updater(InputHandler inputHandler)
     {
         var mouseState = Mouse.GetState();
@@ -82,6 +84,7 @@ public sealed class UiTextEntry(SpriteFont spriteFont) : UiElement
         _previousKeyboardState = keyboardState;
     }
 
+    /// <summary>Applies navigation, editing keys, and typed characters.</summary>
     private void HandleEditingKeys(KeyboardState keyboardState, IReadOnlyList<char> typedCharacters)
     {
         if (IsKeyDownEdge(Keys.Enter) || IsKeyDownEdge(Keys.Escape))
@@ -120,6 +123,7 @@ public sealed class UiTextEntry(SpriteFont spriteFont) : UiElement
             keyboardState.IsKeyDown(key) && !_previousKeyboardState.IsKeyDown(key);
     }
 
+    /// <summary>Draws background, text, and the cursor when focused.</summary>
     protected override void Drawer(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice)
     {
         spriteBatch.FillRectangle(Bounds, _isFocused ? FocusedBgColor : BgColor);
@@ -159,9 +163,11 @@ public sealed class UiTextEntry(SpriteFont spriteFont) : UiElement
         );
     }
 
+    /// <summary>Masks the text with PasswordChar when IsPassword is set.</summary>
     private string PasswordAware(string text) =>
         IsPassword ? new string(PasswordChar, text.Length) : text;
 
+    /// <summary>Maps a pixel x-offset to the nearest cursor index.</summary>
     private int GetCursorPositionFromX(float x)
     {
         if (_text.Length == 0)

@@ -18,6 +18,7 @@ public class KeyboardListener(Dictionary<(Keys, InputEventType), byte> bindings)
     private Keys[] _currentPressedKeys,
         _previousPressedKeys = [];
 
+    /// <summary>Detects key transitions and sets bound action flags.</summary>
     public void Update(double elapsedMilliseconds, BitArray actionFlags)
     {
         _pressedKeyStates.Clear();

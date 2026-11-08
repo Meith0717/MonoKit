@@ -10,6 +10,7 @@ namespace MonoKit.App.Core.IO;
 
 internal static class JsonHandler
 {
+    /// <summary>Serializes an object to formatted JSON with type names.</summary>
     public static string SerializeToJson(object obj)
     {
         var jsonSerializerSettings = new JsonSerializerSettings
@@ -21,6 +22,7 @@ internal static class JsonHandler
         return JsonConvert.SerializeObject(obj, jsonSerializerSettings);
     }
 
+    /// <summary>Fills an existing object from JSON, replacing its members.</summary>
     public static object PopulateObject(object target, string jsonString)
     {
         if (jsonString is null)

@@ -31,6 +31,7 @@ public class AppHost(Microsoft.Xna.Framework.Game game, GraphicsDeviceManager gr
 
     public PathService PathService { get; init; }
 
+    /// <summary>Creates and starts the debug console, reusing an existing instance.</summary>
     public DebugConsole EnableDebugConsole()
     {
         if (game.Services.GetService(typeof(DebugConsole)) is DebugConsole console)
@@ -42,6 +43,7 @@ public class AppHost(Microsoft.Xna.Framework.Game game, GraphicsDeviceManager gr
         return debugConsole;
     }
 
+    /// <summary>Registers all host services; runs only once.</summary>
     public void Initialize(GraphicsDevice graphicsDevice)
     {
         if (_wasInitialized)
@@ -70,6 +72,7 @@ public class AppHost(Microsoft.Xna.Framework.Game game, GraphicsDeviceManager gr
         };
     }
 
+    /// <summary>Advances input, viewport scale and screens each frame.</summary>
     public void Update(GameTime gameTime, GraphicsDevice graphicsDevice)
     {
         if (!_wasInitialized)
@@ -81,6 +84,7 @@ public class AppHost(Microsoft.Xna.Framework.Game game, GraphicsDeviceManager gr
         ScreenManager.Update(elapsedMs, InputHandler, DisplayController.ViewportScale);
     }
 
+    /// <summary>Updates frame statistics and draws the active screens.</summary>
     public void Draw(GameTime gameTime, GraphicsDevice graphicsDevice, SpriteBatch spriteBatch)
     {
         if (!_wasInitialized)
@@ -93,6 +97,7 @@ public class AppHost(Microsoft.Xna.Framework.Game game, GraphicsDeviceManager gr
         ScreenManager.Draw(spriteBatch, graphicsDevice);
     }
 
+    /// <summary>Releases the debug console, audio service and display controller.</summary>
     public void Dispose()
     {
         if (game.Services.GetService<DebugConsole>() is DebugConsole console)

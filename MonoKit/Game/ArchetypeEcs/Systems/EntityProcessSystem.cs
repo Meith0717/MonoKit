@@ -10,16 +10,20 @@ namespace MonoKit.Game.ArchetypeEcs.Systems;
 
 public interface IEntityProcessSystem : ISystem
 {
+    /// <summary>Notifies the system when an entity is destroyed.</summary>
     void OnEntityDestroyed(Entity entity);
 }
 
 public abstract class EntityProcessSystem<T1> : IUpdateSystem, IEntityProcessSystem
     where T1 : struct
 {
+    /// <summary>Hook: releases resources held by the derived system.</summary>
     public abstract void Dispose();
 
+    /// <summary>Hook: sets the system up within the world.</summary>
     public abstract void Initialize(World world);
 
+    /// <summary>Iterates matching archetypes and processes every entity.</summary>
     public void Update(double elapsedMs, World world)
     {
         world.BeginIteration();
@@ -47,12 +51,16 @@ public abstract class EntityProcessSystem<T1> : IUpdateSystem, IEntityProcessSys
         }
     }
 
+    /// <summary>Hook: runs once before entities are processed.</summary>
     protected abstract void Begin();
 
+    /// <summary>Hook: processes one entity's components this update.</summary>
     protected abstract void Process(double elapsedMs, World world, Entity entity, ref T1 c1);
 
+    /// <summary>Hook: runs once after entities are processed.</summary>
     protected abstract void End();
 
+    /// <summary>Hook: reacts when an entity is destroyed.</summary>
     public abstract void OnEntityDestroyed(Entity entity);
 }
 
@@ -60,10 +68,13 @@ public abstract class EntityProcessSystem<T1, T2> : IUpdateSystem, IEntityProces
     where T1 : struct
     where T2 : struct
 {
+    /// <summary>Hook: releases resources held by the derived system.</summary>
     public abstract void Dispose();
 
+    /// <summary>Hook: sets the system up within the world.</summary>
     public abstract void Initialize(World world);
 
+    /// <summary>Iterates matching archetypes and processes every entity.</summary>
     public void Update(double elapsedMs, World world)
     {
         world.BeginIteration();
@@ -103,8 +114,10 @@ public abstract class EntityProcessSystem<T1, T2> : IUpdateSystem, IEntityProces
         }
     }
 
+    /// <summary>Hook: runs once before entities are processed.</summary>
     protected abstract void Begin();
 
+    /// <summary>Hook: processes one entity's components this update.</summary>
     protected abstract void Process(
         double elapsedMs,
         World world,
@@ -113,8 +126,10 @@ public abstract class EntityProcessSystem<T1, T2> : IUpdateSystem, IEntityProces
         ref T2 c2
     );
 
+    /// <summary>Hook: runs once after entities are processed.</summary>
     protected abstract void End();
 
+    /// <summary>Hook: reacts when an entity is destroyed.</summary>
     public abstract void OnEntityDestroyed(Entity entity);
 }
 
@@ -123,10 +138,13 @@ public abstract class EntityProcessSystem<T1, T2, T3> : IUpdateSystem, IEntityPr
     where T2 : struct
     where T3 : struct
 {
+    /// <summary>Hook: releases resources held by the derived system.</summary>
     public abstract void Dispose();
 
+    /// <summary>Hook: sets the system up within the world.</summary>
     public abstract void Initialize(World world);
 
+    /// <summary>Iterates matching archetypes and processes every entity.</summary>
     public void Update(double elapsedMs, World world)
     {
         world.BeginIteration();
@@ -169,8 +187,10 @@ public abstract class EntityProcessSystem<T1, T2, T3> : IUpdateSystem, IEntityPr
         }
     }
 
+    /// <summary>Hook: runs once before entities are processed.</summary>
     protected abstract void Begin();
 
+    /// <summary>Hook: processes one entity's components this update.</summary>
     protected abstract void Process(
         double elapsedMs,
         World world,
@@ -180,8 +200,10 @@ public abstract class EntityProcessSystem<T1, T2, T3> : IUpdateSystem, IEntityPr
         ref T3 c3
     );
 
+    /// <summary>Hook: runs once after entities are processed.</summary>
     protected abstract void End();
 
+    /// <summary>Hook: reacts when an entity is destroyed.</summary>
     public abstract void OnEntityDestroyed(Entity entity);
 }
 
@@ -191,10 +213,13 @@ public abstract class EntityProcessSystem<T1, T2, T3, T4> : IUpdateSystem, IEnti
     where T3 : struct
     where T4 : struct
 {
+    /// <summary>Hook: releases resources held by the derived system.</summary>
     public abstract void Dispose();
 
+    /// <summary>Hook: sets the system up within the world.</summary>
     public abstract void Initialize(World world);
 
+    /// <summary>Iterates matching archetypes and processes every entity.</summary>
     public void Update(double elapsedMs, World world)
     {
         world.BeginIteration();
@@ -241,8 +266,10 @@ public abstract class EntityProcessSystem<T1, T2, T3, T4> : IUpdateSystem, IEnti
         }
     }
 
+    /// <summary>Hook: runs once before entities are processed.</summary>
     protected abstract void Begin();
 
+    /// <summary>Hook: processes one entity's components this update.</summary>
     protected abstract void Process(
         double elapsedMs,
         World world,
@@ -253,7 +280,9 @@ public abstract class EntityProcessSystem<T1, T2, T3, T4> : IUpdateSystem, IEnti
         ref T4 c4
     );
 
+    /// <summary>Hook: runs once after entities are processed.</summary>
     protected abstract void End();
 
+    /// <summary>Hook: reacts when an entity is destroyed.</summary>
     public abstract void OnEntityDestroyed(Entity entity);
 }

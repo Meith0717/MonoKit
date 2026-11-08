@@ -8,6 +8,7 @@ using System;
 
 namespace MonoKit.App.Core.Diagnostics;
 
+/// <summary>Represents a named console command with description and executor.</summary>
 public class ConsoleCommand(string name, string description, Action<string[]> execute)
 {
     public string Name { get; } = name;

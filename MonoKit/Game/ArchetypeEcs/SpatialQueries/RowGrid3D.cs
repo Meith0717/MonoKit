@@ -21,6 +21,7 @@ internal sealed class RowGrid3D<TPos>
 
     private Vector3[] _vecPositions = [];
 
+    /// <summary>Creates the grid, requiring a positive cell size.</summary>
     public RowGrid3D(float cellSize)
     {
         if (cellSize <= 0)
@@ -31,6 +32,7 @@ internal sealed class RowGrid3D<TPos>
 
     public float CellSize { get; }
 
+    /// <summary>Interleaves cell coordinates into a 64-bit Morton code.</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     private static long MortonEncode(int x, int y, int z)
     {
@@ -48,12 +50,14 @@ internal sealed class RowGrid3D<TPos>
         }
     }
 
+    /// <summary>Converts a world coordinate to its cell index.</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     private int ToCell(float value)
     {
         return (int)float.Floor(value * _inverseCellSize);
     }
 
+    /// <summary>Packs masked cell coordinates into a unique dictionary key.</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     private static long CellKey(int x, int y, int z)
     {
@@ -62,6 +66,7 @@ internal sealed class RowGrid3D<TPos>
             | (uint)(z & 0x1F_FFFF);
     }
 
+    /// <summary>Sorts rows by Morton cell code and returns the sort permutation.</summary>
     public int[] Prepare(
         TPos[] positions,
         Vector3[] vecPositions,
@@ -89,6 +94,7 @@ internal sealed class RowGrid3D<TPos>
         return _order;
     }
 
+    /// <summary>Records the contiguous sorted range of each occupied cell.</summary>
     public void BuildRanges(TPos[] positions, int rowCount, Func<TPos, Vector3> getPosition)
     {
         _ranges.Clear();
@@ -118,6 +124,7 @@ internal sealed class RowGrid3D<TPos>
         _ranges[CellKey(cx, cy, cz)] = new CellRange(start, rowCount - start);
     }
 
+    /// <summary>Collects all spatial indices within the radius into results.</summary>
     public void GetInRadius(Vector3 center, float radius, List<int> results)
     {
         results.Clear();

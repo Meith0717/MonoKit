@@ -21,6 +21,7 @@ public class ContentLoader
     private bool _isIncrementalMode;
     private int _loadedCount;
 
+    /// <summary>Creates a loader bound to the given content manager.</summary>
     private ContentLoader(ContentManager contentManager)
     {
         _contentManager = contentManager;
@@ -28,6 +29,7 @@ public class ContentLoader
 
     private bool IsComplete => _loadedCount >= _loadActions.Count;
 
+    /// <summary>Creates a loader and ensures the content directories exist.</summary>
     public static ContentLoader Create(ContentManager contentManager)
     {
         var contentRoot = contentManager.RootDirectory;
@@ -43,6 +45,7 @@ public class ContentLoader
         return new ContentLoader(contentManager);
     }
 
+    /// <summary>Queues loading of every file in a content directory as T.</summary>
     public ContentLoader RegisterContentDirectory<T>(
         string contentDirectory,
         SearchOption searchOption = SearchOption.AllDirectories
@@ -82,6 +85,7 @@ public class ContentLoader
         return this;
     }
 
+    /// <summary>Runs all queued load actions into the provider at once.</summary>
     public void LoadAll(ContentProvider contentProvider)
     {
         if (_isIncrementalMode)
@@ -95,6 +99,7 @@ public class ContentLoader
             LoadNextInternal(contentProvider);
     }
 
+    /// <summary>Prepares the loader for step-by-step loading into a provider.</summary>
     public ContentLoader BeginIncremental(ContentProvider contentProvider)
     {
         if (_loadedCount > 0)
@@ -110,6 +115,7 @@ public class ContentLoader
         return this;
     }
 
+    /// <summary>Loads the next queued file and reports overall progress.</summary>
     public (string LoadedFilePath, float Percentage) LoadNext()
     {
         if (!_isIncrementalMode)
@@ -119,6 +125,7 @@ public class ContentLoader
         return (result.FilePath, result.Percentage);
     }
 
+    /// <summary>Finishes incremental loading once everything is loaded.</summary>
     public void EndIncremental()
     {
         if (!_isIncrementalMode || !IsComplete)
@@ -129,6 +136,7 @@ public class ContentLoader
         _isIncrementalMode = false;
     }
 
+    /// <summary>Resets the load counter so all content can load again.</summary>
     public void Reset()
     {
         if (_isIncrementalMode)
@@ -138,6 +146,7 @@ public class ContentLoader
         _loadedCount = 0;
     }
 
+    /// <summary>Runs the next load action and returns its path and progress.</summary>
     private (string FilePath, float Percentage) LoadNextInternal(ContentProvider contentProvider)
     {
         if (_loadedCount >= _loadActions.Count)

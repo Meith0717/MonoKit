@@ -26,6 +26,7 @@ public sealed class DebugConsole : IDisposable
 
     public bool IsRunning => _running;
 
+    /// <summary>Shows the console and starts the background input thread.</summary>
     public void Start(string welcomeMessage = "Console initialized.")
     {
         if (_running || _disposed)
@@ -38,6 +39,7 @@ public sealed class DebugConsole : IDisposable
         _inputThread.Start();
     }
 
+    /// <summary>Reads console input lines and dispatches them as commands.</summary>
     private void InputLoop()
     {
         while (_running)
@@ -60,11 +62,13 @@ public sealed class DebugConsole : IDisposable
         }
     }
 
+    /// <summary>Signals the input loop to exit.</summary>
     public void Stop()
     {
         _running = false;
     }
 
+    /// <summary>Stops the console and hides the window once.</summary>
     public void Dispose()
     {
         if (_disposed)

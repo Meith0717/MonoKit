@@ -17,5 +17,6 @@ public enum InputEventType
 
 public interface IInputDevice
 {
+    /// <summary>Polls the device and sets action flags for events fired this frame.</summary>
     void Update(double elapsedMilliseconds, BitArray actionFlags);
 }

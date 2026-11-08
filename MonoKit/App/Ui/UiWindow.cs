@@ -28,6 +28,7 @@ public class UiWindow : UiContainer
     private Point _lastMouse;
     private int _lastWheel;
 
+    /// <summary>Builds the title bar with its text and the content layer.</summary>
     public UiWindow(SpriteFont font, string title)
     {
         _titleText = new UiText(font, title) { Align = Align.W, Color = Color.White };
@@ -67,12 +68,14 @@ public class UiWindow : UiContainer
     public UiContainer Content => _content;
 
 
+    /// <summary>Adds a child to the scrollable content layer.</summary>
     public void AddContent(UiElement child)
     {
         _content.Add(child);
         _contentBaseRelY.Add(child.RelY);
     }
 
+    /// <summary>Positions the title bar and the scrolled content layer.</summary>
     protected override void LayoutChildren()
     {
         _titleBar.RelX = 0;
@@ -96,6 +99,7 @@ public class UiWindow : UiContainer
             children[i].RelY = _contentBaseRelY[i] - ScrollOffset / contentHeight;
     }
 
+    /// <summary>Handles title-bar dragging and mouse-wheel scrolling.</summary>
     protected override void Updater(InputHandler inputHandler)
     {
         base.Updater(inputHandler);
@@ -130,6 +134,7 @@ public class UiWindow : UiContainer
             ScrollOffset = Math.Clamp(ScrollOffset - wheelDelta * ScrollSpeed, 0, MaxScrollOffset());
     }
 
+    /// <summary>Returns the content height overflowing the visible area.</summary>
     private float MaxScrollOffset()
     {
         var contentHeight = _content.Bounds.Height;

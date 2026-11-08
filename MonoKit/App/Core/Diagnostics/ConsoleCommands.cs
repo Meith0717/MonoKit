@@ -15,17 +15,20 @@ public class ConsoleCommands
     private readonly Dictionary<string, ConsoleCommand> _commands = new();
     private readonly object _lock = new();
 
+    /// <summary>Initializes the registry with the built-in help command.</summary>
     public ConsoleCommands()
     {
         Register(new ConsoleCommand("help", "Lists all commands", args => PrintHelp()));
     }
 
+    /// <summary>Adds a command to the registry, keyed by lowercase name.</summary>
     public void Register(ConsoleCommand command)
     {
         lock (_lock)
             _commands[command.Name.ToLower()] = command;
     }
 
+    /// <summary>Parses input and runs the matching command, returning success.</summary>
     public bool Execute(string input)
     {
         var parts = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
@@ -55,6 +58,7 @@ public class ConsoleCommands
         return false;
     }
 
+    /// <summary>Prints each registered command name and description.</summary>
     public void PrintHelp()
     {
         Console.WriteLine("Available commands:");

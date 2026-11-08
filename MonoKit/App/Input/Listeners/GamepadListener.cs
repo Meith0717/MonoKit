@@ -22,6 +22,7 @@ public class GamepadListener(
 {
     private HashSet<Buttons> _previousButtons = [];
 
+    /// <summary>Compares current and previous buttons and sets bound action flags.</summary>
     public void Update(double elapsedMilliseconds, BitArray actionFlags)
     {
         var current = GetPressedButtons(GamePad.GetState(playerIndex));
@@ -45,6 +46,7 @@ public class GamepadListener(
         _previousButtons = current;
     }
 
+    /// <summary>Collects all currently pressed buttons of a connected gamepad.</summary>
     private static HashSet<Buttons> GetPressedButtons(GamePadState state)
     {
         var pressed = new HashSet<Buttons>();

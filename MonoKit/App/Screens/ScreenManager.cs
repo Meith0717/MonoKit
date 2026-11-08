@@ -190,6 +190,7 @@ public class ScreenManager(Microsoft.Xna.Framework.Game game)
         spriteBatch.End();
     }
 
+    /// <summary>Returns the scratch render target, recreating it when the viewport resizes.</summary>
     private RenderTarget2D GetOrCreateScreenScratch(GraphicsDevice graphicsDevice)
     {
         var width = graphicsDevice.Viewport.Width;
@@ -216,6 +217,7 @@ public class ScreenManager(Microsoft.Xna.Framework.Game game)
         return _screenScratch;
     }
 
+    /// <summary>Returns the lower-chain composite render target, recreating it when the viewport resizes.</summary>
     private RenderTarget2D GetOrCreateComposite(GraphicsDevice graphicsDevice)
     {
         var width = graphicsDevice.Viewport.Width;

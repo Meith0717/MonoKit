@@ -39,6 +39,7 @@ public class MouseListener(Dictionary<(MouseButton, InputEventType), byte> bindi
     private MouseState _currentState,
         _previousState;
 
+    /// <summary>Detects mouse and wheel transitions and sets bound action flags.</summary>
     public void Update(double elapsedMilliseconds, BitArray actionFlags)
     {
         _currentState = Mouse.GetState();

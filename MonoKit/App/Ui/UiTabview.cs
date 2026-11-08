@@ -32,6 +32,7 @@ public sealed class UiTabView<ButtonType> : UiContainer
     /// <summary>Highlight color applied to the active tab's button.</summary>
     public Color ActiveTabColor { get; set; } = Color.Red;
 
+    /// <summary>Creates the button bar and content frame containers.</summary>
     public UiTabView(Color color)
     {
         Color = color;
@@ -39,6 +40,7 @@ public sealed class UiTabView<ButtonType> : UiContainer
         Add(_contentFrame);
     }
 
+    /// <summary>Registers a tab button and its content frame.</summary>
     public void Add(ButtonType button, UiContainer tabFrame)
     {
         button.OnClickAction += () => _activeFrame = tabFrame;
@@ -81,6 +83,7 @@ public sealed class UiTabView<ButtonType> : UiContainer
     // The bar and content area manage their own slots (assigned in Initialize).
     protected override void LayoutChildren() { }
 
+    /// <summary>Shows the active tab's frame and highlights its button.</summary>
     protected override void Updater(InputHandler inputHandler)
     {
         // Swap in the active tab's frame so the child cascade below updates it this frame.

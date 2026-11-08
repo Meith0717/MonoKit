@@ -27,11 +27,13 @@ public class SettingsManager
         .5f
     );
 
+    /// <summary>Returns the currently stored settings state.</summary>
     public SettingsState GetSettings()
     {
         return _settings;
     }
 
+    /// <summary>Replaces the current settings state.</summary>
     public void SetSettings(SettingsState settings)
     {
         _settings = settings;

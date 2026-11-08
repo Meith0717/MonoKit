@@ -12,13 +12,16 @@ public static class ConsoleManager
 {
     // Only available on Windows — guard with OS checks
 #if WINDOWS
+    /// <summary>Allocates a new Win32 console window for the process.</summary>
     [DllImport("kernel32.dll")]
     private static extern bool AllocConsole();
 
+    /// <summary>Detaches the process from its current console window.</summary>
     [DllImport("kernel32.dll")]
     private static extern bool FreeConsole();
 #endif
 
+    /// <summary>Shows a console window and prints the welcome message.</summary>
     public static void Show(string welcomeMessage = "Console initialized.")
     {
 #if WINDOWS
@@ -37,6 +40,7 @@ public static class ConsoleManager
         Console.WriteLine(welcomeMessage + "\n");
     }
 
+    /// <summary>Hides the console window on Windows.</summary>
     public static void Hide()
     {
 #if WINDOWS
@@ -53,6 +57,7 @@ public static class ConsoleManager
 #endif
     }
 
+    /// <summary>Renders an inline progress bar with the current percentage.</summary>
     public static void DrawProgressBar(string info, int progress, int total, int barWidth = 40)
     {
         if (Console.IsOutputRedirected)
@@ -66,6 +71,7 @@ public static class ConsoleManager
         Console.Write($"\r{info} [{bar}] {percent * 100:0.0}%");
     }
 
+    /// <summary>Clears the current console line using an ANSI escape.</summary>
     public static void ClearLine()
     {
         if (Console.IsOutputRedirected)

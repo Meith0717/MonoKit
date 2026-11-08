@@ -22,6 +22,7 @@ public class PostProcessingRunner : IDisposable
     private readonly List<RenderTarget2D> _pool = [];
     private readonly List<RenderTarget2D> _rented = [];
 
+    /// <summary>Disposes all pooled and rented render targets.</summary>
     public void Dispose()
     {
         foreach (var target in _pool)
@@ -77,6 +78,7 @@ public class PostProcessingRunner : IDisposable
         _rented.Clear();
     }
 
+    /// <summary>Returns a pooled target matching the viewport size or creates a new one.</summary>
     private RenderTarget2D Rent(GraphicsDevice graphicsDevice)
     {
         var width = graphicsDevice.Viewport.Width;

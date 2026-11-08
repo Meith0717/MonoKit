@@ -30,6 +30,7 @@ public sealed class SoundEffectManager(
         set => _volume = Math.Clamp(value, 0, 1);
     }
 
+    /// <summary>Plays a sound, reusing stopped instances up to the limit.</summary>
     public void Play(
         string soundId,
         float volume = 1f,
@@ -69,6 +70,7 @@ public sealed class SoundEffectManager(
         instance.Play();
     }
 
+    /// <summary>Creates the sound instances up front for one sound id.</summary>
     public void Preload(string soundId)
     {
         if (_instances.ContainsKey(soundId))
@@ -82,6 +84,7 @@ public sealed class SoundEffectManager(
         _instances[soundId] = instances;
     }
 
+    /// <summary>Preloads every sound effect in this manager's category.</summary>
     public void PreloadAll()
     {
         foreach (var (_, id, _) in contentProvider.Container<SoundEffect>())
@@ -94,6 +97,7 @@ public sealed class SoundEffectManager(
         }
     }
 
+    /// <summary>Pauses all currently playing sound instances.</summary>
     public void Pause()
     {
         foreach (var instances in _instances.Values)
@@ -102,6 +106,7 @@ public sealed class SoundEffectManager(
                 instance.Pause();
     }
 
+    /// <summary>Resumes all paused sound instances.</summary>
     public void Resume()
     {
         foreach (var instances in _instances.Values)
@@ -110,6 +115,7 @@ public sealed class SoundEffectManager(
                 instance.Resume();
     }
 
+    /// <summary>Stops every sound instance of this category.</summary>
     public void Stop()
     {
         foreach (var instances in _instances.Values)
@@ -120,11 +126,13 @@ public sealed class SoundEffectManager(
         }
     }
 
+    /// <summary>Discards all cached sound instances.</summary>
     public void Clear()
     {
         _instances.Clear();
     }
 
+    /// <summary>Clears instances and marks the manager as disposed.</summary>
     public void Dispose()
     {
         if (_isDisposed)

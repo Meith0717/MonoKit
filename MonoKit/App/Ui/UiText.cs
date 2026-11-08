@@ -11,6 +11,7 @@ using MonoKit.App.Input;
 
 namespace MonoKit.App.Ui;
 
+/// <summary>Label rendering a single string with a sprite font.</summary>
 public sealed class UiText(SpriteFont spriteFont, string text = null) : UiElement
 {
     private float _scale = 1;
@@ -31,6 +32,7 @@ public sealed class UiText(SpriteFont spriteFont, string text = null) : UiElemen
     public Color Color { get; set; } = Color.Black;
     public Func<string> TextProvider { get; set; }
 
+    /// <summary>Sizes the element to the scaled text dimensions.</summary>
     protected override void MeasureSize()
     {
         var textDimension = _text == null ? Vector2.Zero : spriteFont.MeasureString(_text);
@@ -38,6 +40,7 @@ public sealed class UiText(SpriteFont spriteFont, string text = null) : UiElemen
         IntrinsicHeight = (int)float.Floor(textDimension.Y * _scale);
     }
 
+    /// <summary>Draws the text at the element bounds.</summary>
     protected override void Drawer(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice)
     {
         if (string.IsNullOrEmpty(_text))
@@ -57,6 +60,7 @@ public sealed class UiText(SpriteFont spriteFont, string text = null) : UiElemen
         );
     }
 
+    /// <summary>Refreshes the text from the optional provider.</summary>
     protected override void Updater(InputHandler inputHandler)
     {
         if (TextProvider != null)

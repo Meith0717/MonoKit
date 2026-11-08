@@ -33,6 +33,7 @@ public class InputHandler
     private readonly List<char> _frameCharacters = new();
     private bool _textSubscribed;
 
+    /// <summary>Adds an input device polled on every update.</summary>
     public void RegisterDevice(IInputDevice device)
     {
         _devices.Add(device);
@@ -50,12 +51,14 @@ public class InputHandler
         window.TextInput += OnTextInput;
     }
 
+    /// <summary>Queues a typed character for the next update.</summary>
     private void OnTextInput(object sender, TextInputEventArgs e)
     {
         lock (_textLock)
             _pendingCharacters.Enqueue(e.Character);
     }
 
+    /// <summary>Clears flags, drains typed characters, then polls all devices.</summary>
     public void Update(double elapsedMilliseconds)
     {
         _actionsFlags.SetAll(false);
@@ -93,6 +96,7 @@ public class InputHandler
         return ConsumeAction(actionID);
     }
 
+    /// <summary>Runs the callback when the action fired this frame.</summary>
     public void DoAction(byte actionID, Action function)
     {
         if (HasAction(actionID))

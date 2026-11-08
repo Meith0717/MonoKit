@@ -20,6 +20,7 @@ public sealed class MusicManager(ContentProvider contentProvider)
         set => MediaPlayer.Volume = Math.Clamp(value, 0, 1);
     }
 
+    /// <summary>Plays a song, skipping a restart when it already plays.</summary>
     public void Play(string soundId, bool loop = true)
     {
         if (_isDisposed)
@@ -35,6 +36,7 @@ public sealed class MusicManager(ContentProvider contentProvider)
         _currentSong = song;
     }
 
+    /// <summary>Stops the current song and clears the reference.</summary>
     public void Stop()
     {
         if (MediaPlayer.State == MediaState.Stopped)
@@ -44,18 +46,21 @@ public sealed class MusicManager(ContentProvider contentProvider)
         _currentSong = null;
     }
 
+    /// <summary>Pauses playback when a song is currently playing.</summary>
     public void Pause()
     {
         if (MediaPlayer.State == MediaState.Playing)
             MediaPlayer.Pause();
     }
 
+    /// <summary>Resumes playback when the player is paused.</summary>
     public void Resume()
     {
         if (MediaPlayer.State == MediaState.Paused)
             MediaPlayer.Resume();
     }
 
+    /// <summary>Stops playback and marks the manager as disposed.</summary>
     public void Dispose()
     {
         if (_isDisposed)

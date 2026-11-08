@@ -19,8 +19,10 @@ public class SpriteDrawSystem2D(Camera2D camera) : IDrawSystem
 {
     private readonly Camera2D _camera = camera;
 
+    /// <summary>Hook: called once when the system joins the world.</summary>
     public void Initialize(World world) { }
 
+    /// <summary>Batches and draws all sprite entities using the camera view.</summary>
     public void Draw(double elapsedMs, World world, SpriteBatch spriteBatch, GraphicsDevice graphicsDevice)
     {
         spriteBatch.Begin(transformMatrix: _camera.View, sortMode: SpriteSortMode.BackToFront);
@@ -44,5 +46,6 @@ public class SpriteDrawSystem2D(Camera2D camera) : IDrawSystem
         spriteBatch.End();
     }
 
+    /// <summary>Releases system resources; none are held.</summary>
     public void Dispose() { }
 }

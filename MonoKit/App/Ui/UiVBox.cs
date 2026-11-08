@@ -21,6 +21,7 @@ public class UiVBox : UiContainer
     private readonly Dictionary<UiElement, float> _baseWidth = new();
     private readonly Dictionary<UiElement, float> _baseHeight = new();
 
+    /// <summary>Adds a child and captures its explicitly set relative size.</summary>
     public override void Add(UiElement child)
     {
         _baseWidth[child] = child.RelWidth;
@@ -28,6 +29,7 @@ public class UiVBox : UiContainer
         base.Add(child);
     }
 
+    /// <summary>Removes all children and their captured base sizes.</summary>
     public override void Clear()
     {
         _baseWidth.Clear();
@@ -35,6 +37,7 @@ public class UiVBox : UiContainer
         base.Clear();
     }
 
+    /// <summary>Places children in equal vertical cells minus the gap.</summary>
     protected override void LayoutChildren()
     {
         var count = Children.Count;

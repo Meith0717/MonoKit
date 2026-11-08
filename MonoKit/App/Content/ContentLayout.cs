@@ -39,6 +39,7 @@ public static class ContentLayout
         return null;
     }
 
+    /// <summary>Creates the standard content subdirectories under the root.</summary>
     public static void CreateContentLayout(string contentRoot)
     {
         // Host content

@@ -25,6 +25,7 @@ public class FrameCounter
     public double CurrentFramesPerSecond { get; private set; }
     public double FrameTime { get; private set; }
 
+    /// <summary>Accumulates frame samples and refreshes FPS statistics each second.</summary>
     public void Update(double elapsedSeconds, double elapsedMilliseconds)
     {
         TotalFrames++;

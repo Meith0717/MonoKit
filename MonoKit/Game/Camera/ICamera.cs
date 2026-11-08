@@ -18,5 +18,6 @@ public interface ICamera
     /// <summary>World-to-screen view matrix.</summary>
     Matrix View { get; }
 
+    /// <summary>Advances the camera state using input and elapsed time.</summary>
     void Update(double elapsedGameTime, InputHandler inputHandler);
 }

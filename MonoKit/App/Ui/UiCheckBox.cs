@@ -14,6 +14,7 @@ public sealed class UiCheckBox : UiButton.Sprite
     private readonly Texture2D _trueButton;
     private bool _state;
 
+    /// <summary>Builds a checkbox that toggles its texture with the state.</summary>
     public UiCheckBox(Texture2D trueButton, Texture2D falseButton)
         : base(trueButton)
     {

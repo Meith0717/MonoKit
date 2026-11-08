@@ -14,6 +14,7 @@ using MonoKit.Game.ArchetypeEcs.Entities;
 
 namespace MonoKit.Game.ArchetypeEcs.SpatialQueries;
 
+/// <summary>Creates the sorter with a fixed cell size and position getter.</summary>
 public sealed class SpatialSorter<TPos>(float cellSize, Func<TPos, Vector3> getPosition)
     where TPos : struct
 {
@@ -27,6 +28,7 @@ public sealed class SpatialSorter<TPos>(float cellSize, Func<TPos, Vector3> getP
 
     internal float CellSize => _grid.CellSize;
 
+    /// <summary>Builds a spatially sorted field; false when no entities hold TPos.</summary>
     internal bool TryBegin(World world, int version, out SpatialField<TPos> field)
     {
         field = default;
@@ -84,6 +86,7 @@ public sealed class SpatialSorter<TPos>(float cellSize, Func<TPos, Vector3> getP
         return true;
     }
 
+    /// <summary>Grows the row arrays to at least the given capacity.</summary>
     private void EnsureCapacity(int capacity)
     {
         if (_positions.Length >= capacity)
@@ -101,6 +104,7 @@ public sealed class SpatialEpoch
 {
     internal int Current;
 
+    /// <summary>Advances the epoch to invalidate caches from older frames.</summary>
     internal void Next()
     {
         Current++;
@@ -120,6 +124,7 @@ public readonly struct SpatialField<TPos>
     public readonly int Count;
     public readonly int Version;
 
+    /// <summary>Creates the field over the spatially sorted row arrays.</summary>
     internal SpatialField(
         Archetype[] archetypes,
         TPos[] positions,
@@ -145,26 +150,31 @@ public readonly struct SpatialField<TPos>
 
     public TPos[] Positions { get; }
 
+    /// <summary>Returns the sorted position of the row at index.</summary>
     public TPos GetPosition(int index)
     {
         return Positions[index];
     }
 
+    /// <summary>Returns the entity of the row at index.</summary>
     public Entity GetEntity(int index)
     {
         return _entityIds[index];
     }
 
+    /// <summary>Collects neighbors of the row at index within the radius.</summary>
     public void GetNeighbors(int index, float radius, List<int> results)
     {
         _grid.GetInRadius(_getPosition(Positions[index]), radius, results);
     }
 
+    /// <summary>Collects neighbors of the position within the radius.</summary>
     public void GetNeighbors(Vector3 position, float radius, List<int> results)
     {
         _grid.GetInRadius(position, radius, results);
     }
 
+    /// <summary>Builds a component cache for lookups by spatial index.</summary>
     public ComponentCache<T> Cache<T>(SpatialEpoch epoch)
         where T : struct
     {
@@ -185,6 +195,7 @@ public readonly struct ComponentCache<T>
     private readonly SpatialEpoch _epoch;
     private readonly int _version;
 
+    /// <summary>Creates the cache mapping spatial indices to archetype rows.</summary>
     internal ComponentCache(
         T[]?[] columns,
         int[] archetypeIndices,
@@ -200,6 +211,7 @@ public readonly struct ComponentCache<T>
         _version = version;
     }
 
+    /// <summary>Throws when the cache stems from an older spatial frame.</summary>
     private void ThrowIfStale()
     {
         if (_epoch.Current != _version)
@@ -208,12 +220,14 @@ public readonly struct ComponentCache<T>
             );
     }
 
+    /// <summary>Tests whether the entity's archetype holds component T.</summary>
     public bool Has(int index)
     {
         ThrowIfStale();
         return _columns[_archetypeIndices[index]] != null;
     }
 
+    /// <summary>Attempts to fetch the component for the spatial index.</summary>
     public bool TryGet(int index, out T value)
     {
         ThrowIfStale();
@@ -228,6 +242,7 @@ public readonly struct ComponentCache<T>
         return true;
     }
 
+    /// <summary>Returns a mutable component reference, throwing when absent.</summary>
     public ref T GetRef(int index)
     {
         ThrowIfStale();

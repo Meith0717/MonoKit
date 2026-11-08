@@ -10,6 +10,7 @@ namespace MonoKit.Game.ArchetypeEcs.SpatialQueries;
 
 internal static class RowOrderUtility
 {
+    /// <summary>Reorders a column in place to match the given sorted row order.</summary>
     internal static void PermuteColumn<T>(T[] column, int[] order, int rowCount)
         where T : struct
     {
@@ -25,6 +26,7 @@ internal static class RowOrderUtility
         [ThreadStatic]
         private static T[]? _buffer;
 
+        /// <summary>Returns the thread-static buffer, growing it as needed.</summary>
         public static T[] Get(int minLength)
         {
             var buffer = _buffer;

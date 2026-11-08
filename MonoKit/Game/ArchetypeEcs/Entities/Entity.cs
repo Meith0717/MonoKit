@@ -6,6 +6,7 @@
 
 namespace MonoKit.Game.ArchetypeEcs.Entities;
 
+/// <summary>Identifies an entity by id and recycle generation.</summary>
 public readonly record struct Entity(int Id, int Generation)
 {
     public readonly int Generation = Generation;

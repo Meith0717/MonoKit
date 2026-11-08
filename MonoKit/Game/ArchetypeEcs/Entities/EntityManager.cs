@@ -17,6 +17,7 @@ internal class EntityManager
 
     internal int Count { get; private set; }
 
+    /// <summary>Creates a live entity, reusing a freed id when possible.</summary>
     internal Entity Create()
     {
         int id;
@@ -36,6 +37,7 @@ internal class EntityManager
         return new Entity(id, _generations[id]);
     }
 
+    /// <summary>Destroys a live entity and recycles its id.</summary>
     internal bool Destroy(Entity entity)
     {
         if (!IsValidHandle(entity))
@@ -48,11 +50,13 @@ internal class EntityManager
         return true;
     }
 
+    /// <summary>Reports whether the entity handle is currently live.</summary>
     internal bool IsAlive(Entity entity)
     {
         return IsValidHandle(entity) && _alive[entity.Id];
     }
 
+    /// <summary>Checks id bounds and generation against current state.</summary>
     private bool IsValidHandle(Entity entity)
     {
         return entity.Id >= 0
@@ -60,6 +64,7 @@ internal class EntityManager
             && entity.Generation == _generations[entity.Id];
     }
 
+    /// <summary>Resets the manager back to its empty state.</summary>
     public void Dispose()
     {
         _nextId = 0;

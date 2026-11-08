@@ -17,6 +17,7 @@ public class AudioService : IDisposable
     private bool _isDisposed;
     private MusicManager _musicManager;
 
+    /// <summary>Binds the service to a content provider; call once at startup.</summary>
     public void Initialize(ContentProvider contentProvider)
     {
         if (_contentProvider != null)
@@ -33,6 +34,7 @@ public class AudioService : IDisposable
         }
     }
 
+    /// <summary>Stops playback and disposes all owned audio managers.</summary>
     public void Dispose()
     {
         if (_isDisposed)
@@ -46,6 +48,7 @@ public class AudioService : IDisposable
         GC.SuppressFinalize(this);
     }
 
+    /// <summary>Returns the manager for a category, creating it on first use.</summary>
     public SoundEffectManager GetOrCreateSfxManager(string category, int maxInstances = 10)
     {
         if (_sfxManagers.TryGetValue(category, out var manager))
@@ -56,24 +59,28 @@ public class AudioService : IDisposable
         return manager;
     }
 
+    /// <summary>Pauses playback in every sound effect manager.</summary>
     public void PauseAll()
     {
         foreach (var manager in _sfxManagers.Values)
             manager.Pause();
     }
 
+    /// <summary>Resumes playback in every sound effect manager.</summary>
     public void ResumeAll()
     {
         foreach (var manager in _sfxManagers.Values)
             manager.Resume();
     }
 
+    /// <summary>Stops playback in every sound effect manager.</summary>
     public void StopAll()
     {
         foreach (var manager in _sfxManagers.Values)
             manager.Stop();
     }
 
+    /// <summary>Applies the same volume to every sound effect manager.</summary>
     public void SetAllVolume(float volume)
     {
         foreach (var manager in _sfxManagers.Values)

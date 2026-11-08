@@ -16,12 +16,14 @@ internal sealed class EntityRecords : IDisposable
     private EntityRecord[] _entityRecords = new EntityRecord[InitialCapacity];
     private bool[] _isValid = new bool[InitialCapacity];
 
+    /// <summary>Clears all stored records and validity flags.</summary>
     public void Dispose()
     {
         Array.Clear(_entityRecords, 0, _entityRecords.Length);
         Array.Clear(_isValid, 0, _isValid.Length);
     }
 
+    /// <summary>Grows the record arrays until the entity id fits.</summary>
     private void EnsureCapacity(int entityId)
     {
         while (entityId >= _entityRecords.Length)
@@ -32,6 +34,7 @@ internal sealed class EntityRecords : IDisposable
         }
     }
 
+    /// <summary>Resolves a live entity to its archetype and row.</summary>
     internal bool TryGetLocation(Entity entity, out Archetype archetype, out int row)
     {
         var id = entity.Id;
@@ -51,6 +54,7 @@ internal sealed class EntityRecords : IDisposable
         return false;
     }
 
+    /// <summary>Records where an entity lives inside its archetype.</summary>
     internal void SetEntityLocation(Entity entity, Archetype archetype, int row)
     {
         EnsureCapacity(entity.Id);
@@ -58,6 +62,7 @@ internal sealed class EntityRecords : IDisposable
         _isValid[entity.Id] = true;
     }
 
+    /// <summary>Invalidates the record stored for the entity.</summary>
     internal bool Remove(Entity entity)
     {
         var id = entity.Id;

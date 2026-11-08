@@ -68,14 +68,17 @@ public abstract class UiElement : IDisposable
     /// <summary>Ancestor clip rectangle (set by clipping containers during Draw); null = no clip.</summary>
     internal Rectangle? ClipRect;
 
+    /// <summary>Marks the element disposed; containers purge disposed children.</summary>
     public virtual void Dispose()
     {
         IsDisposed = true;
         GC.SuppressFinalize(this);
     }
 
+    /// <summary>Hook: performs the element’s per-frame update and input handling.</summary>
     protected abstract void Updater(InputHandler inputHandler);
 
+    /// <summary>Hook: draws the element’s own content.</summary>
     protected abstract void Drawer(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice);
 
     /// <summary>
@@ -91,6 +94,7 @@ public abstract class UiElement : IDisposable
     /// </summary>
     protected virtual void MeasureSize() { }
 
+    /// <summary>Relayouts this element, then updates it unless clipped away.</summary>
     public void Update(InputHandler inputHandler, Rectangle root, float uiScale)
     {
         ApplyScale(root, uiScale);
@@ -99,6 +103,7 @@ public abstract class UiElement : IDisposable
         Updater(inputHandler);
     }
 
+    /// <summary>Draws the element unless an ancestor clip rect culls it.</summary>
     public void Draw(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice)
     {
         if (ClipRect is { } clip && !Bounds.Intersects(clip))
@@ -109,6 +114,7 @@ public abstract class UiElement : IDisposable
 #endif
     }
 
+    /// <summary>Recomputes layout from the given root rectangle and UI scale.</summary>
     public virtual void ApplyScale(Rectangle root, float uiScale)
     {
         UiScale = uiScale;
@@ -116,6 +122,7 @@ public abstract class UiElement : IDisposable
         UpdateBounds(root);
     }
 
+    /// <summary>Computes bounds from position, size, fill, align and spacing settings.</summary>
     private void UpdateBounds(Rectangle root)
     {
         var x = (int)float.Floor(X * UiScale ?? root.Width * RelX);
@@ -140,6 +147,7 @@ public abstract class UiElement : IDisposable
         Bounds = new Rectangle(root.X + x, root.Y + y, width, height);
     }
 
+    /// <summary>Adjusts size per fill mode: stretch or fit within the root.</summary>
     private static void ManageFillScale(
         Rectangle root,
         FillScale fillScale,
@@ -218,6 +226,7 @@ public abstract class UiElement : IDisposable
         }
     }
 
+    /// <summary>Positions the element within the root according to alignment.</summary>
     private static void ManageAlign(
         Rectangle root,
         Align align,
@@ -261,6 +270,7 @@ public abstract class UiElement : IDisposable
         };
     }
 
+    /// <summary>Applies HSpace and VSpace margins within the root.</summary>
     private static void ManageSpacing(
         Rectangle root,
         ref int x,

@@ -17,6 +17,7 @@ internal sealed class ArchetypeManager : IDisposable
     private readonly Dictionary<Type, HashSet<Archetype>> _componentTypeToArchetypes = new();
     private bool _snapshotsDirty;
 
+    /// <summary>Creates the shared empty archetype.</summary>
     internal ArchetypeManager()
     {
         EmptyArchetype = GetOrCreateArchetype(ArchetypeType.Empty);
@@ -28,6 +29,7 @@ internal sealed class ArchetypeManager : IDisposable
 
     internal IEnumerable<Archetype> Archetypes => _archetypes.Values;
 
+    /// <summary>Disposes all archetypes and clears the lookup maps.</summary>
     public void Dispose()
     {
         foreach (var archetype in _archetypes.Values)
@@ -38,6 +40,7 @@ internal sealed class ArchetypeManager : IDisposable
         _snapshotsDirty = false;
     }
 
+    /// <summary>Returns the archetype for the type, creating it when missing.</summary>
     internal Archetype GetOrCreateArchetype(ArchetypeType archetypeType)
     {
         if (_archetypes.TryGetValue(archetypeType, out var archetype))
@@ -57,6 +60,7 @@ internal sealed class ArchetypeManager : IDisposable
         return archetype;
     }
 
+    /// <summary>Returns archetypes that contain the given component type.</summary>
     internal Archetype[] GetArchetypesWith(Type componentType)
     {
         if (!_componentTypeToArchetypes.TryGetValue(componentType, out var set))

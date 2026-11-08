@@ -13,11 +13,13 @@ public class RuntimeContainer
 {
     private readonly Dictionary<Type, object> _services = new();
 
+    /// <summary>Registers a service instance under its type.</summary>
     public void AddService<T>(T service)
     {
         _services[typeof(T)] = service!;
     }
 
+    /// <summary>Retrieves a service, throwing when it is not registered.</summary>
     public T Get<T>()
     {
         if (_services.TryGetValue(typeof(T), out var service))
@@ -25,6 +27,7 @@ public class RuntimeContainer
         throw new KeyNotFoundException($"Service of type {typeof(T).Name} not found.");
     }
 
+    /// <summary>Tries to retrieve a service; false when not registered.</summary>
     public bool TryGet<T>(out T value)
     {
         if (_services.TryGetValue(typeof(T), out var service))

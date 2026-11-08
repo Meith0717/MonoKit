@@ -26,6 +26,7 @@ public sealed class UiVariableSelector<T> : UiContainer
     private List<T> _items;
     private int _selectedIndex;
 
+    /// <summary>Builds the arrow buttons and the centered value label.</summary>
     public UiVariableSelector(
         Texture2D leftButton,
         Texture2D rightButton,
@@ -117,6 +118,7 @@ public sealed class UiVariableSelector<T> : UiContainer
         _text.Align = Align.Center;
     }
 
+    /// <summary>Advances the selection to the next item, wrapping around.</summary>
     private void IncreaseIndex()
     {
         if (_items.Count <= 0)
@@ -128,6 +130,7 @@ public sealed class UiVariableSelector<T> : UiContainer
         OnClickAction?.Invoke(_items[_selectedIndex]);
     }
 
+    /// <summary>Moves the selection to the previous item, wrapping around.</summary>
     private void DecreaseIndex()
     {
         if (_items.Count <= 0)
@@ -139,9 +142,11 @@ public sealed class UiVariableSelector<T> : UiContainer
         OnClickAction?.Invoke(_items[_selectedIndex]);
     }
 
+    /// <summary>Syncs the label with the selected item.</summary>
     private void UpdateText() =>
         _text.Text = _items.Count == 0 ? string.Empty : _items[_selectedIndex].ToString();
 
+    /// <summary>Returns the item's index; throws if the value is absent.</summary>
     private int GetIndex(T value)
     {
         var index = _items.IndexOf(value);

@@ -11,6 +11,7 @@ namespace MonoKit.App.Core.IO;
 
 public static class DataIO
 {
+    /// <summary>Populates an existing object from a JSON file on disk.</summary>
     public static TObj Load<TObj>(string path, TObj obj)
     {
         var jsonStr = FileUtils.ReadFile(path);
@@ -18,6 +19,7 @@ public static class DataIO
         return obj;
     }
 
+    /// <summary>Serializes an object to JSON and writes it to disk.</summary>
     public static void Save<TObj>(string path, TObj obj)
     {
         if (obj is null)
@@ -26,6 +28,7 @@ public static class DataIO
         FileUtils.CreateFile(path, jsonStr);
     }
 
+    /// <summary>Loads an object on a background thread and invokes the callback.</summary>
     public static void LoadAsync<TObj>(string path, TObj newObj, Action<TObj> onComplete)
     {
         new Thread(_ =>
@@ -35,6 +38,7 @@ public static class DataIO
         }).Start();
     }
 
+    /// <summary>Saves an object on a background thread and invokes the callback.</summary>
     public static void SaveAsync<TObj>(TObj obj, string path, Action onComplete)
     {
         new Thread(_ =>

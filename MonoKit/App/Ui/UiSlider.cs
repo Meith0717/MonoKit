@@ -12,6 +12,7 @@ using MonoKit.App.Input;
 
 namespace MonoKit.App.Ui;
 
+/// <summary>Slider element filled proportionally to its 0-to-1 value.</summary>
 public sealed class UiSlider(bool interactive) : UiElement
 {
     private readonly bool _interactive = interactive;
@@ -29,6 +30,7 @@ public sealed class UiSlider(bool interactive) : UiElement
     public Color Color { private get; set; } = Color.MonoGameOrange;
     public Color HoverColor { private get; set; } = Color.Orange;
 
+    /// <summary>Handles hover, drag, and value tracking from the mouse.</summary>
     protected override void Updater(InputHandler inputHandler)
     {
         if (!_interactive)
@@ -56,6 +58,7 @@ public sealed class UiSlider(bool interactive) : UiElement
         }
     }
 
+    /// <summary>Draws the background and the filled value portion.</summary>
     protected override void Drawer(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice)
     {
         var rectangle = Bounds;

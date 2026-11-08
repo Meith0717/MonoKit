@@ -13,7 +13,9 @@ namespace MonoKit.Game.Camera;
 
 public interface ICamera3DBehavior
 {
+    /// <summary>Called once when the behaviour is attached to the camera.</summary>
     void Initialize(Camera3D owner);
+    /// <summary>Advances the behaviour each frame with input and elapsed time.</summary>
     void Update(Camera3D owner, InputHandler inputHandler, double elapsedGameTime);
 }
 
@@ -50,12 +52,14 @@ public class Camera3D(Vector3 positon, GraphicsDevice graphicsDevice) : ICamera
     public Matrix View { get; private set; }
     public Matrix Projection { get; private set; }
 
+    /// <summary>Initializes and registers a behaviour on this camera.</summary>
     public void AddBehaviour(ICamera3DBehavior behaviour)
     {
         behaviour.Initialize(this);
         _behaviours.Add(behaviour);
     }
 
+    /// <summary>Recomputes view and projection, then updates behaviours.</summary>
     public void Update(double elapsedGameTime, InputHandler inputHandler)
     {
         View = Matrix.CreateLookAt(Position, Target, Up);

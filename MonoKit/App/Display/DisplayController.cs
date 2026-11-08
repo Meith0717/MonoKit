@@ -29,6 +29,7 @@ public sealed class DisplayController : IDisposable
     private int _restoreWidth;
     private int _restoreHeight;
 
+    /// <summary>Initializes the controller and hooks the window's size-changed event.</summary>
     public DisplayController(
         Microsoft.Xna.Framework.Game game,
         GraphicsDeviceManager graphicsDeviceManager,
@@ -58,6 +59,7 @@ public sealed class DisplayController : IDisposable
     public int SupportedMultiSampleCount =>
         Capabilities.MultiSampleCounts.Length > 1 ? Capabilities.MultiSampleCounts[0] : 0;
 
+    /// <summary>Queries adapter MSAA counts, profiles, fullscreen modes and monitor descriptions.</summary>
     private static DisplayCapabilities QueryCapabilities()
     {
         var adapter = GraphicsAdapter.DefaultAdapter;
@@ -129,6 +131,7 @@ public sealed class DisplayController : IDisposable
         SetScale(float.Min(bounds.X / _virtualWidth, bounds.Y / _virtualHeight));
     }
 
+    /// <summary>Updates the scale and raises ResolutionChanged when it changed.</summary>
     private void SetScale(float scale)
     {
         if (scale.Equals(ViewportScale))
@@ -138,6 +141,7 @@ public sealed class DisplayController : IDisposable
         ResolutionChanged?.Invoke(scale);
     }
 
+    /// <summary>Remembers windowed sizes on resize and refreshes the viewport scale.</summary>
     private void OnClientSizeChanged(object? sender, EventArgs e)
     {
         // Only remember windowed sizes; a fullscreen resize must not overwrite them.
@@ -220,6 +224,7 @@ public sealed class DisplayController : IDisposable
         UpdateViewportScale();
     }
 
+    /// <summary>Resolution of the default monitor.</summary>
     private static Point MonitorSize =>
         new(
             GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width,

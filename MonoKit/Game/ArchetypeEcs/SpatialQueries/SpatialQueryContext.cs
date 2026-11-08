@@ -35,6 +35,7 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
 
     public SpatialField<TPos> Field => GetField();
 
+    /// <summary>Clears caches, buffers, and the active spatial frame.</summary>
     public void Dispose()
     {
         _componentCaches.Clear();
@@ -45,23 +46,27 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
         _sorter = null;
     }
 
+    /// <summary>Pops a scratch list from the pool or allocates one.</summary>
     private List<int> RentScratchBuffer()
     {
         return !_scratchBuffers.TryPop(out var buffer) ? new List<int>(64) : buffer;
     }
 
+    /// <summary>Clears and returns the scratch list to the pool.</summary>
     private void ReturnScratchBuffer(List<int> buffer)
     {
         buffer.Clear();
         _scratchBuffers.Push(buffer);
     }
 
+    /// <summary>Resets all entity-to-spatial-index mappings to none.</summary>
     private void ClearEntityToSpatialIndex()
     {
         if (_spatialIndexById.Length > 0)
             Array.Fill(_spatialIndexById, -1);
     }
 
+    /// <summary>Grows the per-entity index and generation arrays to fit id.</summary>
     private void EnsureEntityMapCapacity(int id)
     {
         if (id < _spatialIndexById.Length)
@@ -74,6 +79,7 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
         Array.Fill(_spatialIndexById, -1, oldLength, newLength - oldLength);
     }
 
+    /// <summary>Resolves the current spatial index of a live, indexed entity.</summary>
     private bool TryGetSpatialIndex(Entity entity, out int index)
     {
         index = -1;
@@ -89,6 +95,7 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
         return true;
     }
 
+    /// <summary>Rebuilds the spatial frame and entity map for this frame.</summary>
     public bool BeginFrame(World world, float cellSize, Func<TPos, Vector3> getPosition)
     {
         _epoch.Next();
@@ -114,11 +121,13 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
         return true;
     }
 
+    /// <summary>Tests whether the field is still the current spatial frame.</summary>
     public bool IsValid(SpatialField<TPos> field)
     {
         return _field is { } current && current.Version == field.Version;
     }
 
+    /// <summary>Returns the active field, throwing before BeginFrame.</summary>
     private SpatialField<TPos> GetField()
     {
         if (_field is not { } field)
@@ -181,6 +190,7 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
         );
     }
 
+    /// <summary>Pairs each TSelf entity with neighbors holding T1.</summary>
     public void ForEachSelfNeighbor<TSelf, T1>(
         float radius,
         RefSelfNeighborAction<TSelf, T1> action
@@ -219,6 +229,7 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
         }
     }
 
+    /// <summary>Pairs each TSelf entity with neighbors holding T1 and T2.</summary>
     public void ForEachSelfNeighbor<TSelf, T1, T2>(
         float radius,
         RefSelfNeighborAction<TSelf, T1, T2> action
@@ -261,6 +272,7 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
         }
     }
 
+    /// <summary>Pairs each TSelf entity with neighbors holding T1 to T3.</summary>
     public void ForEachSelfNeighbor<TSelf, T1, T2, T3>(
         float radius,
         RefSelfNeighborAction<TSelf, T1, T2, T3> action
@@ -307,6 +319,7 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
         }
     }
 
+    /// <summary>Pairs each TSelf entity with neighbors holding T1 to T4.</summary>
     public void ForEachSelfNeighbor<TSelf, T1, T2, T3, T4>(
         float radius,
         RefSelfNeighborAction<TSelf, T1, T2, T3, T4> action
@@ -357,6 +370,7 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
         }
     }
 
+    /// <summary>Runs the T1 self-neighbor pass in parallel partitions.</summary>
     public void ForEachSelfNeighborParallel<TSelf, T1>(
         float radius,
         RefSelfNeighborAction<TSelf, T1> action
@@ -397,6 +411,7 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
         );
     }
 
+    /// <summary>Runs the T1-T2 self-neighbor pass in parallel partitions.</summary>
     public void ForEachSelfNeighborParallel<TSelf, T1, T2>(
         float radius,
         RefSelfNeighborAction<TSelf, T1, T2> action
@@ -441,6 +456,7 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
         );
     }
 
+    /// <summary>Runs the T1-T3 self-neighbor pass in parallel partitions.</summary>
     public void ForEachSelfNeighborParallel<TSelf, T1, T2, T3>(
         float radius,
         RefSelfNeighborAction<TSelf, T1, T2, T3> action
@@ -489,6 +505,7 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
         );
     }
 
+    /// <summary>Runs the T1-T4 self-neighbor pass in parallel partitions.</summary>
     public void ForEachSelfNeighborParallel<TSelf, T1, T2, T3, T4>(
         float radius,
         RefSelfNeighborAction<TSelf, T1, T2, T3, T4> action
@@ -549,6 +566,7 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
         );
     }
 
+    /// <summary>Visits the entity's neighbors holding T1.</summary>
     public void ForEachNeighbor<T1>(Entity entity, float radius, RefEntityNeighborAction<T1> action)
         where T1 : struct
     {
@@ -574,6 +592,7 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
         }
     }
 
+    /// <summary>Visits the entity's neighbors holding T1 and T2.</summary>
     public void ForEachNeighbor<T1, T2>(
         Entity entity,
         float radius,
@@ -610,6 +629,7 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
         }
     }
 
+    /// <summary>Visits the entity's neighbors holding T1 to T3.</summary>
     public void ForEachNeighbor<T1, T2, T3>(
         Entity entity,
         float radius,
@@ -650,6 +670,7 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
         }
     }
 
+    /// <summary>Visits the entity's neighbors holding T1 to T4.</summary>
     public void ForEachNeighbor<T1, T2, T3, T4>(
         Entity entity,
         float radius,
@@ -694,6 +715,7 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
         }
     }
 
+    /// <summary>Returns the frame-local component cache for T, creating it lazily.</summary>
     public ComponentCache<T> GetComponentCache<T>()
         where T : struct
     {
@@ -706,8 +728,10 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
     }
 }
 
+/// <summary>Receives a self/neighbor pair with their spatial indices.</summary>
 public delegate void RefPairAction(int selfIndex, Entity self, int neighborIndex, Entity neighbor);
 
+/// <summary>Receives a self entity plus one neighbor component.</summary>
 public delegate void RefSelfNeighborAction<TSelf, T1>(
     Entity entity,
     ref TSelf selfComponent,
@@ -715,6 +739,7 @@ public delegate void RefSelfNeighborAction<TSelf, T1>(
     ref T1 nComponent1
 );
 
+/// <summary>Receives a self entity plus two neighbor components.</summary>
 public delegate void RefSelfNeighborAction<TSelf, T1, T2>(
     Entity entity,
     ref TSelf selfComponent,
@@ -723,6 +748,7 @@ public delegate void RefSelfNeighborAction<TSelf, T1, T2>(
     ref T2 nComponent2
 );
 
+/// <summary>Receives a self entity plus three neighbor components.</summary>
 public delegate void RefSelfNeighborAction<TSelf, T1, T2, T3>(
     Entity entity,
     ref TSelf selfComponent,
@@ -732,6 +758,7 @@ public delegate void RefSelfNeighborAction<TSelf, T1, T2, T3>(
     ref T3 nComponent3
 );
 
+/// <summary>Receives a self entity plus four neighbor components.</summary>
 public delegate void RefSelfNeighborAction<TSelf, T1, T2, T3, T4>(
     Entity entity,
     ref TSelf selfComponent,
@@ -742,14 +769,17 @@ public delegate void RefSelfNeighborAction<TSelf, T1, T2, T3, T4>(
     ref T4 nComponent4
 );
 
+/// <summary>Receives a neighbor entity and one component.</summary>
 public delegate void RefEntityNeighborAction<T1>(Entity neighbor, ref T1 nComponent1);
 
+/// <summary>Receives a neighbor entity and two components.</summary>
 public delegate void RefEntityNeighborAction<T1, T2>(
     Entity neighbor,
     ref T1 nComponent1,
     ref T2 nComponent2
 );
 
+/// <summary>Receives a neighbor entity and three components.</summary>
 public delegate void RefEntityNeighborAction<T1, T2, T3>(
     Entity neighbor,
     ref T1 nComponent1,
@@ -757,6 +787,7 @@ public delegate void RefEntityNeighborAction<T1, T2, T3>(
     ref T3 nComponent3
 );
 
+/// <summary>Receives a neighbor entity and four components.</summary>
 public delegate void RefEntityNeighborAction<T1, T2, T3, T4>(
     Entity neighbor,
     ref T1 nComponent1,

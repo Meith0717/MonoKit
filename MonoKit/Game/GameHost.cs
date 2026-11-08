@@ -46,6 +46,7 @@ public class GameHost : IDisposable
     public double LastElapsedMs { get; private set; }
     public Vector2 WorldMousePosition { get; private set; }
 
+    /// <summary>Builds the world, camera, and services for the chosen dimension.</summary>
     public GameHost(GraphicsDevice graphicsDevice, RuntimeDimension dimension)
     {
         Dimension = dimension;
@@ -76,6 +77,7 @@ public class GameHost : IDisposable
         Services.AddService(World);
     }
 
+    /// <summary>Advances the world and camera; refreshes the world mouse position.</summary>
     public void Update(double elapsedMilliseconds, InputHandler inputHandler)
     {
         LastElapsedMs = elapsedMilliseconds;
@@ -94,6 +96,7 @@ public class GameHost : IDisposable
     public void Draw(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice) =>
         World.Draw(LastElapsedMs, spriteBatch, graphicsDevice);
 
+    /// <summary>Disposes the underlying world.</summary>
     public void Dispose()
     {
         World.Dispose();

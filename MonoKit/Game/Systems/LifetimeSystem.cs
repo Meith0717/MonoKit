@@ -14,8 +14,10 @@ namespace MonoKit.Game.Systems;
 /// <summary>Counts down <see cref="Lifetime.CoolDown"/> and destroys the entity when it expires or DestroyNow is set.</summary>
 public class LifetimeSystem : IUpdateSystem
 {
+    /// <summary>Hook: called once when the system joins the world.</summary>
     public void Initialize(World world) { }
 
+    /// <summary>Counts down lifetimes and destroys expired entities.</summary>
     public void Update(double elapsedMs, World world)
     {
         world.ForEach<Lifetime>((Entity entity, ref Lifetime lifetime) =>
@@ -30,5 +32,6 @@ public class LifetimeSystem : IUpdateSystem
         });
     }
 
+    /// <summary>Releases system resources; none are held.</summary>
     public void Dispose() { }
 }

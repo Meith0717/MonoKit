@@ -19,6 +19,7 @@ internal sealed class Archetype : IDisposable
     private object[] _columns;
     private Entity[] _entityIds;
 
+    /// <summary>Builds typed columns and index map for the archetype's component types.</summary>
     internal Archetype(ArchetypeType type)
     {
         var componentTypes = type.ComponentTypes;
@@ -40,6 +41,7 @@ internal sealed class Archetype : IDisposable
     internal ArchetypeType Type { get; }
     internal int RowCount { get; private set; }
 
+    /// <summary>Clears all component storage held by this archetype.</summary>
     public void Dispose()
     {
         foreach (var t in _columns)
@@ -50,6 +52,7 @@ internal sealed class Archetype : IDisposable
         _capacity = 0;
     }
 
+    /// <summary>Grows the columns until the target row index fits.</summary>
     private void EnsureCapacity(int targetRow)
     {
         if (targetRow < _capacity)
@@ -70,6 +73,7 @@ internal sealed class Archetype : IDisposable
         _capacity = newCapacity;
     }
 
+    /// <summary>Appends a row from boxed components with type validation.</summary>
     internal void AddRow(Entity entity, object[] components)
     {
         if (components.Length != _columns.Length)
@@ -98,6 +102,7 @@ internal sealed class Archetype : IDisposable
         RowCount++;
     }
 
+    /// <summary>Appends an entity row with one component.</summary>
     internal void AddRow<T1>(Entity entity, T1 c1)
         where T1 : struct
     {
@@ -107,6 +112,7 @@ internal sealed class Archetype : IDisposable
         RowCount++;
     }
 
+    /// <summary>Appends an entity row with two components.</summary>
     internal void AddRow<T1, T2>(Entity entity, T1 c1, T2 c2)
         where T1 : struct
         where T2 : struct
@@ -118,6 +124,7 @@ internal sealed class Archetype : IDisposable
         RowCount++;
     }
 
+    /// <summary>Appends an entity row with three components.</summary>
     internal void AddRow<T1, T2, T3>(Entity entity, T1 c1, T2 c2, T3 c3)
         where T1 : struct
         where T2 : struct
@@ -131,6 +138,7 @@ internal sealed class Archetype : IDisposable
         RowCount++;
     }
 
+    /// <summary>Appends an entity row with four components.</summary>
     internal void AddRow<T1, T2, T3, T4>(Entity entity, T1 c1, T2 c2, T3 c3, T4 c4)
         where T1 : struct
         where T2 : struct
@@ -146,6 +154,7 @@ internal sealed class Archetype : IDisposable
         RowCount++;
     }
 
+    /// <summary>Removes a row via swap-with-last, returning the moved entity.</summary>
     internal Entity? RemoveRow(int row)
     {
         Entity? movedEntity = null;
@@ -165,16 +174,19 @@ internal sealed class Archetype : IDisposable
         return movedEntity;
     }
 
+    /// <summary>Returns the entity occupying the given row.</summary>
     internal Entity GetEntityAt(int row)
     {
         return _entityIds[row];
     }
 
+    /// <summary>Permutes stored entity ids into the given row order.</summary>
     internal void ApplyEntityIdOrder(int[] order, int rowCount)
     {
         RowOrderUtility.PermuteColumn(_entityIds, order, rowCount);
     }
 
+    /// <summary>Finds the typed column storing a component type.</summary>
     internal bool TryGetColumn(Type componentType, out Array column)
     {
         if (_typeToColumnIndex.TryGetValue(componentType, out var columnIndex))
@@ -187,6 +199,7 @@ internal sealed class Archetype : IDisposable
         return false;
     }
 
+    /// <summary>Returns a by-ref component at the given row.</summary>
     internal ref T Get<T>(int row)
         where T : struct
     {
@@ -198,11 +211,13 @@ internal sealed class Archetype : IDisposable
         return ref ((T[])_columns[columnIndex])[row];
     }
 
+    /// <summary>Reports whether this archetype stores the component type.</summary>
     internal bool Contains(Type componentType)
     {
         return _typeToColumnIndex.ContainsKey(componentType);
     }
 
+    /// <summary>Boxes every component of the row into an array.</summary>
     internal object[] GetRowComponents(int row)
     {
         var components = new object[Type.ComponentTypes.Length];

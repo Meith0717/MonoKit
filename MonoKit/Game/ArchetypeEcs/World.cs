@@ -19,10 +19,13 @@ using MonoKit.Game.ArchetypeEcs.Systems;
 
 namespace MonoKit.Game.ArchetypeEcs;
 
+/// <summary>Iteration callback: one component by reference.</summary>
 public delegate void RefAction<T1>(Entity entity, ref T1 component1);
 
+/// <summary>Iteration callback: two components by reference.</summary>
 public delegate void RefAction<T1, T2>(Entity entity, ref T1 component1, ref T2 component2);
 
+/// <summary>Iteration callback: three components by reference.</summary>
 public delegate void RefAction<T1, T2, T3>(
     Entity entity,
     ref T1 component1,
@@ -30,6 +33,7 @@ public delegate void RefAction<T1, T2, T3>(
     ref T3 component3
 );
 
+/// <summary>Iteration callback: four components by reference.</summary>
 public delegate void RefAction<T1, T2, T3, T4>(
     Entity entity,
     ref T1 component1,
@@ -38,6 +42,7 @@ public delegate void RefAction<T1, T2, T3, T4>(
     ref T4 component4
 );
 
+/// <summary>Archetype-based ECS world: entity storage, systems, deferred structural commands, spatial queries.</summary>
 public sealed class World : IDisposable
 {
     internal readonly ArchetypeManager ArchetypeManager = new();
@@ -51,6 +56,7 @@ public sealed class World : IDisposable
     private readonly List<ISystem> _systems = [];
     private int _iterationDepth;
 
+    /// <summary>Internal; create worlds via <see cref="WorldBuilder"/>.</summary>
     internal World()
     {
         ;
@@ -59,6 +65,7 @@ public sealed class World : IDisposable
     public int EntityCount => _entityManager.Count;
     public int ArchetypeCount => ArchetypeManager.ArchetypeCount;
 
+    /// <summary>Disposes systems, spatial contexts, archetype, and entity storage.</summary>
     public void Dispose()
     {
         foreach (var system in _systems)
@@ -76,12 +83,14 @@ public sealed class World : IDisposable
         _iterationDepth = 0;
     }
 
+    /// <summary>Registers a system and initializes it with this world.</summary>
     internal void AddSystem(ISystem system)
     {
         _systems.Add(system);
         system.Initialize(this);
     }
 
+    /// <summary>Runs all update systems; deferred commands flush after each system.</summary>
     public void Update(double elapsedMs)
     {
         foreach (var system in _systems)
@@ -100,6 +109,7 @@ public sealed class World : IDisposable
         }
     }
 
+    /// <summary>Runs all draw systems.</summary>
     public void Draw(double elapsedMs, SpriteBatch spriteBatch, GraphicsDevice graphicsDevice)
     {
         foreach (var system in _systems)
@@ -118,11 +128,13 @@ public sealed class World : IDisposable
         }
     }
 
+    /// <summary>Opens an iteration scope; structural changes become deferred.</summary>
     public void BeginIteration()
     {
         _iterationDepth++;
     }
 
+    /// <summary>Closes an iteration scope; flushes commands when the outermost scope ends.</summary>
     public void EndIteration()
     {
         if (_iterationDepth == 0)
@@ -133,6 +145,7 @@ public sealed class World : IDisposable
             FlushCommands();
     }
 
+    /// <summary>Applies queued commands until the command queue is empty.</summary>
     private void FlushCommands()
     {
         while (true)
@@ -159,6 +172,7 @@ public sealed class World : IDisposable
         }
     }
 
+    /// <summary>Destroys an entity now, or defers the destruction while iterating.</summary>
     public bool DestroyEntity(Entity entity)
     {
         if (!IsAlive(entity))
@@ -173,6 +187,7 @@ public sealed class World : IDisposable
         return DestroyEntityImmediate(entity);
     }
 
+    /// <summary>Removes the entity's archetype row, recycles the id, notifies process systems.</summary>
     private bool DestroyEntityImmediate(Entity entity)
     {
         if (!_entityRecords.TryGetLocation(entity, out var archetype, out var row))
@@ -192,6 +207,7 @@ public sealed class World : IDisposable
         return true;
     }
 
+    /// <summary>Creates an entity without components in the empty archetype.</summary>
     public Entity CreateEntity()
     {
         var entity = _entityManager.Create();
@@ -201,6 +217,7 @@ public sealed class World : IDisposable
         return entity;
     }
 
+    /// <summary>Creates an entity from boxed components.</summary>
     public Entity CreateEntityWithComponents(params object[] components)
     {
         if (components == null || components.Length == 0)
@@ -222,6 +239,7 @@ public sealed class World : IDisposable
         return entity;
     }
 
+    /// <summary>Creates an entity with one typed component.</summary>
     public Entity CreateEntityWithComponents<T1>(T1 c1)
         where T1 : struct
     {
@@ -233,6 +251,7 @@ public sealed class World : IDisposable
         return entity;
     }
 
+    /// <summary>Creates an entity with two typed components.</summary>
     public Entity CreateEntityWithComponents<T1, T2>(T1 c1, T2 c2)
         where T1 : struct
         where T2 : struct
@@ -249,6 +268,7 @@ public sealed class World : IDisposable
         return entity;
     }
 
+    /// <summary>Creates an entity with three typed components.</summary>
     public Entity CreateEntityWithComponents<T1, T2, T3>(T1 c1, T2 c2, T3 c3)
         where T1 : struct
         where T2 : struct
@@ -266,6 +286,7 @@ public sealed class World : IDisposable
         return entity;
     }
 
+    /// <summary>Creates an entity with four typed components.</summary>
     public Entity CreateEntityWithComponents<T1, T2, T3, T4>(T1 c1, T2 c2, T3 c3, T4 c4)
         where T1 : struct
         where T2 : struct
@@ -291,6 +312,7 @@ public sealed class World : IDisposable
         return entity;
     }
 
+    /// <summary>Returns whether the entity has component of type T.</summary>
     public bool HasComponent<T>(Entity entity)
         where T : struct
     {
@@ -298,6 +320,7 @@ public sealed class World : IDisposable
             && archetype.Contains(typeof(T));
     }
 
+    /// <summary>Returns the component of type T by reference.</summary>
     public ref T GetComponent<T>(Entity entity)
         where T : struct
     {
@@ -306,11 +329,13 @@ public sealed class World : IDisposable
         return ref archetype.Get<T>(row);
     }
 
+    /// <summary>Returns whether the entity id is still alive.</summary>
     public bool IsAlive(Entity entity)
     {
         return _entityManager.IsAlive(entity);
     }
 
+    /// <summary>Adds components; deferred while iterating.</summary>
     public void AddComponent(Entity entity, params object[] components)
     {
         if (components == null || components.Length == 0)
@@ -327,6 +352,7 @@ public sealed class World : IDisposable
         AddComponentImmediate(entity, components);
     }
 
+    /// <summary>Throws if components are not distinct structs.</summary>
     private static void ValidateComponents(object[] components)
     {
         var seen = new HashSet<Type>(components.Length);
@@ -340,6 +366,7 @@ public sealed class World : IDisposable
         }
     }
 
+    /// <summary>Moves the entity to the archetype extended by the new components.</summary>
     private void AddComponentImmediate(Entity entity, object[] components)
     {
         if (!_entityRecords.TryGetLocation(entity, out var oldArchetype, out var oldRow))
@@ -376,12 +403,14 @@ public sealed class World : IDisposable
         MoveEntity(entity, oldArchetype, oldRow, newArchetype, newComponents);
     }
 
+    /// <summary>Removes component T; deferred while iterating.</summary>
     public void RemoveComponent<T>(Entity entity)
         where T : struct
     {
         RemoveComponent(entity, typeof(T));
     }
 
+    /// <summary>Removes a component by type; deferred while iterating.</summary>
     public void RemoveComponent(Entity entity, Type componentType)
     {
         if (!componentType.IsValueType)
@@ -396,6 +425,7 @@ public sealed class World : IDisposable
         RemoveComponentImmediate(entity, componentType);
     }
 
+    /// <summary>Moves the entity to the archetype without the component.</summary>
     private void RemoveComponentImmediate(Entity entity, Type componentType)
     {
         if (!_entityRecords.TryGetLocation(entity, out var oldArchetype, out var oldRow))
@@ -437,6 +467,7 @@ public sealed class World : IDisposable
         MoveEntity(entity, oldArchetype, oldRow, newArchetype, newComponents);
     }
 
+    /// <summary>Swap-removes the entity's old row and appends it to the target archetype.</summary>
     private void MoveEntity(
         Entity entity,
         Archetype oldArchetype,
@@ -454,6 +485,7 @@ public sealed class World : IDisposable
         _entityRecords.SetEntityLocation(entity, newArchetype, newRow);
     }
 
+    /// <summary>Visits all entities with T1, passing the component by reference.</summary>
     public void ForEach<T1>(RefAction<T1> action)
         where T1 : struct
     {
@@ -482,6 +514,7 @@ public sealed class World : IDisposable
         }
     }
 
+    /// <summary>Visits all entities with T1 and T2, passing components by reference.</summary>
     public void ForEach<T1, T2>(RefAction<T1, T2> action)
         where T1 : struct
         where T2 : struct
@@ -517,6 +550,7 @@ public sealed class World : IDisposable
         }
     }
 
+    /// <summary>Visits all entities with T1, T2, and T3, passing components by reference.</summary>
     public void ForEach<T1, T2, T3>(RefAction<T1, T2, T3> action)
         where T1 : struct
         where T2 : struct
@@ -555,6 +589,7 @@ public sealed class World : IDisposable
         }
     }
 
+    /// <summary>Visits all entities with T1 to T4, passing components by reference.</summary>
     public void ForEach<T1, T2, T3, T4>(RefAction<T1, T2, T3, T4> action)
         where T1 : struct
         where T2 : struct
@@ -603,6 +638,7 @@ public sealed class World : IDisposable
         }
     }
 
+    /// <summary>Like ForEach, but rows are partitioned in parallel.</summary>
     public void ForEachParallel<T1>(RefAction<T1> action)
         where T1 : struct
     {
@@ -634,6 +670,7 @@ public sealed class World : IDisposable
         }
     }
 
+    /// <summary>Like ForEach with two components, but rows are partitioned in parallel.</summary>
     public void ForEachParallel<T1, T2>(RefAction<T1, T2> action)
         where T1 : struct
         where T2 : struct
@@ -676,6 +713,7 @@ public sealed class World : IDisposable
         }
     }
 
+    /// <summary>Like ForEach with three components, but rows are partitioned in parallel.</summary>
     public void ForEachParallel<T1, T2, T3>(RefAction<T1, T2, T3> action)
         where T1 : struct
         where T2 : struct
@@ -723,6 +761,7 @@ public sealed class World : IDisposable
         }
     }
 
+    /// <summary>Like ForEach with four components, but rows are partitioned in parallel.</summary>
     public void ForEachParallel<T1, T2, T3, T4>(RefAction<T1, T2, T3, T4> action)
         where T1 : struct
         where T2 : struct
@@ -775,6 +814,7 @@ public sealed class World : IDisposable
         }
     }
 
+    /// <summary>Gets or creates the spatial query context for a position component type.</summary>
     public SpatialQueryContext<TPos> SpatialQueries<TPos>()
         where TPos : struct
     {
@@ -786,6 +826,7 @@ public sealed class World : IDisposable
         return context;
     }
 
+    /// <summary>Renders entity and archetype counts per component set for debugging.</summary>
     public override string ToString()
     {
         var sb = new StringBuilder();

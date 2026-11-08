@@ -23,6 +23,7 @@ public interface IButton
     /// <summary>Restores the idle colors (undoes any <c>OverrideColor</c> call).</summary>
     void ResetColor();
 
+    /// <summary>Overrides the idle colors until <c>ResetColor</c> is called.</summary>
     void OverrideColor(params Color[] color);
 }
 
@@ -33,6 +34,7 @@ public static class UiButton
         public bool IsHovered;
         private bool _isPressed;
 
+        /// <summary>Tracks hover and press state and fires hover and click actions.</summary>
         public void Update(
             InputHandler inputHandler,
             Rectangle bounds,
@@ -54,6 +56,7 @@ public static class UiButton
         }
     }
 
+    /// <summary>Button built from a texture with an optional composed label.</summary>
     public class Sprite(Texture2D texture2D) : UiSprite(texture2D), IButton
     {
         private readonly ButtonBehaviour _buttonBehaviour = new();
@@ -69,6 +72,7 @@ public static class UiButton
         public bool Disable { get; set; }
         public Action OnClickAction { get; set; }
 
+        /// <summary>Overrides the label and texture colors until ResetColor is called.</summary>
         public void OverrideColor(params Color[] color)
         {
             if (color.Length > 0)
@@ -77,8 +81,10 @@ public static class UiButton
                 Color = color[1];
         }
 
+        /// <summary>Restores the idle label and texture colors.</summary>
         public void ResetColor() => OverrideColor(TextIdleColor, TextureIdleColor);
 
+        /// <summary>Updates label, button behavior, and state-based colors.</summary>
         protected override void Updater(InputHandler inputHandler)
         {
             base.Updater(inputHandler);
@@ -95,12 +101,14 @@ public static class UiButton
                     : TextIdleColor;
         }
 
+        /// <summary>Draws the texture and its composed label.</summary>
         protected override void Drawer(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice)
         {
             base.Drawer(spriteBatch, graphicsDevice);
             UiText?.Draw(spriteBatch, graphicsDevice);
         }
 
+        /// <summary>Scales the button and forwards the clip rect to the label.</summary>
         public override void ApplyScale(Rectangle root, float uiScale)
         {
             base.ApplyScale(root, uiScale);
@@ -112,6 +120,7 @@ public static class UiButton
             UiText.ApplyScale(Bounds, uiScale);
         }
 
+        /// <summary>Disposes the button and its composed label.</summary>
         public override void Dispose()
         {
             base.Dispose();
@@ -119,6 +128,7 @@ public static class UiButton
         }
     }
 
+    /// <summary>Button rendering just a text label.</summary>
     public class Text(ButtonStyle? style = null) : UiElement, IButton
     {
         private readonly ButtonBehaviour _buttonBehaviour = new();
@@ -136,14 +146,17 @@ public static class UiButton
         public bool Disable { get; set; }
         public Action OnClickAction { get; set; }
 
+        /// <summary>Overrides the label color until ResetColor is called.</summary>
         public void OverrideColor(params Color[] color)
         {
             if (color.Length > 0)
                 UiText.Color = color.First();
         }
 
+        /// <summary>Restores the idle label color.</summary>
         public void ResetColor() => OverrideColor(TextIdleColor);
 
+        /// <summary>Updates the label and applies state-based colors.</summary>
         protected override void Updater(InputHandler inputHandler)
         {
             UiText.Update(inputHandler, Bounds, UiScale);
@@ -154,17 +167,20 @@ public static class UiButton
                 : TextIdleColor;
         }
 
+        /// <summary>Draws the label.</summary>
         protected override void Drawer(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice)
         {
             UiText.Draw(spriteBatch, graphicsDevice);
         }
 
+        /// <summary>Scales the button and its label.</summary>
         public override void ApplyScale(Rectangle root, float uiScale)
         {
             base.ApplyScale(root, uiScale);
             UiText.ApplyScale(Bounds, uiScale);
         }
 
+        /// <summary>Disposes the button and its label.</summary>
         public override void Dispose()
         {
             base.Dispose();

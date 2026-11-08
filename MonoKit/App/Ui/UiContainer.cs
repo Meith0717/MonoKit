@@ -42,6 +42,7 @@ public class UiContainer : UiElement
     /// </summary>
     public bool ClipChildren { get; set; } = true;
 
+    /// <summary>Appends a child; Dispose later cascades disposal to it.</summary>
     public virtual void Add(UiElement child) => _children.Add(child);
 
     /// <summary>Removes all children without disposing them (Dispose cascades disposal).</summary>
@@ -61,6 +62,7 @@ public class UiContainer : UiElement
         return this;
     }
 
+    /// <summary>Derives intrinsic size from the attached background texture.</summary>
     protected override void MeasureSize()
     {
         if (_backgroundTexture is null)
@@ -70,6 +72,7 @@ public class UiContainer : UiElement
         IntrinsicHeight = (int)(_backgroundTexture.Height * _textureScale);
     }
 
+    /// <summary>Purges disposed children, then updates the remaining ones.</summary>
     protected override void Updater(InputHandler inputHandler)
     {
         _children.RemoveAll(c => c.IsDisposed);
@@ -77,6 +80,7 @@ public class UiContainer : UiElement
             child.Update(inputHandler, Bounds, UiScale);
     }
 
+    /// <summary>Draws the background, then children under the clip rectangle.</summary>
     protected override void Drawer(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice)
     {
         if (_backgroundTexture is not null)
@@ -100,6 +104,7 @@ public class UiContainer : UiElement
         graphicsDevice.ScissorRectangle = previousScissor;
     }
 
+    /// <summary>Lays out bounds and cascades scale and clip rects to children.</summary>
     public override void ApplyScale(Rectangle root, float uiScale)
     {
         base.ApplyScale(root, uiScale);
@@ -114,6 +119,7 @@ public class UiContainer : UiElement
         }
     }
 
+    /// <summary>Disposes this element and cascades disposal to every child.</summary>
     public override void Dispose()
     {
         base.Dispose();

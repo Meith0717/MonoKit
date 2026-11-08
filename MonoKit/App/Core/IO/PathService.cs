@@ -15,6 +15,7 @@ public class PathService
 {
     private readonly Dictionary<byte, string> _paths = new();
 
+    /// <summary>Builds and creates the root path from a folder or relative name.</summary>
     public PathService(string rootPath = null, SpecialFolder? baseFolder = null)
     {
         var folderName = rootPath ?? "AppHost";
@@ -30,6 +31,7 @@ public class PathService
     // ReSharper disable once MemberCanBePrivate.Global
     public string RootPath { get; }
 
+    /// <summary>Creates a subdirectory and registers it under an id.</summary>
     public PathService RegisterPath(byte id, string relativePath)
     {
         var fullPath = Path.Combine(RootPath, relativePath);
@@ -38,11 +40,13 @@ public class PathService
         return this;
     }
 
+    /// <summary>Returns the registered path for an id, or null.</summary>
     public string GetPath(byte id)
     {
         return _paths.GetValueOrDefault(id);
     }
 
+    /// <summary>Combines a registered path with a file name.</summary>
     public string GetFilePath(byte id, string fileName)
     {
         return !_paths.TryGetValue(id, out var path)
