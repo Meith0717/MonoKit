@@ -8,14 +8,10 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoKit.App.Input;
-using MonoKit.App.Ui;
+using MonoKit.App.Screens;
 
-namespace MonoKit.App.Screens;
+namespace MonoKit.App.Ui;
 
-/// <summary>
-///     Base class for UI-driven screens: owns a full-viewport root <see cref="UiFrame" /> that receives update, draw
-///     and resize.
-/// </summary>
 public abstract class UiScreen(
     GameServiceContainer appServices,
     bool updateBelow = false,

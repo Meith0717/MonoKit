@@ -11,7 +11,7 @@ using MonoKit.App.Input;
 
 namespace MonoKit.Game.Camera;
 
-public interface ICamera3dBehavior
+public interface ICamera3DBehavior
 {
     void Initialize(Camera3D owner);
     void Update(Camera3D owner, InputHandler inputHandler, double elapsedGameTime);
@@ -19,7 +19,7 @@ public interface ICamera3dBehavior
 
 public class Camera3D(Vector3 positon, GraphicsDevice graphicsDevice) : ICamera
 {
-    private readonly List<ICamera3dBehavior> _behaviours = new();
+    private readonly List<ICamera3DBehavior> _behaviours = new();
     public float FarPlane = 1000f;
     public Vector3 Forward = new(1, 0, 0);
 
@@ -50,7 +50,7 @@ public class Camera3D(Vector3 positon, GraphicsDevice graphicsDevice) : ICamera
     public Matrix View { get; private set; }
     public Matrix Projection { get; private set; }
 
-    public void AddBehaviour(ICamera3dBehavior behaviour)
+    public void AddBehaviour(ICamera3DBehavior behaviour)
     {
         behaviour.Initialize(this);
         _behaviours.Add(behaviour);

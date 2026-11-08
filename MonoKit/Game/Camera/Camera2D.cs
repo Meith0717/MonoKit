@@ -12,7 +12,7 @@ using MonoKit.App.Input;
 
 namespace MonoKit.Game.Camera;
 
-public interface ICamera2dBehavior
+public interface ICamera2DBehavior
 {
     void Initialize(Camera2D owner);
     void Update(Camera2D owner, InputHandler inputHandler, double elapsedGameTime);
@@ -20,7 +20,7 @@ public interface ICamera2dBehavior
 
 public class Camera2D : ICamera
 {
-    private readonly List<ICamera2dBehavior> _behaviours = new();
+    private readonly List<ICamera2DBehavior> _behaviours = new();
     private readonly GraphicsDevice _graphicsDevice;
 
     public Vector2 Position = Vector2.Zero;
@@ -58,7 +58,7 @@ public class Camera2D : ICamera
         Bounds = TransformViewport(viewport, ViewInvert);
     }
 
-    public void AddBehaviour(ICamera2dBehavior behaviour)
+    public void AddBehaviour(ICamera2DBehavior behaviour)
     {
         behaviour.Initialize(this);
         _behaviours.Add(behaviour);
