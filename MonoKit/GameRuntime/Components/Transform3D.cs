@@ -7,7 +7,7 @@
 using Microsoft.Xna.Framework;
 using Vector3 = Microsoft.Xna.Framework.Vector3;
 
-namespace MonoKit.GameRuntime.Ecs.Components;
+namespace MonoKit.GameRuntime.Components;
 
 public struct Transform3D(Vector3 position, Matrix orientation, Vector3 scale)
 {

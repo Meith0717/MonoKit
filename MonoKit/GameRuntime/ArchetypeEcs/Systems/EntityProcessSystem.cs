@@ -1,4 +1,4 @@
-// AppHost - EntityProcessSystem.cs
+// EntityProcessSystem.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -16,7 +16,6 @@ public interface IEntityProcessSystem : ISystem
 public abstract class EntityProcessSystem<T1> : IUpdateSystem, IEntityProcessSystem
     where T1 : struct
 {
-    public abstract void OnEntityDestroyed(Entity entity);
     public abstract void Dispose();
 
     public abstract void Initialize(World world);
@@ -37,7 +36,7 @@ public abstract class EntityProcessSystem<T1> : IUpdateSystem, IEntityProcessSys
                 var columnArray = (T1[])column;
                 var rowCount = archetype.RowCount;
                 for (var row = 0; row < rowCount; row++)
-                    Process(elapsedMs, world, ref columnArray[row]);
+                    Process(elapsedMs, world, archetype.GetEntityAt(row), ref columnArray[row]);
             }
 
             End();
@@ -50,16 +49,17 @@ public abstract class EntityProcessSystem<T1> : IUpdateSystem, IEntityProcessSys
 
     protected abstract void Begin();
 
-    protected abstract void Process(double elapsedMs, World world, ref T1 c1);
+    protected abstract void Process(double elapsedMs, World world, Entity entity, ref T1 c1);
 
     protected abstract void End();
+
+    public abstract void OnEntityDestroyed(Entity entity);
 }
 
 public abstract class EntityProcessSystem<T1, T2> : IUpdateSystem, IEntityProcessSystem
     where T1 : struct
     where T2 : struct
 {
-    public abstract void OnEntityDestroyed(Entity entity);
     public abstract void Dispose();
 
     public abstract void Initialize(World world);
@@ -86,7 +86,13 @@ public abstract class EntityProcessSystem<T1, T2> : IUpdateSystem, IEntityProces
                 var col2Array = (T2[])column2;
                 var rowCount = archetype.RowCount;
                 for (var row = 0; row < rowCount; row++)
-                    Process(elapsedMs, world, ref col1Array[row], ref col2Array[row]);
+                    Process(
+                        elapsedMs,
+                        world,
+                        archetype.GetEntityAt(row),
+                        ref col1Array[row],
+                        ref col2Array[row]
+                    );
             }
 
             End();
@@ -99,9 +105,17 @@ public abstract class EntityProcessSystem<T1, T2> : IUpdateSystem, IEntityProces
 
     protected abstract void Begin();
 
-    protected abstract void Process(double elapsedMs, World world, ref T1 c1, ref T2 c2);
+    protected abstract void Process(
+        double elapsedMs,
+        World world,
+        Entity entity,
+        ref T1 c1,
+        ref T2 c2
+    );
 
     protected abstract void End();
+
+    public abstract void OnEntityDestroyed(Entity entity);
 }
 
 public abstract class EntityProcessSystem<T1, T2, T3> : IUpdateSystem, IEntityProcessSystem
@@ -109,7 +123,6 @@ public abstract class EntityProcessSystem<T1, T2, T3> : IUpdateSystem, IEntityPr
     where T2 : struct
     where T3 : struct
 {
-    public abstract void OnEntityDestroyed(Entity entity);
     public abstract void Dispose();
 
     public abstract void Initialize(World world);
@@ -141,6 +154,7 @@ public abstract class EntityProcessSystem<T1, T2, T3> : IUpdateSystem, IEntityPr
                     Process(
                         elapsedMs,
                         world,
+                        archetype.GetEntityAt(row),
                         ref col1Array[row],
                         ref col2Array[row],
                         ref col3Array[row]
@@ -157,9 +171,18 @@ public abstract class EntityProcessSystem<T1, T2, T3> : IUpdateSystem, IEntityPr
 
     protected abstract void Begin();
 
-    protected abstract void Process(double elapsedMs, World world, ref T1 c1, ref T2 c2, ref T3 c3);
+    protected abstract void Process(
+        double elapsedMs,
+        World world,
+        Entity entity,
+        ref T1 c1,
+        ref T2 c2,
+        ref T3 c3
+    );
 
     protected abstract void End();
+
+    public abstract void OnEntityDestroyed(Entity entity);
 }
 
 public abstract class EntityProcessSystem<T1, T2, T3, T4> : IUpdateSystem, IEntityProcessSystem
@@ -168,7 +191,6 @@ public abstract class EntityProcessSystem<T1, T2, T3, T4> : IUpdateSystem, IEnti
     where T3 : struct
     where T4 : struct
 {
-    public abstract void OnEntityDestroyed(Entity entity);
     public abstract void Dispose();
 
     public abstract void Initialize(World world);
@@ -203,6 +225,7 @@ public abstract class EntityProcessSystem<T1, T2, T3, T4> : IUpdateSystem, IEnti
                     Process(
                         elapsedMs,
                         world,
+                        archetype.GetEntityAt(row),
                         ref col1Array[row],
                         ref col2Array[row],
                         ref col3Array[row],
@@ -223,6 +246,7 @@ public abstract class EntityProcessSystem<T1, T2, T3, T4> : IUpdateSystem, IEnti
     protected abstract void Process(
         double elapsedMs,
         World world,
+        Entity entity,
         ref T1 c1,
         ref T2 c2,
         ref T3 c3,
@@ -230,4 +254,6 @@ public abstract class EntityProcessSystem<T1, T2, T3, T4> : IUpdateSystem, IEnti
     );
 
     protected abstract void End();
+
+    public abstract void OnEntityDestroyed(Entity entity);
 }

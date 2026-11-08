@@ -22,13 +22,15 @@ internal static class RowOrderUtility
     private static class OrderBuffer<T>
         where T : struct
     {
-        private static T[] _buffer = [];
+        [ThreadStatic]
+        private static T[]? _buffer;
 
         public static T[] Get(int minLength)
         {
-            if (_buffer.Length < minLength)
-                _buffer = new T[int.Max(minLength, _buffer.Length * 2)];
-            return _buffer;
+            var buffer = _buffer;
+            if (buffer == null || buffer.Length < minLength)
+                _buffer = buffer = new T[int.Max(minLength, (buffer?.Length ?? 0) * 2)];
+            return buffer;
         }
     }
 }

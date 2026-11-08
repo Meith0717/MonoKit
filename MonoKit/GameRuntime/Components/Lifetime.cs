@@ -4,7 +4,7 @@
 // AI-assisted development using Mistral Vibe Code;
 // all output reviewed and adapted by the author.
 
-namespace MonoKit.GameRuntime.Ecs.Components;
+namespace MonoKit.GameRuntime.Components;
 
 public struct Lifetime
 {

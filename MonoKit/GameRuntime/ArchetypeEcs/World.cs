@@ -7,8 +7,10 @@
 #nullable enable
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using MonoKit.GameRuntime.ArchetypeEcs.Archetypes;
 using MonoKit.GameRuntime.ArchetypeEcs.Entities;
 using MonoKit.GameRuntime.ArchetypeEcs.SpatialQueries;
@@ -39,7 +41,7 @@ public sealed class World : IDisposable
 {
     internal readonly ArchetypeManager ArchetypeManager = new();
 
-    private readonly List<Command> _commands = [];
+    private readonly ConcurrentQueue<Command> _commands = new();
     private readonly EntityManager _entityManager = new();
     private readonly EntityRecords _entityRecords = new();
 
@@ -132,12 +134,15 @@ public sealed class World : IDisposable
 
     private void FlushCommands()
     {
-        while (_commands.Count > 0)
+        while (true)
         {
-            var commands = _commands.ToArray();
-            _commands.Clear();
+            var batch = new List<Command>();
+            while (_commands.TryDequeue(out var command))
+                batch.Add(command);
+            if (batch.Count == 0)
+                break;
 
-            foreach (var command in commands)
+            foreach (var command in batch)
                 switch (command.Kind)
                 {
                     case CommandKind.DestroyEntity:
@@ -160,7 +165,7 @@ public sealed class World : IDisposable
 
         if (_iterationDepth > 0)
         {
-            _commands.Add(new Command(CommandKind.DestroyEntity, entity, null));
+            _commands.Enqueue(new Command(CommandKind.DestroyEntity, entity, null));
             return true;
         }
 
@@ -216,6 +221,90 @@ public sealed class World : IDisposable
         return entity;
     }
 
+    public Entity CreateEntityWithComponents<T1>(T1 c1)
+        where T1 : struct
+    {
+        var archetype = ArchetypeManager.GetOrCreateArchetype(new ArchetypeType(typeof(T1)));
+        var entity = _entityManager.Create();
+        var row = archetype.RowCount;
+        archetype.AddRow(entity, c1);
+        _entityRecords.SetEntityLocation(entity, archetype, row);
+        return entity;
+    }
+
+    public Entity CreateEntityWithComponents<T1, T2>(T1 c1, T2 c2)
+        where T1 : struct
+        where T2 : struct
+    {
+        if (typeof(T1) == typeof(T2))
+            throw new ArgumentException($"Duplicate component type: {typeof(T1).Name}");
+        var archetype = ArchetypeManager.GetOrCreateArchetype(
+            new ArchetypeType(typeof(T1), typeof(T2))
+        );
+        var entity = _entityManager.Create();
+        var row = archetype.RowCount;
+        archetype.AddRow(entity, c1, c2);
+        _entityRecords.SetEntityLocation(entity, archetype, row);
+        return entity;
+    }
+
+    public Entity CreateEntityWithComponents<T1, T2, T3>(T1 c1, T2 c2, T3 c3)
+        where T1 : struct
+        where T2 : struct
+        where T3 : struct
+    {
+        if (typeof(T1) == typeof(T2) || typeof(T1) == typeof(T3) || typeof(T2) == typeof(T3))
+            throw new ArgumentException("Duplicate component type");
+        var archetype = ArchetypeManager.GetOrCreateArchetype(
+            new ArchetypeType(typeof(T1), typeof(T2), typeof(T3))
+        );
+        var entity = _entityManager.Create();
+        var row = archetype.RowCount;
+        archetype.AddRow(entity, c1, c2, c3);
+        _entityRecords.SetEntityLocation(entity, archetype, row);
+        return entity;
+    }
+
+    public Entity CreateEntityWithComponents<T1, T2, T3, T4>(T1 c1, T2 c2, T3 c3, T4 c4)
+        where T1 : struct
+        where T2 : struct
+        where T3 : struct
+        where T4 : struct
+    {
+        if (
+            typeof(T1) == typeof(T2)
+            || typeof(T1) == typeof(T3)
+            || typeof(T1) == typeof(T4)
+            || typeof(T2) == typeof(T3)
+            || typeof(T2) == typeof(T4)
+            || typeof(T3) == typeof(T4)
+        )
+            throw new ArgumentException("Duplicate component type");
+        var archetype = ArchetypeManager.GetOrCreateArchetype(
+            new ArchetypeType(typeof(T1), typeof(T2), typeof(T3), typeof(T4))
+        );
+        var entity = _entityManager.Create();
+        var row = archetype.RowCount;
+        archetype.AddRow(entity, c1, c2, c3, c4);
+        _entityRecords.SetEntityLocation(entity, archetype, row);
+        return entity;
+    }
+
+    public bool HasComponent<T>(Entity entity)
+        where T : struct
+    {
+        return _entityRecords.TryGetLocation(entity, out var archetype, out _)
+            && archetype.Contains(typeof(T));
+    }
+
+    public ref T GetComponent<T>(Entity entity)
+        where T : struct
+    {
+        if (!_entityRecords.TryGetLocation(entity, out var archetype, out var row))
+            throw new ArgumentException("Entity does not exist or has been destroyed");
+        return ref archetype.Get<T>(row);
+    }
+
     public bool IsAlive(Entity entity)
     {
         return _entityManager.IsAlive(entity);
@@ -230,7 +319,7 @@ public sealed class World : IDisposable
 
         if (_iterationDepth > 0)
         {
-            _commands.Add(new Command(CommandKind.AddComponents, entity, components));
+            _commands.Enqueue(new Command(CommandKind.AddComponents, entity, components));
             return;
         }
 
@@ -299,7 +388,7 @@ public sealed class World : IDisposable
 
         if (_iterationDepth > 0)
         {
-            _commands.Add(new Command(CommandKind.RemoveComponent, entity, componentType));
+            _commands.Enqueue(new Command(CommandKind.RemoveComponent, entity, componentType));
             return;
         }
 
@@ -505,6 +594,178 @@ public sealed class World : IDisposable
                         ref col4Array[row]
                     );
                 }
+            }
+        }
+        finally
+        {
+            EndIteration();
+        }
+    }
+
+    public void ForEachParallel<T1>(RefAction<T1> action)
+        where T1 : struct
+    {
+        var componentType = typeof(T1);
+        var archetypes = ArchetypeManager.GetArchetypesWith(componentType);
+
+        BeginIteration();
+        try
+        {
+            foreach (var archetype in archetypes)
+            {
+                if (!archetype.TryGetColumn(componentType, out var column))
+                    continue;
+                var columnArray = (T1[])column;
+                var rowCount = archetype.RowCount;
+                Parallel.ForEach(
+                    Partitioner.Create(0, rowCount),
+                    range =>
+                    {
+                        for (var row = range.Item1; row < range.Item2; row++)
+                            action(archetype.GetEntityAt(row), ref columnArray[row]);
+                    }
+                );
+            }
+        }
+        finally
+        {
+            EndIteration();
+        }
+    }
+
+    public void ForEachParallel<T1, T2>(RefAction<T1, T2> action)
+        where T1 : struct
+        where T2 : struct
+    {
+        var type1 = typeof(T1);
+        var type2 = typeof(T2);
+        var archetypes = ArchetypeManager.GetArchetypesWith(type1);
+
+        BeginIteration();
+        try
+        {
+            foreach (var archetype in archetypes)
+            {
+                if (
+                    !archetype.TryGetColumn(type1, out var column1)
+                    || !archetype.TryGetColumn(type2, out var column2)
+                )
+                    continue;
+
+                var col1Array = (T1[])column1;
+                var col2Array = (T2[])column2;
+                var rowCount = archetype.RowCount;
+                Parallel.ForEach(
+                    Partitioner.Create(0, rowCount),
+                    range =>
+                    {
+                        for (var row = range.Item1; row < range.Item2; row++)
+                            action(
+                                archetype.GetEntityAt(row),
+                                ref col1Array[row],
+                                ref col2Array[row]
+                            );
+                    }
+                );
+            }
+        }
+        finally
+        {
+            EndIteration();
+        }
+    }
+
+    public void ForEachParallel<T1, T2, T3>(RefAction<T1, T2, T3> action)
+        where T1 : struct
+        where T2 : struct
+        where T3 : struct
+    {
+        var type1 = typeof(T1);
+        var type2 = typeof(T2);
+        var type3 = typeof(T3);
+        var archetypes = ArchetypeManager.GetArchetypesWith(type1);
+
+        BeginIteration();
+        try
+        {
+            foreach (var archetype in archetypes)
+            {
+                if (
+                    !archetype.TryGetColumn(type1, out var column1)
+                    || !archetype.TryGetColumn(type2, out var column2)
+                    || !archetype.TryGetColumn(type3, out var column3)
+                )
+                    continue;
+
+                var col1Array = (T1[])column1;
+                var col2Array = (T2[])column2;
+                var col3Array = (T3[])column3;
+                var rowCount = archetype.RowCount;
+                Parallel.ForEach(
+                    Partitioner.Create(0, rowCount),
+                    range =>
+                    {
+                        for (var row = range.Item1; row < range.Item2; row++)
+                            action(
+                                archetype.GetEntityAt(row),
+                                ref col1Array[row],
+                                ref col2Array[row],
+                                ref col3Array[row]
+                            );
+                    }
+                );
+            }
+        }
+        finally
+        {
+            EndIteration();
+        }
+    }
+
+    public void ForEachParallel<T1, T2, T3, T4>(RefAction<T1, T2, T3, T4> action)
+        where T1 : struct
+        where T2 : struct
+        where T3 : struct
+        where T4 : struct
+    {
+        var type1 = typeof(T1);
+        var type2 = typeof(T2);
+        var type3 = typeof(T3);
+        var type4 = typeof(T4);
+        var archetypes = ArchetypeManager.GetArchetypesWith(type1);
+
+        BeginIteration();
+        try
+        {
+            foreach (var archetype in archetypes)
+            {
+                if (
+                    !archetype.TryGetColumn(type1, out var column1)
+                    || !archetype.TryGetColumn(type2, out var column2)
+                    || !archetype.TryGetColumn(type3, out var column3)
+                    || !archetype.TryGetColumn(type4, out var column4)
+                )
+                    continue;
+
+                var col1Array = (T1[])column1;
+                var col2Array = (T2[])column2;
+                var col3Array = (T3[])column3;
+                var col4Array = (T4[])column4;
+                var rowCount = archetype.RowCount;
+                Parallel.ForEach(
+                    Partitioner.Create(0, rowCount),
+                    range =>
+                    {
+                        for (var row = range.Item1; row < range.Item2; row++)
+                            action(
+                                archetype.GetEntityAt(row),
+                                ref col1Array[row],
+                                ref col2Array[row],
+                                ref col3Array[row],
+                                ref col4Array[row]
+                            );
+                    }
+                );
             }
         }
         finally

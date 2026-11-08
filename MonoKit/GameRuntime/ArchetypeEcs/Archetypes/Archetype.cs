@@ -98,6 +98,54 @@ internal sealed class Archetype : IDisposable
         RowCount++;
     }
 
+    internal void AddRow<T1>(Entity entity, T1 c1)
+        where T1 : struct
+    {
+        EnsureCapacity(RowCount);
+        _entityIds[RowCount] = entity;
+        ((T1[])_columns[_typeToColumnIndex[typeof(T1)]])[RowCount] = c1;
+        RowCount++;
+    }
+
+    internal void AddRow<T1, T2>(Entity entity, T1 c1, T2 c2)
+        where T1 : struct
+        where T2 : struct
+    {
+        EnsureCapacity(RowCount);
+        _entityIds[RowCount] = entity;
+        ((T1[])_columns[_typeToColumnIndex[typeof(T1)]])[RowCount] = c1;
+        ((T2[])_columns[_typeToColumnIndex[typeof(T2)]])[RowCount] = c2;
+        RowCount++;
+    }
+
+    internal void AddRow<T1, T2, T3>(Entity entity, T1 c1, T2 c2, T3 c3)
+        where T1 : struct
+        where T2 : struct
+        where T3 : struct
+    {
+        EnsureCapacity(RowCount);
+        _entityIds[RowCount] = entity;
+        ((T1[])_columns[_typeToColumnIndex[typeof(T1)]])[RowCount] = c1;
+        ((T2[])_columns[_typeToColumnIndex[typeof(T2)]])[RowCount] = c2;
+        ((T3[])_columns[_typeToColumnIndex[typeof(T3)]])[RowCount] = c3;
+        RowCount++;
+    }
+
+    internal void AddRow<T1, T2, T3, T4>(Entity entity, T1 c1, T2 c2, T3 c3, T4 c4)
+        where T1 : struct
+        where T2 : struct
+        where T3 : struct
+        where T4 : struct
+    {
+        EnsureCapacity(RowCount);
+        _entityIds[RowCount] = entity;
+        ((T1[])_columns[_typeToColumnIndex[typeof(T1)]])[RowCount] = c1;
+        ((T2[])_columns[_typeToColumnIndex[typeof(T2)]])[RowCount] = c2;
+        ((T3[])_columns[_typeToColumnIndex[typeof(T3)]])[RowCount] = c3;
+        ((T4[])_columns[_typeToColumnIndex[typeof(T4)]])[RowCount] = c4;
+        RowCount++;
+    }
+
     internal Entity? RemoveRow(int row)
     {
         Entity? movedEntity = null;

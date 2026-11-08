@@ -6,7 +6,7 @@
 
 using Microsoft.Xna.Framework;
 
-namespace MonoKit.GameRuntime.Ecs.Components;
+namespace MonoKit.GameRuntime.Components;
 
 public struct Velocity3D(Vector3 linearVelocity, Vector3 angularVelocity)
 {

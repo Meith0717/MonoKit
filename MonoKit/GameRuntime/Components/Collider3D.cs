@@ -6,7 +6,7 @@
 
 using Microsoft.Xna.Framework;
 
-namespace MonoKit.GameRuntime.Ecs.Components;
+namespace MonoKit.GameRuntime.Components;
 
 public struct Collider3D(Vector3 size)
 {

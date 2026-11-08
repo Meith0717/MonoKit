@@ -1,4 +1,4 @@
-﻿// AppHost - GameRuntime2D.cs
+// GameRuntime2D.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -9,49 +9,48 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoKit.App.Input;
+using MonoKit.GameRuntime.ArchetypeEcs;
 using MonoKit.GameRuntime.Camera;
-using MonoKit.GameRuntime.Ecs;
-using MonoKit.GameRuntime.Ecs.Systems;
-using MonoKit.GameRuntime.Spatial;
+using MonoKit.GameRuntime.Systems;
 
 namespace MonoKit.GameRuntime.Gameplay;
 
+/// <summary>2D game runtime: an AECS world with lifetime + movement systems, a camera, and a service container.</summary>
 public class GameRuntime2D : IDisposable
 {
     public readonly RuntimeContainer Services = new();
     private readonly Camera2D _camera;
     private readonly World _world;
 
-    public GameRuntime2D(GraphicsDevice graphicsDevice, int spatialHashingCellSize)
-    {
-        _world = new World();
-        _camera = new Camera2D(graphicsDevice);
-
-        var ecsSpatialHash = new EcsSpatialHash2D(spatialHashingCellSize);
-        Services.AddService(_world);
-        Services.AddService(_camera);
-        Services.AddService(ecsSpatialHash);
-
-        _world.Systems.Add(new SpatialHashSystem2D(ecsSpatialHash));
-        _world.Systems.Add(new MovementsSystem2D());
-        _world.Systems.Add(new LifetimeSystem());
-    }
-
+    public World World => _world;
+    public Camera2D Camera => _camera;
     public Vector2 WorldMousePosition { get; private set; }
 
-    public void Dispose()
+    public GameRuntime2D(GraphicsDevice graphicsDevice)
     {
-        _world.Dispose();
-        GC.SuppressFinalize(this);
+        _world = new WorldBuilder()
+            .AddSystem(new LifetimeSystem())
+            .AddSystem(new MovementSystem2D())
+            .Build();
+        _camera = new Camera2D(graphicsDevice);
+
+        Services.AddService(_world);
+        Services.AddService(_camera);
     }
 
     public void Update(double elapsedMilliseconds, InputHandler inputHandler)
     {
-        _world.Update(elapsedMilliseconds, Services, inputHandler);
+        _world.Update(elapsedMilliseconds);
         _camera.Update(elapsedMilliseconds, inputHandler);
         WorldMousePosition = Vector2.Transform(
             Mouse.GetState().Position.ToVector2(),
             _camera.ViewInvert
         );
+    }
+
+    public void Dispose()
+    {
+        _world.Dispose();
+        GC.SuppressFinalize(this);
     }
 }

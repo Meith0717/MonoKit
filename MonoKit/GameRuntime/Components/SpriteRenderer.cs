@@ -7,7 +7,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace MonoKit.GameRuntime.Ecs.Components;
+namespace MonoKit.GameRuntime.Components;
 
 public struct SpriteRenderer(Texture2D texture)
 {

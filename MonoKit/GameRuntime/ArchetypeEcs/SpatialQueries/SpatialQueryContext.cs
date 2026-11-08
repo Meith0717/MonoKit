@@ -128,6 +128,59 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
         return field;
     }
 
+    /// <summary>
+    /// Raw all-pairs pass: the action gets spatial indices and entities for both sides, so any
+    /// number of components can be pulled via <see cref="GetComponentCache{T}"/>().GetRef(index).
+    /// Neighbor results include the self pair (distance 0); skip <paramref name="neighborIndex"/> ==
+    /// <paramref name="selfIndex"/> or process only neighborIndex &gt; selfIndex for unordered pairs.
+    /// </summary>
+    public void ForEachSelfNeighborRaw(float radius, RefPairAction action)
+    {
+        var field = GetField();
+        var count = field.Count;
+        var neighbors = RentScratchBuffer();
+
+        try
+        {
+            for (var i = 0; i < count; i++)
+            {
+                var entity = field.GetEntity(i);
+                field.GetNeighbors(i, radius, neighbors);
+                foreach (var n in neighbors)
+                    action(i, entity, n, field.GetEntity(n));
+            }
+        }
+        finally
+        {
+            ReturnScratchBuffer(neighbors);
+        }
+    }
+
+    /// <summary>Parallel variant of <see cref="ForEachSelfNeighborRaw"/>.</summary>
+    public void ForEachSelfNeighborRawParallel(float radius, RefPairAction action)
+    {
+        var field = GetField();
+        var count = field.Count;
+
+        Parallel.ForEach(
+            Partitioner.Create(0, count),
+            RentScratchBuffer,
+            (range, _, neighbors) =>
+            {
+                for (var i = range.Item1; i < range.Item2; i++)
+                {
+                    var entity = field.GetEntity(i);
+                    field.GetNeighbors(i, radius, neighbors);
+                    foreach (var n in neighbors)
+                        action(i, entity, n, field.GetEntity(n));
+                }
+
+                return neighbors;
+            },
+            ReturnScratchBuffer
+        );
+    }
+
     public void ForEachSelfNeighbor<TSelf, T1>(
         float radius,
         RefSelfNeighborAction<TSelf, T1> action
@@ -652,6 +705,8 @@ public sealed class SpatialQueryContext<TPos> : IDisposable
         return newCache;
     }
 }
+
+public delegate void RefPairAction(int selfIndex, Entity self, int neighborIndex, Entity neighbor);
 
 public delegate void RefSelfNeighborAction<TSelf, T1>(
     Entity entity,

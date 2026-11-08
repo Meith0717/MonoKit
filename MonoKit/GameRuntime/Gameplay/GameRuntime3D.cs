@@ -1,4 +1,4 @@
-﻿// AppHost - GameRuntime3D.cs
+// GameRuntime3D.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -8,42 +8,43 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoKit.App.Input;
+using MonoKit.GameRuntime.ArchetypeEcs;
 using MonoKit.GameRuntime.Camera;
-using MonoKit.GameRuntime.Ecs;
-using MonoKit.GameRuntime.Ecs.Systems;
-using MonoKit.GameRuntime.Spatial;
+using MonoKit.GameRuntime.Systems;
 
 namespace MonoKit.GameRuntime.Gameplay;
 
+/// <summary>3D game runtime: an AECS world with lifetime + movement systems, a 3D camera, and a service container.</summary>
 public class GameRuntime3D : IDisposable
 {
     public readonly RuntimeContainer Services = new();
     private readonly Camera3D _camera;
     private readonly World _world;
 
-    public GameRuntime3D(GraphicsDevice graphicsDevice, float spatialHashingCellSize)
+    public World World => _world;
+    public Camera3D Camera => _camera;
+
+    public GameRuntime3D(GraphicsDevice graphicsDevice)
     {
-        _world = new World();
+        _world = new WorldBuilder()
+            .AddSystem(new LifetimeSystem())
+            .AddSystem(new MovementSystem3D())
+            .Build();
         _camera = new Camera3D(Vector3.Zero, graphicsDevice);
 
-        var ecsSpatialHash = new EcsSpatialHash3D(spatialHashingCellSize);
         Services.AddService(_world);
         Services.AddService(_camera);
-        Services.AddService(ecsSpatialHash);
+    }
 
-        _world.Systems.Add(new SpatialHashSystem3D(ecsSpatialHash));
-        _world.Systems.Add(new LifetimeSystem());
+    public void Update(double elapsedMilliseconds, InputHandler inputHandler)
+    {
+        _world.Update(elapsedMilliseconds);
+        _camera.Update(elapsedMilliseconds, inputHandler);
     }
 
     public void Dispose()
     {
         _world.Dispose();
         GC.SuppressFinalize(this);
-    }
-
-    public void Update(double elapsedMilliseconds, InputHandler inputHandler)
-    {
-        _world.Update(elapsedMilliseconds, Services, inputHandler);
-        _camera.Update(elapsedMilliseconds, inputHandler);
     }
 }
