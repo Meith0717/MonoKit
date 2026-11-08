@@ -34,14 +34,16 @@ public sealed class UiText(SpriteFont spriteFont, string text = null) : UiElemen
     protected override void MeasureSize()
     {
         var textDimension = _text == null ? Vector2.Zero : spriteFont.MeasureString(_text);
-        Width = (int)(textDimension.X * _scale);
-        Height = (int)float.Floor(textDimension.Y * _scale);
+        IntrinsicWidth = (int)(textDimension.X * _scale);
+        IntrinsicHeight = (int)float.Floor(textDimension.Y * _scale);
     }
 
     protected override void Drawer(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice)
     {
-        var position = Bounds.Location.ToVector2();
+        if (string.IsNullOrEmpty(_text))
+            return;
 
+        var position = Bounds.Location.ToVector2();
         spriteBatch.DrawString(
             spriteFont,
             _text,

@@ -21,13 +21,13 @@ public class UiSprite(Texture2D texture2D, float scale = 1, Color color = defaul
     {
         if (Texture2D == null)
         {
-            Width = 1;
-            Height = 1;
+            IntrinsicWidth = 1;
+            IntrinsicHeight = 1;
             return;
         }
 
-        Width = (int)float.Floor(Texture2D.Width * Scale);
-        Height = (int)float.Floor(Texture2D.Height * Scale);
+        IntrinsicWidth = (int)float.Floor(Texture2D.Width * Scale);
+        IntrinsicHeight = (int)float.Floor(Texture2D.Height * Scale);
     }
 
     protected override void Updater(InputHandler inputHandler) { }

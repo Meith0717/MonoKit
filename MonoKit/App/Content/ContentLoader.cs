@@ -57,9 +57,18 @@ public class ContentLoader
         foreach (var fileLocation in files)
         {
             var directory = Path.GetDirectoryName(fileLocation);
-            var contentId = Path.GetFileNameWithoutExtension(fileLocation);
+            var fileName = Path.GetFileNameWithoutExtension(fileLocation);
             var relativePath = Path.GetRelativePath(_contentManager.RootDirectory, directory!);
-            var contentPath = Path.Combine(relativePath, contentId);
+            var contentPath = Path.Combine(relativePath, fileName);
+
+            // Key by location relative to the scanned directory: files at its root keep
+            // their plain name; nested files carry their subfolder with '/' separators
+            // (e.g. soundEffects/ui/click.wav -> "ui/click"), matching SoundEffectManager's
+            // category scheme. Normalized to '/' so keys are identical on all platforms.
+            var relativeDir = Path
+                .GetRelativePath(fullContentDirectory, directory!)
+                .Replace('\\', '/');
+            var contentId = relativeDir == "." ? fileName : $"{relativeDir}/{fileName}";
 
             _loadActions.Add(cp =>
             {

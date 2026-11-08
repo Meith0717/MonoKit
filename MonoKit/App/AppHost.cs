@@ -58,6 +58,9 @@ public class AppHost(Microsoft.Xna.Framework.Game game, GraphicsDeviceManager gr
         services.AddService(DisplayController);
         services.AddService(ScreenManager);
 
+        // OS text input (keyboard layout + key repeat) for text entry widgets.
+        InputHandler.EnableTextInput(game.Window);
+
         if (PathService != null)
             services.AddService(PathService);
 

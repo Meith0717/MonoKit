@@ -5,6 +5,7 @@
 // all output reviewed and adapted by the author.
 
 using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -14,29 +15,18 @@ using MonoKit.App.Input;
 namespace MonoKit.App.Ui;
 
 /// <summary>
-///     A text entry field for the UI system.
-///     Supports click-to-focus, cursor navigation, selection, backspace, delete.
+///     Single-line text entry: click to focus, drag-free cursor navigation, password masking.
+///     Characters arrive from the platform text-input event (see <see cref="InputHandler.EnableTextInput" />),
+///     so keyboard layout, modifiers and key repeat are handled by the OS.
 /// </summary>
-public sealed class UiTextEntry : UiElement
+public sealed class UiTextEntry(SpriteFont spriteFont) : UiElement
 {
-    private readonly SpriteFont _font;
+    private readonly SpriteFont _font = spriteFont;
     private int _cursorPosition;
     private bool _isFocused;
     private string _placeholder = string.Empty;
-
-    // Track previous keyboard state for edge detection
     private KeyboardState _previousKeyboardState;
-    private int _selectionLength;
-    private int _selectionStart = -1;
-    private bool _showCursor;
     private string _text = string.Empty;
-
-    public UiTextEntry(SpriteFont spriteFont)
-    {
-        _font = spriteFont;
-        _previousKeyboardState = Keyboard.GetState();
-        UpdateSize();
-    }
 
     public string Text
     {
@@ -45,18 +35,13 @@ public sealed class UiTextEntry : UiElement
         {
             _text = value ?? string.Empty;
             _cursorPosition = MathHelper.Clamp(_cursorPosition, 0, _text.Length);
-            UpdateSize();
         }
     }
 
     public string Placeholder
     {
         get => _placeholder;
-        set
-        {
-            _placeholder = value ?? string.Empty;
-            UpdateSize();
-        }
+        set => _placeholder = value ?? string.Empty;
     }
 
     public float Scale { get; set; } = 1f;
@@ -70,428 +55,122 @@ public sealed class UiTextEntry : UiElement
     public bool IsPassword { get; set; }
     public char PasswordChar { get; set; } = '*';
 
-    public override void ApplyScale(Rectangle root, float uiScale)
+    protected override void MeasureSize()
     {
-        base.ApplyScale(root, uiScale);
-        UpdateSize();
+        var displayText = PasswordAware(_text.Length > 0 ? _text : _placeholder);
+        var textDimension = _font.MeasureString(displayText);
+        IntrinsicWidth = (int)(textDimension.X * Scale) + Padding * 2;
+        IntrinsicHeight = (int)(MathHelper.Max(textDimension.Y, _font.LineSpacing) * Scale) + Padding * 2;
     }
 
     protected override void Updater(InputHandler inputHandler)
     {
         var mouseState = Mouse.GetState();
-        var mousePos = mouseState.Position;
         var keyboardState = Keyboard.GetState();
 
-        // Handle focus on click
-        var wasMousePressed = mouseState.LeftButton == ButtonState.Pressed;
-
-        if (Bounds.Contains(mousePos) && wasMousePressed)
+        // Click to focus/unfocus; clicking inside also moves the cursor to the click position.
+        if (mouseState.LeftButton == ButtonState.Pressed)
         {
-            _isFocused = true;
-            // Move cursor to clicked position
-            var relativeX = mousePos.X - Bounds.X - Padding;
-            _cursorPosition = GetCursorPositionFromX(relativeX);
-            _selectionStart = -1;
-            _selectionLength = 0;
-        }
-        else if (wasMousePressed)
-        {
-            _isFocused = false;
+            _isFocused = Bounds.Contains(mouseState.Position);
+            if (_isFocused)
+                _cursorPosition = GetCursorPositionFromX(mouseState.X - Bounds.X - Padding);
         }
 
         if (_isFocused)
-        {
-            _showCursor = true; // Always show cursor when focused
-
-            // Handle keyboard input using edge detection
-            var currentKeys = keyboardState.GetPressedKeys();
-            var previousKeys = _previousKeyboardState.GetPressedKeys();
-
-            // Check for Enter (unfocus)
-            if (IsKeyPressed(Keys.Enter, keyboardState, _previousKeyboardState))
-                _isFocused = false;
-
-            // Check for Backspace
-            if (IsKeyPressed(Keys.Back, keyboardState, _previousKeyboardState))
-                HandleBackspace();
-
-            // Check for Delete
-            if (IsKeyPressed(Keys.Delete, keyboardState, _previousKeyboardState))
-                HandleDelete();
-
-            // Check for Left arrow
-            if (IsKeyPressed(Keys.Left, keyboardState, _previousKeyboardState))
-            {
-                var shiftPressed =
-                    keyboardState.IsKeyDown(Keys.LeftShift)
-                    || keyboardState.IsKeyDown(Keys.RightShift);
-                if (shiftPressed)
-                {
-                    if (_selectionStart == -1)
-                        _selectionStart = _cursorPosition;
-                    _cursorPosition = Math.Max(0, _cursorPosition - 1);
-                    _selectionLength = Math.Abs(_selectionStart - _cursorPosition);
-                }
-                else
-                {
-                    _cursorPosition = Math.Max(0, _cursorPosition - 1);
-                    _selectionStart = -1;
-                    _selectionLength = 0;
-                }
-            }
-
-            // Check for Right arrow
-            if (IsKeyPressed(Keys.Right, keyboardState, _previousKeyboardState))
-            {
-                var shiftPressed =
-                    keyboardState.IsKeyDown(Keys.LeftShift)
-                    || keyboardState.IsKeyDown(Keys.RightShift);
-                if (shiftPressed)
-                {
-                    if (_selectionStart == -1)
-                        _selectionStart = _cursorPosition;
-                    _cursorPosition = Math.Min(_text.Length, _cursorPosition + 1);
-                    _selectionLength = Math.Abs(_selectionStart - _cursorPosition);
-                }
-                else
-                {
-                    _cursorPosition = Math.Min(_text.Length, _cursorPosition + 1);
-                    _selectionStart = -1;
-                    _selectionLength = 0;
-                }
-            }
-
-            // Check for Home
-            if (IsKeyPressed(Keys.Home, keyboardState, _previousKeyboardState))
-            {
-                var shiftPressed =
-                    keyboardState.IsKeyDown(Keys.LeftShift)
-                    || keyboardState.IsKeyDown(Keys.RightShift);
-                if (shiftPressed)
-                {
-                    if (_selectionStart == -1)
-                        _selectionStart = _cursorPosition;
-                    _cursorPosition = 0;
-                    _selectionLength = Math.Abs(_selectionStart - _cursorPosition);
-                }
-                else
-                {
-                    _cursorPosition = 0;
-                    _selectionStart = -1;
-                    _selectionLength = 0;
-                }
-            }
-
-            // Check for End
-            if (IsKeyPressed(Keys.End, keyboardState, _previousKeyboardState))
-            {
-                var shiftPressed =
-                    keyboardState.IsKeyDown(Keys.LeftShift)
-                    || keyboardState.IsKeyDown(Keys.RightShift);
-                if (shiftPressed)
-                {
-                    if (_selectionStart == -1)
-                        _selectionStart = _cursorPosition;
-                    _cursorPosition = _text.Length;
-                    _selectionLength = Math.Abs(_selectionStart - _cursorPosition);
-                }
-                else
-                {
-                    _cursorPosition = _text.Length;
-                    _selectionStart = -1;
-                    _selectionLength = 0;
-                }
-            }
-
-            // Check for Escape (unfocus without changing text)
-            if (IsKeyPressed(Keys.Escape, keyboardState, _previousKeyboardState))
-                _isFocused = false;
-
-            // Handle character input
-            HandleCharacterInput(keyboardState, _previousKeyboardState);
-        }
-        else
-        {
-            _showCursor = false;
-        }
+            HandleEditingKeys(keyboardState, inputHandler.TypedCharacters);
 
         _previousKeyboardState = keyboardState;
     }
 
-    private bool IsKeyPressed(Keys key, KeyboardState current, KeyboardState previous)
+    private void HandleEditingKeys(KeyboardState keyboardState, IReadOnlyList<char> typedCharacters)
     {
-        return current.IsKeyDown(key) && !previous.IsKeyDown(key);
-    }
-
-    private void HandleBackspace()
-    {
-        if (_selectionLength > 0)
+        if (IsKeyDownEdge(Keys.Enter) || IsKeyDownEdge(Keys.Escape))
         {
-            _text = _text.Remove(_selectionStart, _selectionLength);
-            _cursorPosition = _selectionStart;
-            _selectionLength = 0;
-            _selectionStart = -1;
+            _isFocused = false;
+            return;
         }
-        else if (_cursorPosition > 0)
+
+        if (IsKeyDownEdge(Keys.Back) && _cursorPosition > 0)
         {
             _text = _text.Remove(_cursorPosition - 1, 1);
             _cursorPosition--;
         }
 
-        UpdateSize();
-    }
-
-    private void HandleDelete()
-    {
-        if (_selectionLength > 0)
-        {
-            _text = _text.Remove(_selectionStart, _selectionLength);
-            _cursorPosition = _selectionStart;
-            _selectionLength = 0;
-            _selectionStart = -1;
-        }
-        else if (_cursorPosition < _text.Length)
-        {
+        if (IsKeyDownEdge(Keys.Delete) && _cursorPosition < _text.Length)
             _text = _text.Remove(_cursorPosition, 1);
+
+        if (IsKeyDownEdge(Keys.Left))
+            _cursorPosition = Math.Max(0, _cursorPosition - 1);
+        if (IsKeyDownEdge(Keys.Right))
+            _cursorPosition = Math.Min(_text.Length, _cursorPosition + 1);
+        if (IsKeyDownEdge(Keys.Home))
+            _cursorPosition = 0;
+        if (IsKeyDownEdge(Keys.End))
+            _cursorPosition = _text.Length;
+
+        foreach (var character in typedCharacters)
+        {
+            _text = _text.Insert(_cursorPosition, character.ToString());
+            _cursorPosition++;
         }
 
-        UpdateSize();
-    }
+        return;
 
-    private void HandleCharacterInput(KeyboardState current, KeyboardState previous)
-    {
-        // Check all keys that were just pressed
-        var currentPressed = current.GetPressedKeys();
-        var previousPressed = previous.GetPressedKeys();
-
-        foreach (var key in currentPressed)
-        {
-            // Skip if this key was also pressed before
-            if (Array.IndexOf(previousPressed, key) >= 0)
-                continue;
-
-            // Skip modifier and special keys
-            if (IsModifierOrSpecialKey(key))
-                continue;
-
-            // Get character from key
-            var character = GetCharFromKey(key, current);
-            if (character != '\0')
-            {
-                // Insert character at cursor position
-                if (_selectionLength > 0)
-                {
-                    _text = _text.Remove(_selectionStart, _selectionLength);
-                    _cursorPosition = _selectionStart;
-                    _selectionLength = 0;
-                    _selectionStart = -1;
-                }
-
-                _text = _text.Insert(_cursorPosition, character.ToString());
-                _cursorPosition++;
-                UpdateSize();
-                break; // Only process one key per frame
-            }
-        }
-    }
-
-    private bool IsModifierOrSpecialKey(Keys key)
-    {
-        return key switch
-        {
-            Keys.LeftShift
-            or Keys.RightShift
-            or Keys.LeftControl
-            or Keys.RightControl
-            or Keys.LeftAlt
-            or Keys.RightAlt
-            or Keys.LeftWindows
-            or Keys.RightWindows
-            or Keys.CapsLock
-            or Keys.NumLock
-            or Keys.PrintScreen
-            or Keys.Left
-            or Keys.Right
-            or Keys.Up
-            or Keys.Down
-            or Keys.Home
-            or Keys.End
-            or Keys.PageUp
-            or Keys.PageDown
-            or Keys.Back
-            or Keys.Delete
-            or Keys.Tab
-            or Keys.Enter
-            or Keys.Escape => true,
-            _ => false,
-        };
-    }
-
-    private char GetCharFromKey(Keys key, KeyboardState keyboardState)
-    {
-        var shiftPressed =
-            keyboardState.IsKeyDown(Keys.LeftShift) || keyboardState.IsKeyDown(Keys.RightShift);
-        var capsLock = keyboardState.CapsLock;
-        var effectiveShift = shiftPressed ^ capsLock;
-
-        return key switch
-        {
-            Keys.A => effectiveShift ? 'A' : 'a',
-            Keys.B => effectiveShift ? 'B' : 'b',
-            Keys.C => effectiveShift ? 'C' : 'c',
-            Keys.D => effectiveShift ? 'D' : 'd',
-            Keys.E => effectiveShift ? 'E' : 'e',
-            Keys.F => effectiveShift ? 'F' : 'f',
-            Keys.G => effectiveShift ? 'G' : 'g',
-            Keys.H => effectiveShift ? 'H' : 'h',
-            Keys.I => effectiveShift ? 'I' : 'i',
-            Keys.J => effectiveShift ? 'J' : 'j',
-            Keys.K => effectiveShift ? 'K' : 'k',
-            Keys.L => effectiveShift ? 'L' : 'l',
-            Keys.M => effectiveShift ? 'M' : 'm',
-            Keys.N => effectiveShift ? 'N' : 'n',
-            Keys.O => effectiveShift ? 'O' : 'o',
-            Keys.P => effectiveShift ? 'P' : 'p',
-            Keys.Q => effectiveShift ? 'Q' : 'q',
-            Keys.R => effectiveShift ? 'R' : 'r',
-            Keys.S => effectiveShift ? 'S' : 's',
-            Keys.T => effectiveShift ? 'T' : 't',
-            Keys.U => effectiveShift ? 'U' : 'u',
-            Keys.V => effectiveShift ? 'V' : 'v',
-            Keys.W => effectiveShift ? 'W' : 'w',
-            Keys.X => effectiveShift ? 'X' : 'x',
-            Keys.Y => effectiveShift ? 'Y' : 'y',
-            Keys.Z => effectiveShift ? 'Z' : 'z',
-            Keys.D0 => shiftPressed ? ')' : '0',
-            Keys.D1 => shiftPressed ? '!' : '1',
-            Keys.D2 => shiftPressed ? '@' : '2',
-            Keys.D3 => shiftPressed ? '#' : '3',
-            Keys.D4 => shiftPressed ? '$' : '4',
-            Keys.D5 => shiftPressed ? '%' : '5',
-            Keys.D6 => shiftPressed ? '^' : '6',
-            Keys.D7 => shiftPressed ? '&' : '7',
-            Keys.D8 => shiftPressed ? '*' : '8',
-            Keys.D9 => shiftPressed ? '(' : '9',
-            Keys.NumPad0 => '0',
-            Keys.NumPad1 => '1',
-            Keys.NumPad2 => '2',
-            Keys.NumPad3 => '3',
-            Keys.NumPad4 => '4',
-            Keys.NumPad5 => '5',
-            Keys.NumPad6 => '6',
-            Keys.NumPad7 => '7',
-            Keys.NumPad8 => '8',
-            Keys.NumPad9 => '9',
-            Keys.OemPeriod => '.',
-            Keys.OemComma => ',',
-            Keys.OemQuestion => shiftPressed ? '?' : '/',
-            Keys.OemSemicolon => shiftPressed ? ':' : ';',
-            Keys.OemQuotes => shiftPressed ? '"' : '\'',
-            Keys.OemOpenBrackets => shiftPressed ? '{' : '[',
-            Keys.OemCloseBrackets => shiftPressed ? '}' : ']',
-            Keys.OemBackslash => shiftPressed ? '|' : '\\',
-            Keys.OemMinus => shiftPressed ? '_' : '-',
-            Keys.OemPlus => shiftPressed ? '+' : '=',
-            Keys.OemTilde => shiftPressed ? '~' : '`',
-            Keys.Space => ' ',
-            _ => '\0',
-        };
+        bool IsKeyDownEdge(Keys key) =>
+            keyboardState.IsKeyDown(key) && !_previousKeyboardState.IsKeyDown(key);
     }
 
     protected override void Drawer(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice)
     {
-        // Draw background
-        var bgColor = _isFocused ? FocusedBgColor : BgColor;
-        spriteBatch.FillRectangle(Bounds, bgColor);
+        spriteBatch.FillRectangle(Bounds, _isFocused ? FocusedBgColor : BgColor);
 
-        // Draw text or placeholder
-        var displayText = string.IsNullOrEmpty(_text) ? _placeholder : _text;
-        var textColor = string.IsNullOrEmpty(_text) ? PlaceholderColor : Color;
-
-        if (IsPassword && !string.IsNullOrEmpty(_text))
-            displayText = new string(PasswordChar, _text.Length);
-
+        var hasText = _text.Length > 0;
+        var displayText = hasText ? PasswordAware(_text) : _placeholder;
         var position = Bounds.Location.ToVector2();
         position.X += Padding;
         position.Y += Padding;
 
-        spriteBatch.DrawString(
-            _font,
-            displayText,
-            position,
-            textColor,
-            0,
-            Vector2.Zero,
-            UiScale * Scale,
-            SpriteEffects.None,
-            1
+        if (!string.IsNullOrEmpty(displayText))
+            spriteBatch.DrawString(
+                _font,
+                displayText,
+                position,
+                hasText ? Color : PlaceholderColor,
+                0,
+                Vector2.Zero,
+                UiScale * Scale,
+                SpriteEffects.None,
+                1
+            );
+
+        if (!_isFocused)
+            return;
+
+        var cursorX =
+            position.X
+            + _font.MeasureString(displayText.Substring(0, _cursorPosition)).X * UiScale * Scale;
+        var cursorHeight = _font.MeasureString("A").Y * UiScale * Scale;
+
+        spriteBatch.DrawLine(
+            new Vector2(cursorX, position.Y),
+            new Vector2(cursorX, position.Y + cursorHeight),
+            CursorColor,
+            2f
         );
-
-        // Draw selection if any
-        if (_selectionLength > 0 && _selectionStart != -1)
-        {
-            var start = Math.Min(_selectionStart, _cursorPosition);
-            var length = _selectionLength;
-            var selectionText = displayText.Substring(start, length);
-            var selectionWidth = _font.MeasureString(selectionText).X * UiScale * Scale;
-            var selectionX =
-                position.X
-                + _font.MeasureString(displayText.Substring(0, start)).X * UiScale * Scale;
-            var selectionY = position.Y;
-            var selectionHeight = _font.MeasureString("A").Y * UiScale * Scale;
-
-            spriteBatch.FillRectangle(
-                new Rectangle(
-                    (int)selectionX,
-                    (int)selectionY,
-                    (int)selectionWidth,
-                    (int)selectionHeight
-                ),
-                new Color(100, 100, 200, 150)
-            );
-        }
-
-        // Draw cursor if focused
-        if (_isFocused && _showCursor)
-        {
-            var cursorX =
-                position.X
-                + _font.MeasureString(displayText.Substring(0, _cursorPosition)).X
-                    * UiScale
-                    * Scale;
-            var cursorY = position.Y;
-            var cursorHeight = _font.MeasureString("A").Y * UiScale * Scale;
-
-            spriteBatch.DrawLine(
-                new Vector2(cursorX, cursorY),
-                new Vector2(cursorX, cursorY + cursorHeight),
-                CursorColor,
-                2f
-            );
-        }
     }
 
-    private void UpdateSize()
-    {
-        var displayText = string.IsNullOrEmpty(_text) ? _placeholder : _text;
-        if (IsPassword && !string.IsNullOrEmpty(_text))
-            displayText = new string(PasswordChar, _text.Length);
-
-        var textDimension = _font.MeasureString(displayText);
-        Width = (int)(textDimension.X * Scale) + Padding * 2;
-        Height = (int)(textDimension.Y * Scale) + Padding * 2;
-    }
+    private string PasswordAware(string text) =>
+        IsPassword ? new string(PasswordChar, text.Length) : text;
 
     private int GetCursorPositionFromX(float x)
     {
-        if (string.IsNullOrEmpty(_text))
+        if (_text.Length == 0)
             return 0;
 
-        var displayText = IsPassword ? new string(PasswordChar, _text.Length) : _text;
+        var displayText = PasswordAware(_text);
         for (var i = 0; i <= displayText.Length; i++)
         {
-            var substring = displayText.Substring(0, i);
-            var width = _font.MeasureString(substring).X * UiScale * Scale;
+            var width = _font.MeasureString(displayText.Substring(0, i)).X * UiScale * Scale;
             if (width > x)
                 return MathHelper.Clamp(i - 1, 0, _text.Length);
         }

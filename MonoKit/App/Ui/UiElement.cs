@@ -79,7 +79,14 @@ public abstract class UiElement : IDisposable
     protected abstract void Drawer(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice);
 
     /// <summary>
-    ///     Computes the element's intrinsic <see cref="Width" />/<see cref="Height" /> before layout.
+    ///     Content-derived size, computed by <see cref="MeasureSize" />.
+    ///     Unlike <see cref="Width" />/<see cref="Height" />, a user-assigned explicit size always wins.
+    /// </summary>
+    protected int? IntrinsicWidth;
+    protected int? IntrinsicHeight;
+
+    /// <summary>
+    ///     Computes the element's <see cref="IntrinsicWidth" />/<see cref="IntrinsicHeight" /> before layout.
     ///     Override in widgets whose size derives from content (text, texture).
     /// </summary>
     protected virtual void MeasureSize() { }
@@ -114,8 +121,9 @@ public abstract class UiElement : IDisposable
         var x = (int)float.Floor(X * UiScale ?? root.Width * RelX);
         var y = (int)float.Floor(Y * UiScale ?? root.Height * RelY);
 
-        var width = (int)float.Floor(Width * UiScale ?? root.Width * RelWidth);
-        var height = (int)float.Floor(Height * UiScale ?? root.Height * RelHeight);
+        // Size priority: explicit Width/Height, then measured intrinsic size, then relative fractions.
+        var width = (int)float.Floor((Width ?? IntrinsicWidth) * UiScale ?? root.Width * RelWidth);
+        var height = (int)float.Floor((Height ?? IntrinsicHeight) * UiScale ?? root.Height * RelHeight);
 
         ManageFillScale(root, FillScale, ref x, ref y, ref width, ref height);
         ManageAlign(root, Align, ref x, ref y, ref width, ref height);

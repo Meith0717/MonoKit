@@ -1,4 +1,4 @@
-﻿// AppHost - UiVariableSelector.cs
+// AppHost - UiVariableSelector.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -12,11 +12,17 @@ using MonoKit.App.Input;
 
 namespace MonoKit.App.Ui;
 
-public sealed class UiVariableSelector<T> : UiElement
+/// <summary>
+///     Value picker: arrow buttons on the left/right edges and a centered label.
+///     A plain <see cref="UiContainer" /> — arrows and label are regular children,
+///     so update/draw/scale/clip cascade is handled by the standard machinery.
+/// </summary>
+public sealed class UiVariableSelector<T> : UiContainer
 {
     private readonly UiButton.Sprite _arrowL;
     private readonly UiButton.Sprite _arrowR;
     private readonly UiText _text;
+    private readonly SpriteFont _font;
     private List<T> _items;
     private int _selectedIndex;
 
@@ -27,6 +33,7 @@ public sealed class UiVariableSelector<T> : UiElement
         T[] items
     )
     {
+        _font = spriteFont;
         _items = [.. items];
 
         _arrowL = new UiButton.Sprite(leftButton) { Align = Align.W };
@@ -35,11 +42,12 @@ public sealed class UiVariableSelector<T> : UiElement
         _arrowR = new UiButton.Sprite(rightButton) { Align = Align.E };
         _arrowR.OnClickAction += IncreaseIndex;
 
-        _text = new UiText(spriteFont)
-        {
-            Align = Align.Center,
-            Text = _items.Count == 0 ? string.Empty : _items[_selectedIndex].ToString(),
-        };
+        _text = new UiText(spriteFont) { Align = Align.Center };
+        UpdateText();
+
+        Add(_arrowL);
+        Add(_text);
+        Add(_arrowR);
     }
 
     public Action<T> OnClickAction { get; set; }
@@ -49,7 +57,9 @@ public sealed class UiVariableSelector<T> : UiElement
         set
         {
             _items = [.. value];
-            _text.Text = _items.Count == 0 ? string.Empty : _items[_selectedIndex].ToString();
+            _selectedIndex =
+                _items.Count == 0 ? 0 : Math.Clamp(_selectedIndex, 0, _items.Count - 1);
+            UpdateText();
         }
     }
 
@@ -75,43 +85,36 @@ public sealed class UiVariableSelector<T> : UiElement
 
     public T Value
     {
-        get => _items[_selectedIndex];
+        get
+        {
+            if (_items.Count == 0)
+                throw new InvalidOperationException("UiVariableSelector has no items.");
+            return _items[_selectedIndex];
+        }
         set => _selectedIndex = GetIndex(value);
     }
 
-    protected override void Updater(InputHandler inputHandler)
+    // Height derives from the tallest part (label or arrows), so parent boxes get a fitting row height.
+    protected override void MeasureSize()
     {
-        _arrowL.Update(inputHandler, Bounds, UiScale);
-        _arrowR.Update(inputHandler, Bounds, UiScale);
-        _text.Update(inputHandler, Bounds, UiScale);
-        Height = (int)
-            float.Floor(
-                int.Max(_text.Bounds.Height, int.Max(_arrowL.Bounds.Height, _arrowR.Bounds.Height))
-                    / UiScale
-            );
+        var arrowHeightL = _arrowL.Texture2D?.Height ?? 0;
+        var arrowHeightR = _arrowR.Texture2D?.Height ?? 0;
+        IntrinsicHeight = (int)
+            Math.Max(_font.LineSpacing * _text.Scale, Math.Max(arrowHeightL, arrowHeightR));
     }
 
-    protected override void Drawer(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice)
+    // Arrows pinned to the edges, label centered — for all window sizes.
+    protected override void LayoutChildren()
     {
-        _arrowL.Draw(spriteBatch, graphicsDevice);
-        _arrowR.Draw(spriteBatch, graphicsDevice);
-        _text.Draw(spriteBatch, graphicsDevice);
-    }
-
-    public override void ApplyScale(Rectangle root, float uiScale)
-    {
-        base.ApplyScale(root, uiScale);
-        _arrowL.ApplyScale(Bounds, UiScale);
-        _arrowR.ApplyScale(Bounds, UiScale);
-        _text.ApplyScale(Bounds, UiScale);
-    }
-
-    public override void Dispose()
-    {
-        base.Dispose();
-        _arrowL.Dispose();
-        _arrowR.Dispose();
-        _text.Dispose();
+        _arrowL.RelX = 0;
+        _arrowL.RelY = 0;
+        _arrowL.Align = Align.W;
+        _arrowR.RelX = 0;
+        _arrowR.RelY = 0;
+        _arrowR.Align = Align.E;
+        _text.RelX = 0;
+        _text.RelY = 0;
+        _text.Align = Align.Center;
     }
 
     private void IncreaseIndex()
@@ -121,7 +124,7 @@ public sealed class UiVariableSelector<T> : UiElement
         _selectedIndex++;
         if (_selectedIndex >= _items.Count)
             _selectedIndex = 0;
-        _text.Text = _items[_selectedIndex].ToString();
+        UpdateText();
         OnClickAction?.Invoke(_items[_selectedIndex]);
     }
 
@@ -132,9 +135,12 @@ public sealed class UiVariableSelector<T> : UiElement
         _selectedIndex--;
         if (_selectedIndex < 0)
             _selectedIndex = _items.Count - 1;
-        _text.Text = _items[_selectedIndex].ToString();
+        UpdateText();
         OnClickAction?.Invoke(_items[_selectedIndex]);
     }
+
+    private void UpdateText() =>
+        _text.Text = _items.Count == 0 ? string.Empty : _items[_selectedIndex].ToString();
 
     private int GetIndex(T value)
     {

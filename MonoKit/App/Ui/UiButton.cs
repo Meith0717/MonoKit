@@ -19,6 +19,10 @@ public interface IButton
 {
     bool Disable { get; set; }
     Action OnClickAction { get; set; }
+
+    /// <summary>Restores the idle colors (undoes any <c>OverrideColor</c> call).</summary>
+    void ResetColor();
+
     void OverrideColor(params Color[] color);
 }
 
@@ -73,6 +77,8 @@ public static class UiButton
                 Color = color[1];
         }
 
+        public void ResetColor() => OverrideColor(TextIdleColor, TextureIdleColor);
+
         protected override void Updater(InputHandler inputHandler)
         {
             base.Updater(inputHandler);
@@ -98,7 +104,12 @@ public static class UiButton
         public override void ApplyScale(Rectangle root, float uiScale)
         {
             base.ApplyScale(root, uiScale);
-            UiText?.ApplyScale(Bounds, uiScale);
+            if (UiText is null)
+                return;
+            // Composed text is not in a container's child list, so forward the clip rect manually
+            // (UiContainer.ApplyScale normally does this for added children).
+            UiText.ClipRect = ClipRect;
+            UiText.ApplyScale(Bounds, uiScale);
         }
 
         public override void Dispose()
@@ -130,6 +141,8 @@ public static class UiButton
             if (color.Length > 0)
                 UiText.Color = color.First();
         }
+
+        public void ResetColor() => OverrideColor(TextIdleColor);
 
         protected override void Updater(InputHandler inputHandler)
         {

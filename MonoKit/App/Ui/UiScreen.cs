@@ -18,9 +18,17 @@ public abstract class UiScreen(
     bool drawBelow = false
 ) : IScreen
 {
+    // Immediate mode: each sprite renders with the GraphicsDevice state at call time, so the
+    // per-container scissor rectangles (clipping) apply. Deferred would buffer all sprites and
+    // apply only the scissor rect set last (the viewport), silently breaking clipping.
+    private static readonly RasterizerState ScissorRasterizerState = new()
+    {
+        ScissorTestEnable = true,
+    };
+
     /// <summary>Root of the screen's UI tree.</summary>
     // ReSharper disable once MemberCanBePrivate.Global
-    protected readonly UiFrame UiRoot = new()
+    protected readonly UiContainer UiRoot = new()
     {
         Color = Color.Transparent,
         RelWidth = 1,
@@ -46,10 +54,10 @@ public abstract class UiScreen(
     /// <summary>Draws the UI tree. Override to additionally draw 3D content via <paramref name="graphicsDevice" />.</summary>
     public virtual void Draw(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice)
     {
-        // ScissorTestEnable lets containers (e.g. UiWindow) clip children via GraphicsDevice.ScissorRectangle.
+        // ScissorTestEnable lets containers clip children via GraphicsDevice.ScissorRectangle.
         // Initialize the scissor rect to the full viewport so nothing is clipped by default.
         graphicsDevice.ScissorRectangle = graphicsDevice.Viewport.Bounds;
-        spriteBatch.Begin(rasterizerState: new RasterizerState { ScissorTestEnable = true });
+        spriteBatch.Begin(SpriteSortMode.Immediate, rasterizerState: ScissorRasterizerState);
         UiRoot.Draw(spriteBatch, graphicsDevice);
         spriteBatch.End();
     }

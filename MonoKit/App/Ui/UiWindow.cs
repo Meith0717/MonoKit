@@ -20,9 +20,9 @@ namespace MonoKit.App.Ui;
 /// </summary>
 public class UiWindow : UiContainer
 {
-    private readonly UiFrame _titleBar;
+    private readonly UiContainer _titleBar;
     private readonly UiText _titleText;
-    private readonly UiLayer _content;
+    private readonly UiContainer _content;
     private readonly List<float> _contentBaseRelY = [];
     private bool _dragging;
     private Point _lastMouse;
@@ -31,10 +31,10 @@ public class UiWindow : UiContainer
     public UiWindow(SpriteFont font, string title)
     {
         _titleText = new UiText(font, title) { Align = Align.W, Color = Color.White };
-        _titleBar = new UiFrame { Color = new Color(40, 40, 40, 220) };
+        _titleBar = new UiContainer { Color = new Color(40, 40, 40, 220) };
         _titleBar.Add(_titleText);
 
-        _content = new UiLayer { ClipChildren = true };
+        _content = new UiContainer();
 
         Add(_titleBar);
         Add(_content);
@@ -64,7 +64,7 @@ public class UiWindow : UiContainer
     }
 
     /// <summary>The scrollable content layer (children render clipped to its bounds).</summary>
-    public UiLayer Content => _content;
+    public UiContainer Content => _content;
 
 
     public void AddContent(UiElement child)
@@ -124,13 +124,10 @@ public class UiWindow : UiContainer
             }
         }
 
-        if (Bounds.Contains(mousePos))
-        {
-            var wheelDelta = mouse.ScrollWheelValue - _lastWheel;
-            _lastWheel = mouse.ScrollWheelValue;
-            if (wheelDelta != 0)
-                ScrollOffset = Math.Clamp(ScrollOffset - wheelDelta * ScrollSpeed, 0, MaxScrollOffset());
-        }
+        var wheelDelta = mouse.ScrollWheelValue - _lastWheel;
+        _lastWheel = mouse.ScrollWheelValue;
+        if (Bounds.Contains(mousePos) && wheelDelta != 0)
+            ScrollOffset = Math.Clamp(ScrollOffset - wheelDelta * ScrollSpeed, 0, MaxScrollOffset());
     }
 
     private float MaxScrollOffset()
@@ -142,10 +139,8 @@ public class UiWindow : UiContainer
         float maxBottom = 0;
         for (var i = 0; i < children.Count; i++)
         {
-            var child = children[i];
-            var childHeightPx = child.Height * UiScale ?? child.RelHeight * contentHeight;
             var childTopPx = _contentBaseRelY[i] * contentHeight;
-            maxBottom = Math.Max(maxBottom, childTopPx + childHeightPx);
+            maxBottom = Math.Max(maxBottom, childTopPx + children[i].Bounds.Height);
         }
         return Math.Max(0, maxBottom - contentHeight);
     }

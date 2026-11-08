@@ -7,24 +7,40 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Extended;
 using MonoKit.App.Input;
 
 namespace MonoKit.App.Ui;
 
 /// <summary>
-///     Base class for elements with children: owns the child list, cascades update/draw/scale/dispose,
-///     and lets subclasses define the child layout via <see cref="LayoutChildren" />.
-///     When <see cref="ClipChildren" /> is true, the container's bounds become the clip rect for all
-///     descendants: culled on the CPU (draw + input) and scissored on the GPU.
+///     Concrete container: owns the child list, cascades update/draw/scale/dispose, and lets
+///     subclasses define the child layout via <see cref="LayoutChildren" />.
+///     Draws an optional background — a solid <see cref="Color" /> or an attached texture
+///     (transparent by default: no background).
+///     When <see cref="ClipChildren" /> is true, the container's bounds become the clip rect for
+///     all descendants: culled on the CPU (draw + input) and scissored on the GPU.
 /// </summary>
-public abstract class UiContainer : UiElement
+public class UiContainer : UiElement
 {
     private readonly List<UiElement> _children = new();
+    private Color _color = Color.Transparent;
+    private Texture2D _backgroundTexture;
+    private float _textureScale = 1;
 
     public IReadOnlyList<UiElement> Children => _children;
 
-    /// <summary>Clip all descendants to this container's <see cref="UiElement.Bounds" /> (GPU scissor + CPU cull).</summary>
-    public bool ClipChildren { get; set; }
+    /// <summary>Background color or texture tint; <see cref="Color.Transparent" /> draws no solid background.</summary>
+    public Color Color
+    {
+        get => _color;
+        set => _color = value;
+    }
+
+    /// <summary>
+    ///     Clip all descendants to this container's <see cref="UiElement.Bounds" /> (GPU scissor + CPU cull).
+    ///     Default on for a WYSIWYG layout; set false to let children overflow (tooltips, dropdowns).
+    /// </summary>
+    public bool ClipChildren { get; set; } = true;
 
     public virtual void Add(UiElement child) => _children.Add(child);
 
@@ -34,7 +50,25 @@ public abstract class UiContainer : UiElement
     /// <summary>Assigns relative layout slots to children; called after the container's own bounds are computed.</summary>
     protected virtual void LayoutChildren() { }
 
-    protected virtual void DrawBackground(SpriteBatch spriteBatch) { }
+    /// <summary>Uses <paramref name="texture" /> as the background (stretched to the bounds).</summary>
+    public UiContainer AttachTexture(Texture2D texture, float scale = 1)
+    {
+        _backgroundTexture = texture;
+        _textureScale = scale;
+        // An attached background texture is meant to be visible; don't keep a transparent tint.
+        if (_color == Color.Transparent)
+            _color = Color.White;
+        return this;
+    }
+
+    protected override void MeasureSize()
+    {
+        if (_backgroundTexture is null)
+            return;
+
+        IntrinsicWidth = (int)(_backgroundTexture.Width * _textureScale);
+        IntrinsicHeight = (int)(_backgroundTexture.Height * _textureScale);
+    }
 
     protected override void Updater(InputHandler inputHandler)
     {
@@ -45,7 +79,10 @@ public abstract class UiContainer : UiElement
 
     protected override void Drawer(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice)
     {
-        DrawBackground(spriteBatch);
+        if (_backgroundTexture is not null)
+            spriteBatch.Draw(_backgroundTexture, Bounds, _color);
+        else if (_color != Color.Transparent)
+            spriteBatch.FillRectangle(Bounds, _color);
 
         if (!ClipChildren)
         {
