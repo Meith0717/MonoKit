@@ -30,6 +30,16 @@ public class ContentLoader
 
     public static ContentLoader Create(ContentManager contentManager)
     {
+        var contentRoot = contentManager.RootDirectory;
+        ContentLayout.CreateContentLayout(contentRoot);
+
+        var projectContent = ContentLayout.FindProjectContentRoot();
+        if (
+            projectContent != null
+            && !string.Equals(projectContent, contentRoot, StringComparison.OrdinalIgnoreCase)
+        )
+            ContentLayout.CreateContentLayout(projectContent);
+
         return new ContentLoader(contentManager);
     }
 
