@@ -30,13 +30,10 @@
         <ProjectReference Include="..\MonoKit\MonoKit.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <Folder Include="Content\boot\effects\" />
         <Folder Include="Content\boot\fonts\" />
         <Folder Include="Content\boot\textures\" />
-        <Folder Include="Content\effects\" />
         <Folder Include="Content\music\" />
-        <Folder Include="Content\prefabs\" />
-        <Folder Include="Content\soundEffects\" />
+        <Folder Include="Content\soundEffects\ui\" />
         <Folder Include="Content\textures\" />
     </ItemGroup>
 </Project>

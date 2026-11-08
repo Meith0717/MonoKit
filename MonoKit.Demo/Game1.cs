@@ -8,8 +8,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
 using MonoKit.App;
 using MonoKit.App.Content;
 using MonoKit.App.Core.IO;
@@ -20,6 +22,10 @@ using MonoKit.Demo.Screens;
 
 namespace MonoKit.Demo;
 
+/// <summary>
+///     Demo bootstrapping: input bindings, boot content (loading screen assets), then the
+///     incremental loader behind the loading screen for everything else (textures, sfx, music).
+/// </summary>
 public class Game1 : Microsoft.Xna.Framework.Game
 {
     private readonly AppHost _appHost;
@@ -32,11 +38,14 @@ public class Game1 : Microsoft.Xna.Framework.Game
         {
             PathService = new PathService("MonoKit.Demo", Environment.SpecialFolder.MyDocuments),
         };
-        _appHost.DisplayController.ApplySettings(new DisplaySettings(WindowMode.Windowed, 60, vSync: true));
+        _appHost.DisplayController.ApplySettings(
+            new DisplaySettings(WindowMode.Windowed, 60, vSync: true)
+        );
 
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
 
+        // Mouse listeners need no custom bindings: ButtonPressed/SliderHold are raised internally.
         _appHost.InputHandler.RegisterDevice(
             new MouseListener(new Dictionary<(MouseButton, InputEventType), byte>())
         );
@@ -53,6 +62,8 @@ public class Game1 : Microsoft.Xna.Framework.Game
                     { (Keys.D, InputEventType.Held), (byte)DemoAction.Right },
                     { (Keys.Right, InputEventType.Held), (byte)DemoAction.Right },
                     { (Keys.Escape, InputEventType.Pressed), (byte)DemoAction.Back },
+                    { (Keys.Space, InputEventType.Pressed), (byte)DemoAction.Shoot },
+                    { (Keys.P, InputEventType.Pressed), (byte)DemoAction.Pause },
                 }
             )
         );
@@ -63,17 +74,22 @@ public class Game1 : Microsoft.Xna.Framework.Game
         // Boot content: needed before the first frame (loading screen included).
         ContentLoader
             .Create(Content)
-            .RegisterContentDirectory<SpriteFont>(Path.Combine(ContentLayout.Boot, ContentLayout.Fonts))
-            .RegisterContentDirectory<Texture2D>(Path.Combine(ContentLayout.Boot, ContentLayout.Textures))
+            .RegisterContentDirectory<SpriteFont>(
+                Path.Combine(ContentLayout.Boot, ContentLayout.Fonts)
+            )
+            .RegisterContentDirectory<Texture2D>(
+                Path.Combine(ContentLayout.Boot, ContentLayout.Textures)
+            )
             .LoadAll(_appHost.ContentProvider);
 
         base.Initialize();
         _appHost.Initialize(GraphicsDevice);
 
         // Everything else loads incrementally behind the loading screen.
-        var loader = ContentLoader
-            .Create(Content)
+        var loader = ContentLoader.Create(Content)
             .RegisterContentDirectory<Texture2D>(ContentLayout.Textures)
+            .RegisterContentDirectory<SoundEffect>(ContentLayout.SoundEffects)
+            .RegisterContentDirectory<Song>(ContentLayout.Music)
             .BeginIncremental(_appHost.ContentProvider);
         _appHost.ScreenManager.AddScreen(new LoadingScreen(_appHost, Services, loader));
     }
@@ -91,7 +107,7 @@ public class Game1 : Microsoft.Xna.Framework.Game
 
     protected override void Draw(GameTime gameTime)
     {
-        GraphicsDevice.Clear(Color.CornflowerBlue);
+        GraphicsDevice.Clear(Color.Black);
         _appHost.Draw(gameTime, GraphicsDevice, _spriteBatch);
         base.Draw(gameTime);
     }
