@@ -19,7 +19,7 @@ namespace MonoKit.App.Display;
 /// </summary>
 public sealed class DisplayController : IDisposable
 {
-    private readonly Game _game;
+    private readonly Microsoft.Xna.Framework.Game _game;
     private readonly GraphicsDeviceManager _graphicsDeviceManager;
     private readonly GameWindow _window;
     private float _virtualWidth;
@@ -30,7 +30,7 @@ public sealed class DisplayController : IDisposable
     private int _restoreHeight;
 
     public DisplayController(
-        Game game,
+        Microsoft.Xna.Framework.Game game,
         GraphicsDeviceManager graphicsDeviceManager,
         float virtualWidth = 1920,
         float virtualHeight = 1080

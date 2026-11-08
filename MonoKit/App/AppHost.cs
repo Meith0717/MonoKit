@@ -19,7 +19,7 @@ using MonoKit.App.Screens;
 
 namespace MonoKit.App;
 
-public class AppHost(Game game, GraphicsDeviceManager graphicsDeviceManager) : IDisposable
+public class AppHost(Microsoft.Xna.Framework.Game game, GraphicsDeviceManager graphicsDeviceManager) : IDisposable
 {
     private bool _wasInitialized;
     public readonly FrameCounter FrameCounter = new();

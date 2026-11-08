@@ -41,7 +41,7 @@ public static class ContentLayout
 
     public static void CreateContentLayout(string contentRoot)
     {
-        // Runtime content
+        // Host content
         FileUtils.CreateDirectory(Path.Combine(contentRoot, Textures));
         FileUtils.CreateDirectory(Path.Combine(contentRoot, Effects));
         FileUtils.CreateDirectory(Path.Combine(contentRoot, Fonts));

@@ -18,7 +18,7 @@ namespace MonoKit.App.Screens;
 ///     Stack of <see cref="IScreen" />s. Updates top-down, composites the visible lower chain
 ///     with an optional effect, and draws the top screen unmodified on top.
 /// </summary>
-public class ScreenManager(Game game)
+public class ScreenManager(Microsoft.Xna.Framework.Game game)
 {
     private readonly ConcurrentQueue<Action<float>> _pendingActions = new();
     private readonly PostProcessingRunner _postProcessingRunner = new();

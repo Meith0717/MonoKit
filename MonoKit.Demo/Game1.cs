@@ -20,7 +20,7 @@ using MonoKit.Demo.Screens;
 
 namespace MonoKit.Demo;
 
-public class Game1 : Game
+public class Game1 : Microsoft.Xna.Framework.Game
 {
     private readonly AppHost _appHost;
     private SpriteBatch _spriteBatch = null!;

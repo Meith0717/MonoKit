@@ -5,8 +5,8 @@
 // all output reviewed and adapted by the author.
 
 using Microsoft.Xna.Framework;
-using MonoKit.GameRuntime.ArchetypeEcs;
-using MonoKit.GameRuntime.ArchetypeEcs.Entities;
+using MonoKit.Game.ArchetypeEcs;
+using MonoKit.Game.ArchetypeEcs.Entities;
 
 namespace MonoKit.Test;
 
