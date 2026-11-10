@@ -74,19 +74,16 @@ public class Game1 : Microsoft.Xna.Framework.Game
         // Boot content: needed before the first frame (loading screen included).
         ContentLoader
             .Create(Content)
-            .RegisterContentDirectory<SpriteFont>(
-                Path.Combine(ContentLayout.Boot, ContentLayout.Fonts)
-            )
-            .RegisterContentDirectory<Texture2D>(
-                Path.Combine(ContentLayout.Boot, ContentLayout.Textures)
-            )
+            .RegisterContentDirectory<SpriteFont>(ContentLayout.BootFonts)
+            .RegisterContentDirectory<Texture2D>(ContentLayout.BootTextures)
             .LoadAll(_appHost.ContentProvider);
 
         base.Initialize();
         _appHost.Initialize(GraphicsDevice);
 
         // Everything else loads incrementally behind the loading screen.
-        var loader = ContentLoader.Create(Content)
+        var loader = ContentLoader
+            .Create(Content)
             .RegisterContentDirectory<Texture2D>(ContentLayout.Textures)
             .RegisterContentDirectory<SoundEffect>(ContentLayout.SoundEffects)
             .RegisterContentDirectory<Song>(ContentLayout.Music)

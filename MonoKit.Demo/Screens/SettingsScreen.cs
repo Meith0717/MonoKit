@@ -63,7 +63,12 @@ public class SettingsScreen(AppHost appHost, GameServiceContainer services) : Ui
             }
         );
 
-        _mode = new UiVariableSelector<WindowMode>(arrowL, arrowR, font, Enum.GetValues<WindowMode>())
+        _mode = new UiVariableSelector<WindowMode>(
+            arrowL,
+            arrowR,
+            font,
+            Enum.GetValues<WindowMode>()
+        )
         {
             TextColor = Color.White,
             ButtonScale = arrowScale,
@@ -111,17 +116,14 @@ public class SettingsScreen(AppHost appHost, GameServiceContainer services) : Ui
         panel.Add(Row(font, "Sound fx", _sfxVolume));
 
         var buttons = new UiHBox { Gap = 0.3f, RelHeight = 1 };
-        buttons.Add(
-            MainMenuScreen.MakeButton(appHost, font, buttonTex, "Apply", Apply, targetWidth: 200f)
-        );
+        buttons.Add(MainMenuScreen.MakeButton(appHost, font, buttonTex, "Apply", Apply));
         buttons.Add(
             MainMenuScreen.MakeButton(
                 appHost,
                 font,
                 buttonTex,
                 "Back",
-                () => appHost.ScreenManager.PopScreen(),
-                targetWidth: 200f
+                () => appHost.ScreenManager.PopScreen()
             )
         );
         panel.Add(Row(font, "", buttons, rowHeight: 0.12f));
@@ -151,7 +153,12 @@ public class SettingsScreen(AppHost appHost, GameServiceContainer services) : Ui
         var row = new UiHBox { Gap = 0.05f, RelHeight = rowHeight };
         if (!string.IsNullOrEmpty(label))
             row.Add(
-                new UiText(font, label) { Color = Color.White, Align = Align.W, RelWidth = 0.2f }
+                new UiText(font, label)
+                {
+                    Color = Color.White,
+                    Align = Align.W,
+                    RelWidth = 0.2f,
+                }
             );
         row.Add(control);
         return row;

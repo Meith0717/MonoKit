@@ -23,12 +23,14 @@ public class MainMenuScreen(AppHost appHost, GameServiceContainer services) : Ui
         var buttonTex = appHost.ContentProvider.Get<Texture2D>("ui_button");
 
         UiRoot.AttachTexture(bg);
+        UiRoot.FillScale = FillScale.Fit;
 
         UiRoot.Add(
             new UiText(font, "MonoKit Demo")
             {
-                Align = Align.Center,
-                RelY = 0.1f,
+                Align = Align.NW,
+                HSpace = 50,
+                VSpace = 50,
                 Scale = 2,
                 Color = Color.White,
             }
@@ -36,31 +38,26 @@ public class MainMenuScreen(AppHost appHost, GameServiceContainer services) : Ui
 
         var menu = new UiVBox
         {
-            RelX = 0.35f,
-            RelY = 0.35f,
+            Align = Align.W,
+            HSpace = 50,
             RelWidth = 0.3f,
-            RelHeight = 0.42f,
-            Gap = 0.1f,
+            RelHeight = 0.45f,
+            Gap = 0.15f,
         };
         UiRoot.Add(menu);
 
-        menu.Add(MakeButton(appHost, font, buttonTex, "Play", OpenGameplay, targetWidth: 280f));
-        menu.Add(
-            MakeButton(appHost, font, buttonTex, "UI Playground", OpenPlayground, targetWidth: 280f)
-        );
+        menu.Add(MakeButton(appHost, font, buttonTex, "Play", OpenGameplay));
+        menu.Add(MakeButton(appHost, font, buttonTex, "UI Playground", OpenPlayground));
         menu.Add(
             MakeButton(
                 appHost,
                 font,
                 buttonTex,
                 "Settings",
-                () => appHost.ScreenManager.AddScreen(new SettingsScreen(appHost, services)),
-                targetWidth: 280f
+                () => appHost.ScreenManager.AddScreen(new SettingsScreen(appHost, services))
             )
         );
-        menu.Add(
-            MakeButton(appHost, font, buttonTex, "Quit", () => appHost.ScreenManager.Exit(), targetWidth: 280f)
-        );
+        menu.Add(MakeButton(appHost, font, buttonTex, "Quit", () => appHost.ScreenManager.Exit()));
 
         UiRoot.Add(
             new UiText(font)
@@ -86,21 +83,16 @@ public class MainMenuScreen(AppHost appHost, GameServiceContainer services) : Ui
         appHost.ScreenManager.AddScreen(new UiPlaygroundScreen(appHost, services));
     }
 
-    /// <summary>
-    ///     Sprite button with a centered label, click/hover sounds, and art normalized to a
-    ///     target pixel width (independent of the source texture's resolution).
-    /// </summary>
+    /// <summary>Sprite button with a centered label and click/hover sounds.</summary>
     internal static UiButton.Sprite MakeButton(
         AppHost appHost,
         SpriteFont font,
         Texture2D texture,
         string label,
-        Action onClick,
-        float targetWidth = 300f
+        Action onClick
     ) =>
         new(texture)
         {
-            Scale = DemoTextures.ScaleFor(texture, targetWidth),
             UiText = new UiText(font, label) { Align = Align.Center, Color = Color.Black },
             OnClickAction = () =>
             {

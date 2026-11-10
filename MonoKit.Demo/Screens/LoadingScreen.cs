@@ -19,11 +19,12 @@ namespace MonoKit.Demo.Screens;
 ///     then opens the main menu.
 /// </summary>
 public class LoadingScreen(AppHost appHost, GameServiceContainer services, ContentLoader loader)
-    : UiScreen(services, false, false)
+    : UiScreen(services)
 {
     private UiText _progress = null!;
     private UiSlider _progressBar = null!;
     private bool _done;
+    private readonly GameServiceContainer _services = services;
 
     public override void Initialize()
     {
@@ -31,33 +32,22 @@ public class LoadingScreen(AppHost appHost, GameServiceContainer services, Conte
         var bg = appHost.ContentProvider.Get<Texture2D>("logo_background");
 
         UiRoot.AttachTexture(bg);
-
-        UiRoot.Add(
-            new UiText(font, "MonoKit Demo")
-            {
-                Align = Align.Center,
-                RelY = 0.5f,
-                RelWidth = 1,
-                RelHeight = 0.1f,
-                Scale = 2,
-                Color = Color.White,
-            }
-        );
+        UiRoot.FillScale = FillScale.Fit;
 
         _progressBar = new UiSlider(interactive: false)
         {
-            Align = Align.CenterH,
-            RelX = 0.3f,
-            RelY = 0.66f,
-            RelWidth = 0.4f,
+            Align = Align.S,
+            VSpace = 50,
+            RelWidth = 0.9f,
             RelHeight = 0.03f,
         };
         UiRoot.Add(_progressBar);
 
         _progress = new UiText(font, "Loading... 0%")
         {
-            Align = Align.Center,
-            RelY = 0.72f,
+            Align = Align.S,
+            VSpace = 55,
+            Scale = 1.5f,
             RelWidth = 1,
             RelHeight = 0.05f,
             Color = Color.LightGray,
@@ -65,7 +55,11 @@ public class LoadingScreen(AppHost appHost, GameServiceContainer services, Conte
         UiRoot.Add(_progress);
     }
 
-    public override void Update(double elapsedMilliseconds, InputHandler inputHandler, float uiScale)
+    public override void Update(
+        double elapsedMilliseconds,
+        InputHandler inputHandler,
+        float uiScale
+    )
     {
         base.Update(elapsedMilliseconds, inputHandler, uiScale);
 
@@ -82,6 +76,6 @@ public class LoadingScreen(AppHost appHost, GameServiceContainer services, Conte
         _done = true;
         loader.EndIncremental();
         appHost.ScreenManager.PopScreen();
-        appHost.ScreenManager.AddScreen(new MainMenuScreen(appHost, services));
+        appHost.ScreenManager.AddScreen(new MainMenuScreen(appHost, _services));
     }
 }

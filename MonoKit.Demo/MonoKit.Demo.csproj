@@ -34,6 +34,5 @@
         <Folder Include="Content\boot\textures\" />
         <Folder Include="Content\music\" />
         <Folder Include="Content\soundEffects\ui\" />
-        <Folder Include="Content\textures\" />
     </ItemGroup>
 </Project>

@@ -17,8 +17,7 @@ namespace MonoKit.Demo.Screens;
 ///     variable selectors, buttons (incl. disabled), a tab view, and a draggable/scrollable
 ///     clipped window.
 /// </summary>
-public class UiPlaygroundScreen(AppHost appHost, GameServiceContainer services)
-    : UiScreen(services)
+public class UiPlaygroundScreen(AppHost appHost, GameServiceContainer services) : UiScreen(services)
 {
     public static readonly string[] DifficultyOptions = ["Easy", "Normal", "Hard", "Nightmare"];
 
@@ -42,8 +41,7 @@ public class UiPlaygroundScreen(AppHost appHost, GameServiceContainer services)
                 font,
                 buttonTex,
                 "Back",
-                () => appHost.ScreenManager.PopScreen(),
-                targetWidth: 160f
+                () => appHost.ScreenManager.PopScreen()
             )
         );
 
@@ -144,18 +142,10 @@ public class UiPlaygroundScreen(AppHost appHost, GameServiceContainer services)
                 font,
                 buttonTex,
                 "Click me",
-                () => DemoAudio.PlayUi(appHost, "confirm"),
-                targetWidth: 150f
+                () => DemoAudio.PlayUi(appHost, "confirm")
             )
         );
-        var disabled = MainMenuScreen.MakeButton(
-            appHost,
-            font,
-            buttonTex,
-            "Disabled",
-            () => { },
-            targetWidth: 150f
-        );
+        var disabled = MainMenuScreen.MakeButton(appHost, font, buttonTex, "Disabled", () => { });
         disabled.Disable = true;
         buttons.Add(disabled);
         panel.Add(Row(font, "Buttons", buttons));
@@ -171,19 +161,22 @@ public class UiPlaygroundScreen(AppHost appHost, GameServiceContainer services)
         };
         var tabA = new UiContainer { Color = new Color(38, 38, 50) };
         var tabB = new UiContainer { Color = new Color(38, 38, 50) };
-        tabs.Add(
-            MainMenuScreen.MakeButton(appHost, font, buttonTex, "Entries", () => { }, targetWidth: 170f),
-            tabA
-        );
-        tabs.Add(
-            MainMenuScreen.MakeButton(appHost, font, buttonTex, "Buttons", () => { }, targetWidth: 170f),
-            tabB
-        );
+        // A scrollable composition: the tab frame itself is a UiScrollArea.
+        var tabC = new UiScrollArea { Color = new Color(38, 38, 50) };
+        tabs.Add(MainMenuScreen.MakeButton(appHost, font, buttonTex, "Entries", () => { }), tabA);
+        tabs.Add(MainMenuScreen.MakeButton(appHost, font, buttonTex, "Buttons", () => { }), tabB);
+        tabs.Add(MainMenuScreen.MakeButton(appHost, font, buttonTex, "Scroll", () => { }), tabC);
         tabs.Initialize(TabAxis.X, 0.16f);
         UiRoot.Add(tabs);
 
         // Tab A: a live mirror of the name field plus a selector.
-        var tabARow1 = new UiVBox { Gap = 0.2f, RelWidth = 1, RelHeight = 1, Color = Color.Transparent };
+        var tabARow1 = new UiVBox
+        {
+            Gap = 0.2f,
+            RelWidth = 1,
+            RelHeight = 1,
+            Color = Color.Transparent,
+        };
         tabARow1.Add(
             new UiText(font, "Name is")
             {
@@ -205,21 +198,39 @@ public class UiPlaygroundScreen(AppHost appHost, GameServiceContainer services)
         tabA.Add(tabARow1);
 
         // Tab B: nested buttons.
-        var tabBRow = new UiVBox { Gap = 0.15f, RelWidth = 1, RelHeight = 1, Color = Color.Transparent };
+        var tabBRow = new UiVBox
+        {
+            Gap = 0.15f,
+            RelWidth = 1,
+            RelHeight = 1,
+            Color = Color.Transparent,
+        };
         tabBRow.Add(
             MainMenuScreen.MakeButton(
                 appHost,
                 font,
                 buttonTex,
                 "Confirm",
-                () => DemoAudio.PlayUi(appHost, "confirm"),
-                targetWidth: 220f
+                () => DemoAudio.PlayUi(appHost, "confirm")
             )
         );
-        tabBRow.Add(
-            MainMenuScreen.MakeButton(appHost, font, buttonTex, "Reset", () => { }, targetWidth: 220f)
-        );
+        tabBRow.Add(MainMenuScreen.MakeButton(appHost, font, buttonTex, "Reset", () => { }));
         tabB.Add(tabBRow);
+
+        // Tab C: a settings-style tab with wheel-scrollable rows in the clipped frame.
+        var tabCRows = new UiVBox
+        {
+            Gap = 0.06f,
+            RelWidth = 1,
+            HSpace = 10,
+            VSpace = 4,
+            Height = 24 * 40,
+        };
+        for (var i = 1; i <= 24; i++)
+            tabCRows.Add(
+                new UiText(font, $"Scrollable tab row {i:00}") { Color = Color.White, RelWidth = 1 }
+            );
+        tabC.Add(tabCRows);
 
         // ------- Draggable, scrollable window demonstrating edge-accurate clipping -------
         var window = new UiWindow(font, "Scroll & Clip")
@@ -229,9 +240,18 @@ public class UiPlaygroundScreen(AppHost appHost, GameServiceContainer services)
             Width = 420,
             Height = 240,
         };
-        var rows = new UiVBox { Gap = 0.06f, RelWidth = 1, HSpace = 10, VSpace = 4, Height = 24 * 40 };
+        var rows = new UiVBox
+        {
+            Gap = 0.06f,
+            RelWidth = 1,
+            HSpace = 10,
+            VSpace = 4,
+            Height = 24 * 40,
+        };
         for (var i = 1; i <= 24; i++)
-            rows.Add(new UiText(font, $"Scrollable row {i:00}") { Color = Color.White, RelWidth = 1 });
+            rows.Add(
+                new UiText(font, $"Scrollable row {i:00}") { Color = Color.White, RelWidth = 1 }
+            );
         window.AddContent(rows);
         UiRoot.Add(window);
     }
