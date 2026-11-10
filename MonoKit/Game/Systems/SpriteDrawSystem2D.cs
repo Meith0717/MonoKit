@@ -17,15 +17,18 @@ namespace MonoKit.Game.Systems;
 /// <summary>Draws all Transform2D+SpriteRenderer entities through the 2D camera, centered on <see cref="Camera2D.Position"/>.</summary>
 public class SpriteDrawSystem2D(Camera2D camera) : IDrawSystem
 {
-    private readonly Camera2D _camera = camera;
-
     /// <summary>Hook: called once when the system joins the world.</summary>
     public void Initialize(World world) { }
 
     /// <summary>Batches and draws all sprite entities using the camera view.</summary>
-    public void Draw(double elapsedMs, World world, SpriteBatch spriteBatch, GraphicsDevice graphicsDevice)
+    public void Draw(
+        double elapsedMs,
+        World world,
+        SpriteBatch spriteBatch,
+        GraphicsDevice graphicsDevice
+    )
     {
-        spriteBatch.Begin(transformMatrix: _camera.View, sortMode: SpriteSortMode.BackToFront);
+        spriteBatch.Begin(transformMatrix: camera.View, sortMode: SpriteSortMode.BackToFront);
         world.ForEach<Transform2D, SpriteRenderer>(
             (Entity e, ref Transform2D t, ref SpriteRenderer s) =>
             {
