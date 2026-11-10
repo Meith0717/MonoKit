@@ -4,7 +4,7 @@
 // AI-assisted development using Mistral Vibe Code;
 // all output reviewed and adapted by the author.
 
-using Microsoft.Xna.Framework;
+using System.Numerics;
 using MonoKit.Game.ArchetypeEcs;
 using MonoKit.Game.ArchetypeEcs.Entities;
 
@@ -143,7 +143,7 @@ public class AecsSmokeTests
             radius,
             (int i, Entity self, int j, Entity neighbor) =>
             {
-                ref var v = ref velocities.GetRef(i);   // self velocity
+                ref var v = ref velocities.GetRef(i); // self velocity
                 ref var p = ref spatial.GetComponentCache<Position>().GetRef(i); // self position
                 v.Value += p.Value * 0f;
                 rawPairs++;
@@ -165,11 +165,15 @@ public class AecsSmokeTests
             );
 
         long serial = 0;
-        world.ForEach<Position, Health>((Entity _, ref Position p, ref Health h) => serial += h.Value);
+        world.ForEach<Position, Health>(
+            (Entity _, ref Position p, ref Health h) => serial += h.Value
+        );
 
         long parallel = 0;
-        world.ForEachParallel<Position, Health>((Entity _, ref Position p, ref Health h) =>
-            System.Threading.Interlocked.Add(ref parallel, h.Value));
+        world.ForEachParallel<Position, Health>(
+            (Entity _, ref Position p, ref Health h) =>
+                System.Threading.Interlocked.Add(ref parallel, h.Value)
+        );
 
         Assert.Equal(serial, parallel);
         world.Dispose();

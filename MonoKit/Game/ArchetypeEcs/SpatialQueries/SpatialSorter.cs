@@ -8,7 +8,7 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework;
+using System.Numerics;
 using MonoKit.Game.ArchetypeEcs.Archetypes;
 using MonoKit.Game.ArchetypeEcs.Entities;
 

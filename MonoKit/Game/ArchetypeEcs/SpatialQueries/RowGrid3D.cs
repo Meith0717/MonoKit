@@ -6,8 +6,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Runtime.CompilerServices;
-using Microsoft.Xna.Framework;
 
 namespace MonoKit.Game.ArchetypeEcs.SpatialQueries;
 

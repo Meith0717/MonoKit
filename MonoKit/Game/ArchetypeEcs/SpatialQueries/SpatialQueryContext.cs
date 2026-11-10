@@ -9,8 +9,8 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Threading.Tasks;
-using Microsoft.Xna.Framework;
 using MonoKit.Game.ArchetypeEcs.Entities;
 
 namespace MonoKit.Game.ArchetypeEcs.SpatialQueries;
