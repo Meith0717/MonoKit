@@ -84,7 +84,7 @@ public sealed class World : IDisposable
     }
 
     /// <summary>Registers a system and initializes it with this world.</summary>
-    internal void AddSystem(ISystem system)
+    public void AddSystem(ISystem system)
     {
         _systems.Add(system);
         system.Initialize(this);

@@ -51,29 +51,15 @@ public class GameHost : IDisposable
     {
         Dimension = dimension;
 
-        switch (dimension)
+        Camera = dimension switch
         {
-            case RuntimeDimension.TwoD:
-                Camera = new Camera2D(graphicsDevice);
-                World = new WorldBuilder()
-                    .AddSystem(new LifetimeSystem())
-                    .AddSystem(new MovementSystem2D())
-                    .AddSystem(new SpriteDrawSystem2D((Camera2D)Camera))
-                    .Build();
-                Services.AddService(Camera);
-                break;
-            case RuntimeDimension.ThreeD:
-                Camera = new Camera3D(Vector3.Zero, graphicsDevice);
-                World = new WorldBuilder()
-                    .AddSystem(new LifetimeSystem())
-                    .AddSystem(new MovementSystem3D())
-                    .Build();
-                Services.AddService(Camera);
-                break;
-            default:
-                throw new NotImplementedException();
-        }
+            RuntimeDimension.TwoD => new Camera2D(graphicsDevice),
+            RuntimeDimension.ThreeD => new Camera3D(Vector3.Zero, graphicsDevice),
+            _ => throw new NotImplementedException(),
+        };
 
+        Services.AddService(Camera);
+        World = new WorldBuilder().Build();
         Services.AddService(World);
     }
 
