@@ -15,7 +15,6 @@ namespace MonoKit.App.Ui;
 /// <summary>Slider element filled proportionally to its 0-to-1 value.</summary>
 public sealed class UiSlider(bool interactive) : UiElement
 {
-    private readonly bool _interactive = interactive;
     private bool _hovered;
     private bool _pressed;
     private float _sliderValue;
@@ -33,11 +32,12 @@ public sealed class UiSlider(bool interactive) : UiElement
     /// <summary>Handles hover, drag, and value tracking from the mouse.</summary>
     protected override void Updater(InputHandler inputHandler)
     {
-        if (!_interactive)
+        if (!interactive)
             return;
         var mousePos = Mouse.GetState().Position;
         _hovered = Bounds.Contains(mousePos);
-        _pressed = _pressed || (_hovered && inputHandler.HasAction(EngineInputActions.SliderHold));
+        // Drag only a press that started on this slider (capture, not hover).
+        _pressed = IsMouseHold;
         if (_pressed)
         {
             var rectangle = Bounds;
@@ -54,7 +54,6 @@ public sealed class UiSlider(bool interactive) : UiElement
             }
 
             _sliderValue = float.Round(float.Clamp(_sliderValue, 0, 1), 2);
-            _pressed = !inputHandler.HasAction(EngineInputActions.ButtonPressed);
         }
     }
 

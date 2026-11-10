@@ -21,7 +21,6 @@ namespace MonoKit.App.Ui;
 /// </summary>
 public sealed class UiTextEntry(SpriteFont spriteFont) : UiElement
 {
-    private readonly SpriteFont _font = spriteFont;
     private int _cursorPosition;
     private bool _isFocused;
     private string _placeholder = string.Empty;
@@ -59,9 +58,10 @@ public sealed class UiTextEntry(SpriteFont spriteFont) : UiElement
     protected override void MeasureSize()
     {
         var displayText = PasswordAware(_text.Length > 0 ? _text : _placeholder);
-        var textDimension = _font.MeasureString(displayText);
+        var textDimension = spriteFont.MeasureString(displayText);
         IntrinsicWidth = (int)(textDimension.X * Scale) + Padding * 2;
-        IntrinsicHeight = (int)(MathHelper.Max(textDimension.Y, _font.LineSpacing) * Scale) + Padding * 2;
+        IntrinsicHeight =
+            (int)(MathHelper.Max(textDimension.Y, spriteFont.LineSpacing) * Scale) + Padding * 2;
     }
 
     /// <summary>Handles focus on click and edits while focused.</summary>
@@ -136,7 +136,7 @@ public sealed class UiTextEntry(SpriteFont spriteFont) : UiElement
 
         if (!string.IsNullOrEmpty(displayText))
             spriteBatch.DrawString(
-                _font,
+                spriteFont,
                 displayText,
                 position,
                 hasText ? Color : PlaceholderColor,
@@ -152,8 +152,10 @@ public sealed class UiTextEntry(SpriteFont spriteFont) : UiElement
 
         var cursorX =
             position.X
-            + _font.MeasureString(displayText.Substring(0, _cursorPosition)).X * UiScale * Scale;
-        var cursorHeight = _font.MeasureString("A").Y * UiScale * Scale;
+            + spriteFont.MeasureString(displayText.Substring(0, _cursorPosition)).X
+                * UiScale
+                * Scale;
+        var cursorHeight = spriteFont.MeasureString("A").Y * UiScale * Scale;
 
         spriteBatch.DrawLine(
             new Vector2(cursorX, position.Y),
@@ -176,7 +178,7 @@ public sealed class UiTextEntry(SpriteFont spriteFont) : UiElement
         var displayText = PasswordAware(_text);
         for (var i = 0; i <= displayText.Length; i++)
         {
-            var width = _font.MeasureString(displayText.Substring(0, i)).X * UiScale * Scale;
+            var width = spriteFont.MeasureString(displayText.Substring(0, i)).X * UiScale * Scale;
             if (width > x)
                 return MathHelper.Clamp(i - 1, 0, _text.Length);
         }

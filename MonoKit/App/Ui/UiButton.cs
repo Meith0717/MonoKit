@@ -32,25 +32,23 @@ public static class UiButton
     private class ButtonBehaviour
     {
         public bool IsHovered;
-        private bool _isPressed;
 
-        /// <summary>Tracks hover and press state and fires hover and click actions.</summary>
+        /// <summary>Fires the click action when the press started and was released on the button.</summary>
         public void Update(
-            InputHandler inputHandler,
             Rectangle bounds,
+            bool mouseClicked,
+            bool isDisabled,
             Action onClickAction,
-            Action onHoverAction,
-            bool isDisabled
+            Action onHoverAction
         )
         {
             var wasHovered = IsHovered;
             IsHovered = !isDisabled && bounds.Contains(Mouse.GetState().Position);
-            _isPressed = IsHovered && inputHandler.HasAction(EngineInputActions.ButtonPressed);
 
             if (IsHovered && !wasHovered)
                 onHoverAction?.Invoke();
 
-            if (!_isPressed)
+            if (!mouseClicked || isDisabled)
                 return;
             onClickAction?.Invoke();
         }
@@ -89,7 +87,7 @@ public static class UiButton
         {
             base.Updater(inputHandler);
             UiText?.Update(inputHandler, Bounds, UiScale);
-            _buttonBehaviour.Update(inputHandler, Bounds, OnClickAction, OnHoverAction, Disable);
+            _buttonBehaviour.Update(Bounds, IsMouseClicked, Disable, OnClickAction, OnHoverAction);
             Color =
                 Disable ? TextureDisableColor
                 : _buttonBehaviour.IsHovered ? TextureHoverColor
@@ -160,7 +158,7 @@ public static class UiButton
         protected override void Updater(InputHandler inputHandler)
         {
             UiText.Update(inputHandler, Bounds, UiScale);
-            _buttonBehaviour.Update(inputHandler, Bounds, OnClickAction, OnHoverAction, Disable);
+            _buttonBehaviour.Update(Bounds, IsMouseClicked, Disable, OnClickAction, OnHoverAction);
             UiText.Color =
                 Disable ? TextDisableColor
                 : _buttonBehaviour.IsHovered ? TextHoverColor

@@ -7,6 +7,7 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using MonoGame.Extended;
 using MonoKit.App.Input;
 
@@ -68,6 +69,18 @@ public abstract class UiElement : IDisposable
     /// <summary>Ancestor clip rectangle (set by clipping containers during Draw); null = no clip.</summary>
     internal Rectangle? ClipRect;
 
+    private ButtonState _previousLeft;
+    private bool _pressStartedHere;
+
+    /// <summary>True on the frame the left button goes down over this element.</summary>
+    internal bool IsMousePressed { get; private set; }
+
+    /// <summary>True while the left button is held and the press started on this element.</summary>
+    internal bool IsMouseHold { get; private set; }
+
+    /// <summary>True on the frame the left button, pressed on this element, is released over it.</summary>
+    internal bool IsMouseClicked { get; private set; }
+
     /// <summary>Marks the element disposed; containers purge disposed children.</summary>
     public virtual void Dispose()
     {
@@ -94,13 +107,38 @@ public abstract class UiElement : IDisposable
     /// </summary>
     protected virtual void MeasureSize() { }
 
-    /// <summary>Relayouts this element, then updates it unless clipped away.</summary>
+    /// <summary>Relayouts this element, tracks the mouse press, then updates it unless clipped away.</summary>
     public void Update(InputHandler inputHandler, Rectangle root, float uiScale)
     {
         ApplyScale(root, uiScale);
-        if (ClipRect is { } clip && !Bounds.Intersects(clip))
+        var visible = ClipRect is not { } clip || Bounds.Intersects(clip);
+        TrackMousePress(visible);
+        if (!visible)
             return; // clipped away: no input either
         Updater(inputHandler);
+    }
+
+    /// <summary>
+    ///     Updates the press-capture state. An element only reacts to a held or released button
+    ///     when the press started on it, so pressing elsewhere and then hovering never triggers it.
+    /// </summary>
+    private void TrackMousePress(bool visible)
+    {
+        var mouse = Mouse.GetState();
+        var downEdge =
+            mouse.LeftButton == ButtonState.Pressed && _previousLeft == ButtonState.Released;
+        var upEdge =
+            mouse.LeftButton == ButtonState.Released && _previousLeft == ButtonState.Pressed;
+        var hovered = visible && Bounds.Contains(mouse.Position);
+
+        if (downEdge)
+            _pressStartedHere = hovered;
+        IsMousePressed = downEdge && _pressStartedHere;
+        IsMouseHold = mouse.LeftButton == ButtonState.Pressed && _pressStartedHere && visible;
+        IsMouseClicked = upEdge && _pressStartedHere && hovered;
+        if (upEdge)
+            _pressStartedHere = false;
+        _previousLeft = mouse.LeftButton;
     }
 
     /// <summary>Draws the element unless an ancestor clip rect culls it.</summary>
@@ -110,7 +148,7 @@ public abstract class UiElement : IDisposable
             return; // culled by an ancestor's clip rect
         Drawer(spriteBatch, graphicsDevice);
 #if DEBUG
-        spriteBatch.DrawRectangle(Bounds, Color.DeepSkyBlue);
+        spriteBatch.DrawRectangle(Bounds, Color.MonoGameOrange);
 #endif
     }
 
@@ -130,7 +168,8 @@ public abstract class UiElement : IDisposable
 
         // Size priority: explicit Width/Height, then measured intrinsic size, then relative fractions.
         var width = (int)float.Floor((Width ?? IntrinsicWidth) * UiScale ?? root.Width * RelWidth);
-        var height = (int)float.Floor((Height ?? IntrinsicHeight) * UiScale ?? root.Height * RelHeight);
+        var height = (int)
+            float.Floor((Height ?? IntrinsicHeight) * UiScale ?? root.Height * RelHeight);
 
         ManageFillScale(root, FillScale, ref x, ref y, ref width, ref height);
         ManageAlign(root, Align, ref x, ref y, ref width, ref height);
