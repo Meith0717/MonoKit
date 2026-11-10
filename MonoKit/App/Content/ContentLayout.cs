@@ -22,6 +22,10 @@ public static class ContentLayout
     public const string Prefabs = "prefabs";
     public const string Boot = "boot";
 
+    public static string BootFonts => Path.Combine(Boot, Fonts);
+    public static string BootTextures => Path.Combine(Boot, Textures);
+    public static string BootEffects => Path.Combine(Boot, Effects);
+
     /// <summary>
     /// Walks up from the app base directory to find the project's Content folder
     /// (the one containing the .mgcb project file). Returns null when not found.
@@ -51,8 +55,8 @@ public static class ContentLayout
         FileUtils.CreateDirectory(Path.Combine(contentRoot, Prefabs));
 
         // Boot content
-        FileUtils.CreateDirectory(Path.Combine(contentRoot, Boot, Textures));
-        FileUtils.CreateDirectory(Path.Combine(contentRoot, Boot, Effects));
-        FileUtils.CreateDirectory(Path.Combine(contentRoot, Boot, Fonts));
+        FileUtils.CreateDirectory(Path.Combine(contentRoot, BootFonts));
+        FileUtils.CreateDirectory(Path.Combine(contentRoot, BootTextures));
+        FileUtils.CreateDirectory(Path.Combine(contentRoot, BootEffects));
     }
 }
