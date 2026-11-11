@@ -1,4 +1,4 @@
-// AppHost - DebugConsole.cs
+// MonoKit - DebugConsole.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -16,15 +16,25 @@ namespace MonoKit.App.Core.Diagnostics;
 /// </summary>
 public sealed class DebugConsole : IDisposable
 {
-    private readonly ConsoleCommands _commands = new();
+    private bool _disposed;
     private Thread _inputThread;
     private volatile bool _running;
-    private bool _disposed;
 
     /// <summary>Command registry; register custom commands before <see cref="Start" />.</summary>
-    public ConsoleCommands Commands => _commands;
+    public ConsoleCommands Commands { get; } = new();
 
     public bool IsRunning => _running;
+
+    /// <summary>Stops the console and hides the window once.</summary>
+    public void Dispose()
+    {
+        if (_disposed)
+            return;
+
+        _disposed = true;
+        Stop();
+        ConsoleManager.Hide();
+    }
 
     /// <summary>Shows the console and starts the background input thread.</summary>
     public void Start(string welcomeMessage = "Console initialized.")
@@ -58,7 +68,7 @@ public sealed class DebugConsole : IDisposable
             if (input == null)
                 break;
 
-            _commands.Execute(input);
+            Commands.Execute(input);
         }
     }
 
@@ -66,16 +76,5 @@ public sealed class DebugConsole : IDisposable
     public void Stop()
     {
         _running = false;
-    }
-
-    /// <summary>Stops the console and hides the window once.</summary>
-    public void Dispose()
-    {
-        if (_disposed)
-            return;
-
-        _disposed = true;
-        Stop();
-        ConsoleManager.Hide();
     }
 }

@@ -1,4 +1,4 @@
-// AppHost - DisplayController.cs
+// MonoKit - DisplayController.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -22,12 +22,12 @@ public sealed class DisplayController : IDisposable
     private readonly Microsoft.Xna.Framework.Game _game;
     private readonly GraphicsDeviceManager _graphicsDeviceManager;
     private readonly GameWindow _window;
-    private float _virtualWidth;
-    private float _virtualHeight;
+    private int _restoreHeight;
 
     // Last windowed size, restored when switching back from fullscreen/borderless.
     private int _restoreWidth;
-    private int _restoreHeight;
+    private float _virtualHeight;
+    private float _virtualWidth;
 
     /// <summary>Initializes the controller and hooks the window's size-changed event.</summary>
     public DisplayController(
@@ -59,6 +59,22 @@ public sealed class DisplayController : IDisposable
     public int SupportedMultiSampleCount =>
         Capabilities.MultiSampleCounts.Length > 1 ? Capabilities.MultiSampleCounts[0] : 0;
 
+    /// <summary>Scale factor from the virtual resolution to the current backbuffer. 1 until a device exists.</summary>
+    public float ViewportScale { get; private set; } = 1f;
+
+    /// <summary>Resolution of the default monitor.</summary>
+    private static Point MonitorSize =>
+        new(
+            GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width,
+            GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height
+        );
+
+    /// <summary>Unsubscribes from the window's size-changed event.</summary>
+    public void Dispose()
+    {
+        _window.ClientSizeChanged -= OnClientSizeChanged;
+    }
+
     /// <summary>Queries adapter MSAA counts, profiles, fullscreen modes and monitor descriptions.</summary>
     private static DisplayCapabilities QueryCapabilities()
     {
@@ -75,7 +91,8 @@ public sealed class DisplayController : IDisposable
                     out _,
                     out _,
                     out var qualityLevels
-                ) && qualityLevels > 0
+                )
+                && qualityLevels > 0
             )
                 sampleCounts.Add(count);
         sampleCounts.Add(0);
@@ -101,9 +118,6 @@ public sealed class DisplayController : IDisposable
             adapters.ToArray()
         );
     }
-
-    /// <summary>Scale factor from the virtual resolution to the current backbuffer. 1 until a device exists.</summary>
-    public float ViewportScale { get; private set; } = 1f;
 
     /// <summary>Raised whenever <see cref="ViewportScale" /> actually changes (window resize, mode switch).</summary>
     public event Action<float> ResolutionChanged;
@@ -163,8 +177,8 @@ public sealed class DisplayController : IDisposable
     }
 
     /// <summary>
-    /// Sets the target refresh rate in Hz; ignored when <paramref name="vSync" /> is on.
-    /// A value &lt;= 0 with vsync off runs uncapped (fixed timestep off, no frame limit).
+    ///     Sets the target refresh rate in Hz; ignored when <paramref name="vSync" /> is on.
+    ///     A value &lt;= 0 with vsync off runs uncapped (fixed timestep off, no frame limit).
     /// </summary>
     public void ApplyRefreshRate(int value, bool vSync)
     {
@@ -177,7 +191,10 @@ public sealed class DisplayController : IDisposable
         _graphicsDeviceManager.ApplyChanges();
     }
 
-    /// <summary>Sets MSAA on the backbuffer via the presentation parameters; clamps to <see cref="SupportedMultiSampleCount" />.</summary>
+    /// <summary>
+    ///     Sets MSAA on the backbuffer via the presentation parameters; clamps to
+    ///     <see cref="SupportedMultiSampleCount" />.
+    /// </summary>
     public void ApplyMultiSample(int sampleCount)
     {
         var device = _graphicsDeviceManager.GraphicsDevice;
@@ -222,18 +239,5 @@ public sealed class DisplayController : IDisposable
 
         _graphicsDeviceManager.ApplyChanges();
         UpdateViewportScale();
-    }
-
-    /// <summary>Resolution of the default monitor.</summary>
-    private static Point MonitorSize =>
-        new(
-            GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width,
-            GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height
-        );
-
-    /// <summary>Unsubscribes from the window's size-changed event.</summary>
-    public void Dispose()
-    {
-        _window.ClientSizeChanged -= OnClientSizeChanged;
     }
 }

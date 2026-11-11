@@ -1,4 +1,4 @@
-// AppHost - AppHost.cs
+// MonoKit - AppHost.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -22,15 +22,25 @@ namespace MonoKit.App;
 public class AppHost(Microsoft.Xna.Framework.Game game, GraphicsDeviceManager graphicsDeviceManager)
     : IDisposable
 {
-    private bool _wasInitialized;
-    public readonly FrameCounter FrameCounter = new();
-    public readonly ContentProvider ContentProvider = new();
     public readonly AudioService AudioService = new();
+    public readonly ContentProvider ContentProvider = new();
+    public readonly DisplayController DisplayController = new(game, graphicsDeviceManager);
+    public readonly FrameCounter FrameCounter = new();
     public readonly InputHandler InputHandler = new();
     public readonly ScreenManager ScreenManager = new(game);
-    public readonly DisplayController DisplayController = new(game, graphicsDeviceManager);
+    private bool _wasInitialized;
 
     public PathService PathService { get; init; }
+
+    /// <summary>Releases the debug console, audio service and display controller.</summary>
+    public void Dispose()
+    {
+        if (game.Services.GetService<DebugConsole>() is DebugConsole console)
+            console.Dispose();
+
+        AudioService.Dispose();
+        DisplayController.Dispose();
+    }
 
     /// <summary>Creates and starts the debug console, reusing an existing instance.</summary>
     public DebugConsole EnableDebugConsole()
@@ -97,15 +107,5 @@ public class AppHost(Microsoft.Xna.Framework.Game game, GraphicsDeviceManager gr
             gameTime.ElapsedGameTime.TotalMilliseconds
         );
         ScreenManager.Draw(spriteBatch, graphicsDevice);
-    }
-
-    /// <summary>Releases the debug console, audio service and display controller.</summary>
-    public void Dispose()
-    {
-        if (game.Services.GetService<DebugConsole>() is DebugConsole console)
-            console.Dispose();
-
-        AudioService.Dispose();
-        DisplayController.Dispose();
     }
 }

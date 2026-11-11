@@ -1,4 +1,4 @@
-// AppHost - AudioService.cs
+// MonoKit - AudioService.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -6,7 +6,6 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework.Audio;
 
 namespace MonoKit.App.Content.Audio;
 
@@ -16,14 +15,6 @@ public class AudioService : IDisposable
     private ContentProvider _contentProvider;
     private bool _isDisposed;
     private MusicManager _musicManager;
-
-    /// <summary>Binds the service to a content provider; call once at startup.</summary>
-    public void Initialize(ContentProvider contentProvider)
-    {
-        if (_contentProvider != null)
-            throw new InvalidOperationException("Audio service has already been initialized");
-        _contentProvider = contentProvider;
-    }
 
     public MusicManager Music
     {
@@ -46,6 +37,14 @@ public class AudioService : IDisposable
         _musicManager = null;
         _isDisposed = true;
         GC.SuppressFinalize(this);
+    }
+
+    /// <summary>Binds the service to a content provider; call once at startup.</summary>
+    public void Initialize(ContentProvider contentProvider)
+    {
+        if (_contentProvider != null)
+            throw new InvalidOperationException("Audio service has already been initialized");
+        _contentProvider = contentProvider;
     }
 
     /// <summary>Returns the manager for a category, creating it on first use.</summary>

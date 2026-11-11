@@ -1,4 +1,4 @@
-﻿// AppHost - Camera2D.cs
+﻿// MonoKit - Camera2D.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -16,6 +16,7 @@ public interface ICamera2DBehavior
 {
     /// <summary>Called once when the behaviour is attached to the camera.</summary>
     void Initialize(Camera2D owner);
+
     /// <summary>Advances the behaviour each frame with input and elapsed time.</summary>
     void Update(Camera2D owner, InputHandler inputHandler, double elapsedGameTime);
 }
@@ -37,8 +38,8 @@ public class Camera2D : ICamera
     }
 
     public RectangleF Bounds { get; private set; }
-    public Matrix View { get; private set; }
     public Matrix ViewInvert { get; private set; }
+    public Matrix View { get; private set; }
 
     /// <summary>Updates behaviours, then refreshes view, invert, and bounds.</summary>
     public void Update(double elapsedGameTime, InputHandler inputHandler)
@@ -49,7 +50,7 @@ public class Camera2D : ICamera
 
     Vector3 ICamera.Position
     {
-        get => new Vector3(Position, 0);
+        get => new(Position, 0);
         set => Position = new Vector2(value.X, value.Y);
     }
 

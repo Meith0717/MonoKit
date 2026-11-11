@@ -1,4 +1,4 @@
-﻿// AppHost - SettingsManager.cs
+﻿// MonoKit - SettingsManager.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;

@@ -1,4 +1,4 @@
-// AppHost - ISystem.cs
+// MonoKit - ISystem.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -24,5 +24,10 @@ public interface IUpdateSystem : ISystem
 public interface IDrawSystem : ISystem
 {
     /// <summary>Draws the system using the given sprite batch.</summary>
-    void Draw(double elapsedMs, World world, SpriteBatch spriteBatch, GraphicsDevice graphicsDevice);
+    void Draw(
+        double elapsedMs,
+        World world,
+        SpriteBatch spriteBatch,
+        GraphicsDevice graphicsDevice
+    );
 }

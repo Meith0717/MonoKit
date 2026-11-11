@@ -27,8 +27,8 @@ public static class ContentLayout
     public static string BootEffects => Path.Combine(Boot, Effects);
 
     /// <summary>
-    /// Walks up from the app base directory to find the project's Content folder
-    /// (the one containing the .mgcb project file). Returns null when not found.
+    ///     Walks up from the app base directory to find the project's Content folder
+    ///     (the one containing the .mgcb project file). Returns null when not found.
     /// </summary>
     public static string? FindProjectContentRoot()
     {
@@ -40,6 +40,7 @@ public static class ContentLayout
                 return candidate;
             dir = dir.Parent;
         }
+
         return null;
     }
 

@@ -1,4 +1,4 @@
-// AppHost - World.cs
+// MonoKit - World.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -14,7 +14,6 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework.Graphics;
 using MonoKit.Game.ArchetypeEcs.Archetypes;
 using MonoKit.Game.ArchetypeEcs.Entities;
-using MonoKit.Game.ArchetypeEcs.SpatialQueries;
 using MonoKit.Game.ArchetypeEcs.Systems;
 
 namespace MonoKit.Game.ArchetypeEcs;
@@ -48,19 +47,16 @@ public sealed class World : IDisposable
     internal readonly ArchetypeManager ArchetypeManager = new();
 
     private readonly ConcurrentQueue<Command> _commands = new();
+
+    private readonly Dictionary<Type, object> _componentColumns = new();
     private readonly EntityManager _entityManager = new();
     private readonly EntityRecords _entityRecords = new();
-
-    private readonly Dictionary<Type, object> _spatialContexts = new();
 
     private readonly List<ISystem> _systems = [];
     private int _iterationDepth;
 
-    /// <summary>Internal; create worlds via <see cref="WorldBuilder"/>.</summary>
-    internal World()
-    {
-        ;
-    }
+    /// <summary>Internal; create worlds via <see cref="WorldBuilder" />.</summary>
+    internal World() { }
 
     public int EntityCount => _entityManager.Count;
     public int ArchetypeCount => ArchetypeManager.ArchetypeCount;
@@ -71,10 +67,6 @@ public sealed class World : IDisposable
         foreach (var system in _systems)
             system.Dispose();
         _systems.Clear();
-
-        foreach (var context in _spatialContexts.Values)
-            ((IDisposable)context).Dispose();
-        _spatialContexts.Clear();
 
         ArchetypeManager.Dispose();
         _entityRecords.Dispose();
@@ -327,6 +319,21 @@ public sealed class World : IDisposable
         if (!_entityRecords.TryGetLocation(entity, out var archetype, out var row))
             throw new ArgumentException("Entity does not exist or has been destroyed");
         return ref archetype.Get<T>(row);
+    }
+
+    /// <summary>Returns a reusable typed column accessor with array-only per-entity lookups.</summary>
+    public ComponentColumn<T> GetComponentColumn<T>()
+        where T : struct
+    {
+        if (!_componentColumns.TryGetValue(typeof(T), out var column))
+            _componentColumns[typeof(T)] = column = new ComponentColumn<T>(this);
+        return (ComponentColumn<T>)column;
+    }
+
+    /// <summary>Resolves a live entity to its archetype and row.</summary>
+    internal bool TryGetLocation(Entity entity, out Archetype archetype, out int row)
+    {
+        return _entityRecords.TryGetLocation(entity, out archetype, out row);
     }
 
     /// <summary>Returns whether the entity id is still alive.</summary>
@@ -812,18 +819,6 @@ public sealed class World : IDisposable
         {
             EndIteration();
         }
-    }
-
-    /// <summary>Gets or creates the spatial query context for a position component type.</summary>
-    public SpatialQueryContext<TPos> SpatialQueries<TPos>()
-        where TPos : struct
-    {
-        if (_spatialContexts.TryGetValue(typeof(TPos), out var existing))
-            return (SpatialQueryContext<TPos>)existing;
-
-        var context = new SpatialQueryContext<TPos>();
-        _spatialContexts[typeof(TPos)] = context;
-        return context;
     }
 
     /// <summary>Renders entity and archetype counts per component set for debugging.</summary>

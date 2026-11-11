@@ -7,6 +7,7 @@
 using System.Numerics;
 using MonoKit.Game.ArchetypeEcs;
 using MonoKit.Game.ArchetypeEcs.Entities;
+using MonoKit.Game.Spatial;
 
 namespace MonoKit.Test;
 
@@ -100,56 +101,77 @@ public class AecsSmokeTests
     }
 
     [Fact]
-    public void SpatialQueriesAreConsistent()
+    public void ComponentColumnSurvivesArchetypeGrowth()
     {
         var world = new WorldBuilder().Build();
-        const int side = 5;
-        const float spacing = 0.6f;
-        const float radius = 0.9f;
-        for (var x = 0; x < side; x++)
-        for (var y = 0; y < side; y++)
-        for (var z = 0; z < side; z++)
-            world.CreateEntityWithComponents(
-                new Position { Value = new Vector3(x * spacing, y * spacing, z * spacing) },
-                new Velocity { Value = Vector3.Zero }
+        var column = world.GetComponentColumn<Position>();
+
+        var entities = new List<Entity>();
+        for (var i = 0; i < 100; i++)
+        {
+            var e = world.CreateEntityWithComponents(new Position { Value = new Vector3(i, 0, 0) });
+            entities.Add(e);
+            ref var p = ref column.GetRef(e);
+            Assert.Equal(new Vector3(i, 0, 0), p.Value);
+            p.Value += new Vector3(1, 0, 0);
+        }
+
+        // Growth replaced the archetype's column arrays; the column must follow.
+        foreach (var e in entities)
+        {
+            ref var p = ref column.GetRef(e);
+            Assert.Equal(e.Id + 1, p.Value.X);
+        }
+
+        Assert.True(column.Has(entities[0]));
+        world.Dispose();
+    }
+
+    [Fact]
+    public void SpatialHashMatchesBruteForce()
+    {
+        var world = new WorldBuilder().Build();
+        var rand = new Random(7);
+        const int n = 500;
+        const float radius = 2.5f;
+        var entities = new List<Entity>();
+        for (var i = 0; i < n; i++)
+            entities.Add(
+                world.CreateEntityWithComponents(
+                    new Position
+                    {
+                        Value = new Vector3(
+                            rand.Next(-20, 20),
+                            rand.Next(-20, 20),
+                            rand.Next(-20, 20)
+                        ),
+                    },
+                    new Velocity { Value = Vector3.Zero }
+                )
             );
 
-        var spatial = world.SpatialQueries<Position>();
-        Assert.True(spatial.BeginFrame(world, radius, static p => p.Value));
+        var hash = new SpatialHash(radius);
+        hash.Rebuild<Position>(world, static p => p.Value);
 
-        long selfPairs = 0;
-        spatial.ForEachSelfNeighbor<Position, Position>(
-            radius,
-            (Entity a, ref Position pa, Entity b, ref Position pb) => selfPairs++
-        );
+        var positions = world.GetComponentColumn<Position>();
+        var neighbors = new List<Entity>();
+        foreach (var e in entities)
+        {
+            var center = positions.GetRef(e).Value;
+            hash.Query(center, radius, neighbors);
 
-        long perEntityPairs = 0;
-        world.ForEach<Position>(
-            (Entity e, ref Position p) =>
-                spatial.ForEachNeighbor<Position>(
-                    e,
-                    radius,
-                    (Entity n, ref Position np) => perEntityPairs++
-                )
-        );
-
-        Assert.Equal(selfPairs, perEntityPairs);
-        Assert.True(selfPairs > 0);
-
-        // raw indexed pass: several SELF components via caches, no arity limit
-        var velocities = spatial.GetComponentCache<Velocity>();
-        long rawPairs = 0;
-        spatial.ForEachSelfNeighborRaw(
-            radius,
-            (int i, Entity self, int j, Entity neighbor) =>
+            var brute = new HashSet<Entity>();
+            foreach (var other in entities)
             {
-                ref var v = ref velocities.GetRef(i); // self velocity
-                ref var p = ref spatial.GetComponentCache<Position>().GetRef(i); // self position
-                v.Value += p.Value * 0f;
-                rawPairs++;
+                var d = positions.GetRef(other).Value - center;
+                if (d.LengthSquared() < radius * radius)
+                    brute.Add(other);
             }
-        );
-        Assert.Equal(selfPairs, rawPairs);
+
+            Assert.Equal(brute.Count, neighbors.Count);
+            Assert.True(brute.SetEquals(neighbors));
+        }
+
         world.Dispose();
     }
 

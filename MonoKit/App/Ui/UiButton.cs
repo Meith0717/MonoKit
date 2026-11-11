@@ -1,4 +1,4 @@
-﻿// AppHost - UiButton.cs
+﻿// MonoKit - UiButton.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -80,7 +80,10 @@ public static class UiButton
         }
 
         /// <summary>Restores the idle label and texture colors.</summary>
-        public void ResetColor() => OverrideColor(TextIdleColor, TextureIdleColor);
+        public void ResetColor()
+        {
+            OverrideColor(TextIdleColor, TextureIdleColor);
+        }
 
         /// <summary>Updates label, button behavior, and state-based colors.</summary>
         protected override void Updater(InputHandler inputHandler)
@@ -152,7 +155,10 @@ public static class UiButton
         }
 
         /// <summary>Restores the idle label color.</summary>
-        public void ResetColor() => OverrideColor(TextIdleColor);
+        public void ResetColor()
+        {
+            OverrideColor(TextIdleColor);
+        }
 
         /// <summary>Updates the label and applies state-based colors.</summary>
         protected override void Updater(InputHandler inputHandler)

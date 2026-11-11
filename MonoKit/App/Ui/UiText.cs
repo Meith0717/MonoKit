@@ -1,4 +1,4 @@
-﻿// AppHost - UiText.cs
+﻿// MonoKit - UiText.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -14,20 +14,9 @@ namespace MonoKit.App.Ui;
 /// <summary>Label rendering a single string with a sprite font.</summary>
 public sealed class UiText(SpriteFont spriteFont, string text = null) : UiElement
 {
-    private float _scale = 1;
-    private string _text = text;
+    public string Text { get; set; } = text;
 
-    public string Text
-    {
-        get => _text;
-        set => _text = value;
-    }
-
-    public float Scale
-    {
-        get => _scale;
-        set => _scale = value;
-    }
+    public float Scale { get; set; } = 1;
 
     public Color Color { get; set; } = Color.Black;
     public Func<string> TextProvider { get; set; }
@@ -35,26 +24,26 @@ public sealed class UiText(SpriteFont spriteFont, string text = null) : UiElemen
     /// <summary>Sizes the element to the scaled text dimensions.</summary>
     protected override void MeasureSize()
     {
-        var textDimension = _text == null ? Vector2.Zero : spriteFont.MeasureString(_text);
-        IntrinsicWidth = (int)(textDimension.X * _scale);
-        IntrinsicHeight = (int)float.Floor(textDimension.Y * _scale);
+        var textDimension = Text == null ? Vector2.Zero : spriteFont.MeasureString(Text);
+        IntrinsicWidth = (int)(textDimension.X * Scale);
+        IntrinsicHeight = (int)float.Floor(textDimension.Y * Scale);
     }
 
     /// <summary>Draws the text at the element bounds.</summary>
     protected override void Drawer(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice)
     {
-        if (string.IsNullOrEmpty(_text))
+        if (string.IsNullOrEmpty(Text))
             return;
 
         var position = Bounds.Location.ToVector2();
         spriteBatch.DrawString(
             spriteFont,
-            _text,
+            Text,
             position,
             Color,
             0,
             Vector2.Zero,
-            UiScale * _scale,
+            UiScale * Scale,
             SpriteEffects.None,
             1
         );
@@ -66,5 +55,4 @@ public sealed class UiText(SpriteFont spriteFont, string text = null) : UiElemen
         if (TextProvider != null)
             Text = TextProvider();
     }
-
 }

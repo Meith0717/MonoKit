@@ -1,4 +1,4 @@
-// AppHost - ContentLoader.cs
+// MonoKit - ContentLoader.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -68,8 +68,7 @@ public class ContentLoader
             // their plain name; nested files carry their subfolder with '/' separators
             // (e.g. soundEffects/ui/click.wav -> "ui/click"), matching SoundEffectManager's
             // category scheme. Normalized to '/' so keys are identical on all platforms.
-            var relativeDir = Path
-                .GetRelativePath(fullContentDirectory, directory!)
+            var relativeDir = Path.GetRelativePath(fullContentDirectory, directory!)
                 .Replace('\\', '/');
             var contentId = relativeDir == "." ? fileName : $"{relativeDir}/{fileName}";
 

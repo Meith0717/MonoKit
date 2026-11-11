@@ -1,4 +1,4 @@
-// GameHost.cs
+// MonoKit - GameHost.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -12,11 +12,10 @@ using MonoKit.App.Input;
 using MonoKit.Game.ArchetypeEcs;
 using MonoKit.Game.Camera;
 using MonoKit.Game.Gameplay;
-using MonoKit.Game.Systems;
 
 namespace MonoKit.Game;
 
-/// <summary>Selects the component/system set of a <see cref="GameHost"/>.</summary>
+/// <summary>Selects the component/system set of a <see cref="GameHost" />.</summary>
 public enum RuntimeDimension
 {
     TwoD,
@@ -24,27 +23,13 @@ public enum RuntimeDimension
 }
 
 /// <summary>
-/// Unified game runtime: an AECS world + camera, configured for 2D or 3D via
-/// <see cref="RuntimeDimension"/>. Update drives world+camera, Draw runs the world's
-/// IDrawSystem pass.
+///     Unified game runtime: an AECS world + camera, configured for 2D or 3D via
+///     <see cref="RuntimeDimension" />. Update drives world+camera, Draw runs the world's
+///     IDrawSystem pass.
 /// </summary>
 public class GameHost : IDisposable
 {
     public readonly RuntimeContainer Services = new();
-
-    public World World { get; }
-    public RuntimeDimension Dimension { get; }
-
-    /// <summary>The active camera, dimension-agnostic.</summary>
-    public ICamera Camera { get; }
-
-    /// <summary>Typed 2D camera when <see cref="Dimension"/> is TwoD, else null. For 2D-only extras (Zoom, ViewInvert).</summary>
-    public Camera2D? Camera2D => Camera as Camera2D;
-
-    /// <summary>Typed 3D camera when <see cref="Dimension"/> is ThreeD, else null. For 3D-only extras (Projection, Target).</summary>
-    public Camera3D? Camera3D => Camera as Camera3D;
-    public double LastElapsedMs { get; private set; }
-    public Vector2 WorldMousePosition { get; private set; }
 
     /// <summary>Builds the world, camera, and services for the chosen dimension.</summary>
     public GameHost(GraphicsDevice graphicsDevice, RuntimeDimension dimension)
@@ -63,6 +48,28 @@ public class GameHost : IDisposable
         Services.AddService(World);
     }
 
+    public World World { get; }
+    public RuntimeDimension Dimension { get; }
+
+    /// <summary>The active camera, dimension-agnostic.</summary>
+    public ICamera Camera { get; }
+
+    /// <summary>Typed 2D camera when <see cref="Dimension" /> is TwoD, else null. For 2D-only extras (Zoom, ViewInvert).</summary>
+    public Camera2D? Camera2D => Camera as Camera2D;
+
+    /// <summary>Typed 3D camera when <see cref="Dimension" /> is ThreeD, else null. For 3D-only extras (Projection, Target).</summary>
+    public Camera3D? Camera3D => Camera as Camera3D;
+
+    public double LastElapsedMs { get; private set; }
+    public Vector2 WorldMousePosition { get; private set; }
+
+    /// <summary>Disposes the underlying world.</summary>
+    public void Dispose()
+    {
+        World.Dispose();
+        GC.SuppressFinalize(this);
+    }
+
     /// <summary>Advances the world and camera; refreshes the world mouse position.</summary>
     public void Update(double elapsedMilliseconds, InputHandler inputHandler)
     {
@@ -79,13 +86,8 @@ public class GameHost : IDisposable
     }
 
     /// <summary>Runs the world's draw systems (e.g. SpriteDrawSystem2D) with the given batch/device.</summary>
-    public void Draw(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice) =>
-        World.Draw(LastElapsedMs, spriteBatch, graphicsDevice);
-
-    /// <summary>Disposes the underlying world.</summary>
-    public void Dispose()
+    public void Draw(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice)
     {
-        World.Dispose();
-        GC.SuppressFinalize(this);
+        World.Draw(LastElapsedMs, spriteBatch, graphicsDevice);
     }
 }

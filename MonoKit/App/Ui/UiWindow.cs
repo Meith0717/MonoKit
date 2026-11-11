@@ -1,4 +1,4 @@
-// UiWindow.cs
+// MonoKit - UiWindow.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -12,15 +12,20 @@ using MonoKit.App.Input;
 namespace MonoKit.App.Ui;
 
 /// <summary>
-/// Draggable window with a title bar and a scrollable content layer below it.
-/// Dragging uses the title bar (hold left mouse); scrolling and clipping of the content
-/// are owned by the <see cref="UiScrollArea" /> content layer (wheel while hovered over it).
+///     Draggable window with a title bar and a scrollable content layer below it.
+///     Dragging uses the title bar (hold left mouse); scrolling and clipping of the content
+///     are owned by the <see cref="UiScrollArea" /> content layer (wheel while hovered over it).
 /// </summary>
 public class UiWindow : UiContainer
 {
     private readonly UiContainer _titleBar;
     private readonly UiText _titleText;
-    private readonly UiScrollArea _content;
+
+    public bool Draggable = true;
+
+    /// <summary>Title bar height as a fraction of the window height.</summary>
+    public float TitleBarHeight = 0.12f;
+
     private bool _dragging;
     private Point _lastMouse;
 
@@ -31,10 +36,10 @@ public class UiWindow : UiContainer
         _titleBar = new UiContainer { Color = new Color(40, 40, 40, 220) };
         _titleBar.Add(_titleText);
 
-        _content = new UiScrollArea();
+        Content = new UiScrollArea();
 
         Add(_titleBar);
-        Add(_content);
+        Add(Content);
     }
 
     public string Title
@@ -43,19 +48,14 @@ public class UiWindow : UiContainer
         set => _titleText.Text = value;
     }
 
-    /// <summary>Title bar height as a fraction of the window height.</summary>
-    public float TitleBarHeight = 0.12f;
-
-    public bool Draggable = true;
-
     /// <summary>Current scroll offset of the content layer in (unscaled) pixels.</summary>
-    public float ScrollOffset => _content.ScrollOffset;
+    public float ScrollOffset => Content.ScrollOffset;
 
     /// <summary>Pixels scrolled per mouse-wheel unit (wheel delta is ±120 per notch).</summary>
     public float ScrollSpeed
     {
-        get => _content.ScrollSpeed;
-        set => _content.ScrollSpeed = value;
+        get => Content.ScrollSpeed;
+        set => Content.ScrollSpeed = value;
     }
 
     public Color TitleBarColor
@@ -65,10 +65,13 @@ public class UiWindow : UiContainer
     }
 
     /// <summary>The scrollable content layer; children render clipped to its bounds.</summary>
-    public UiScrollArea Content => _content;
+    public UiScrollArea Content { get; }
 
     /// <summary>Adds a child to the scrollable content layer.</summary>
-    public void AddContent(UiElement child) => _content.Add(child);
+    public void AddContent(UiElement child)
+    {
+        Content.Add(child);
+    }
 
     /// <summary>Positions the title bar and the content layer.</summary>
     protected override void LayoutChildren()
@@ -80,12 +83,12 @@ public class UiWindow : UiContainer
         _titleBar.Align = Align.None;
         _titleBar.FillScale = FillScale.None;
 
-        _content.RelX = 0;
-        _content.RelY = TitleBarHeight;
-        _content.RelWidth = 1;
-        _content.RelHeight = 1 - TitleBarHeight;
-        _content.Align = Align.None;
-        _content.FillScale = FillScale.None;
+        Content.RelX = 0;
+        Content.RelY = TitleBarHeight;
+        Content.RelWidth = 1;
+        Content.RelHeight = 1 - TitleBarHeight;
+        Content.Align = Align.None;
+        Content.FillScale = FillScale.None;
     }
 
     /// <summary>Handles title-bar dragging; scrolling is owned by the content layer.</summary>

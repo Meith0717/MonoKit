@@ -1,4 +1,4 @@
-﻿// AppHost - Camera3D.cs
+﻿// MonoKit - Camera3D.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -15,6 +15,7 @@ public interface ICamera3DBehavior
 {
     /// <summary>Called once when the behaviour is attached to the camera.</summary>
     void Initialize(Camera3D owner);
+
     /// <summary>Advances the behaviour each frame with input and elapsed time.</summary>
     void Update(Camera3D owner, InputHandler inputHandler, double elapsedGameTime);
 }
@@ -29,12 +30,6 @@ public class Camera3D(Vector3 positon, GraphicsDevice graphicsDevice) : ICamera
     public float NearPlane = 0.1f;
 
     public Vector3 Position = positon;
-
-    Vector3 ICamera.Position
-    {
-        get => Position;
-        set => Position = value;
-    }
     public Vector3 Right = Vector3.Right;
     public Vector3 Up = Vector3.Up;
 
@@ -49,15 +44,15 @@ public class Camera3D(Vector3 positon, GraphicsDevice graphicsDevice) : ICamera
         }
     }
 
-    public Matrix View { get; private set; }
     public Matrix Projection { get; private set; }
 
-    /// <summary>Initializes and registers a behaviour on this camera.</summary>
-    public void AddBehaviour(ICamera3DBehavior behaviour)
+    Vector3 ICamera.Position
     {
-        behaviour.Initialize(this);
-        _behaviours.Add(behaviour);
+        get => Position;
+        set => Position = value;
     }
+
+    public Matrix View { get; private set; }
 
     /// <summary>Recomputes view and projection, then updates behaviours.</summary>
     public void Update(double elapsedGameTime, InputHandler inputHandler)
@@ -70,5 +65,12 @@ public class Camera3D(Vector3 positon, GraphicsDevice graphicsDevice) : ICamera
             FarPlane
         );
         _behaviours.ForEach(behaviour => behaviour.Update(this, inputHandler, elapsedGameTime));
+    }
+
+    /// <summary>Initializes and registers a behaviour on this camera.</summary>
+    public void AddBehaviour(ICamera3DBehavior behaviour)
+    {
+        behaviour.Initialize(this);
+        _behaviours.Add(behaviour);
     }
 }

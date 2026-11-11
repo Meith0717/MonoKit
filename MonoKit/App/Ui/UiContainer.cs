@@ -1,4 +1,4 @@
-// UiContainer.cs
+// MonoKit - UiContainer.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -23,18 +23,16 @@ namespace MonoKit.App.Ui;
 public class UiContainer : UiElement
 {
     private readonly List<UiElement> _children = new();
-    private Color _color = Color.Transparent;
     private Texture2D _backgroundTexture;
     private float _textureScale = 1;
 
     public IReadOnlyList<UiElement> Children => _children;
 
-    /// <summary>Background color or texture tint; <see cref="Color.Transparent" /> draws no solid background.</summary>
-    public Color Color
-    {
-        get => _color;
-        set => _color = value;
-    }
+    /// <summary>
+    ///     Background color or texture tint; <see cref="Microsoft.Xna.Framework.Color.Transparent" /> draws no solid
+    ///     background.
+    /// </summary>
+    public Color Color { get; set; } = Color.Transparent;
 
     /// <summary>
     ///     Clip all descendants to this container's <see cref="UiElement.Bounds" /> (GPU scissor + CPU cull).
@@ -43,10 +41,16 @@ public class UiContainer : UiElement
     public bool ClipChildren { get; set; } = true;
 
     /// <summary>Appends a child; Dispose later cascades disposal to it.</summary>
-    public virtual void Add(UiElement child) => _children.Add(child);
+    public virtual void Add(UiElement child)
+    {
+        _children.Add(child);
+    }
 
     /// <summary>Removes all children without disposing them (Dispose cascades disposal).</summary>
-    public virtual void Clear() => _children.Clear();
+    public virtual void Clear()
+    {
+        _children.Clear();
+    }
 
     /// <summary>Assigns relative layout slots to children; called after the container's own bounds are computed.</summary>
     protected virtual void LayoutChildren() { }
@@ -57,8 +61,8 @@ public class UiContainer : UiElement
         _backgroundTexture = texture;
         _textureScale = scale;
         // An attached background texture is meant to be visible; don't keep a transparent tint.
-        if (_color == Color.Transparent)
-            _color = Color.White;
+        if (Color == Color.Transparent)
+            Color = Color.White;
         return this;
     }
 
@@ -84,9 +88,9 @@ public class UiContainer : UiElement
     protected override void Drawer(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice)
     {
         if (_backgroundTexture is not null)
-            spriteBatch.Draw(_backgroundTexture, Bounds, _color);
-        else if (_color != Color.Transparent)
-            spriteBatch.FillRectangle(Bounds, _color);
+            spriteBatch.Draw(_backgroundTexture, Bounds, Color);
+        else if (Color != Color.Transparent)
+            spriteBatch.FillRectangle(Bounds, Color);
 
         if (!ClipChildren)
         {

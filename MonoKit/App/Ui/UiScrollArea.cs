@@ -1,4 +1,4 @@
-// UiScrollArea.cs
+// MonoKit - UiScrollArea.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -6,7 +6,6 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using MonoKit.App.Input;
 
@@ -24,13 +23,14 @@ public class UiScrollArea : UiContainer
     // Wheel value the innermost hovered scroll area last consumed; outer areas skip the same event.
     private static int _wheelConsumedAt;
     private readonly Dictionary<UiElement, float> _baseRelY = new();
+
+    /// <summary>Pixels scrolled per mouse-wheel unit (wheel delta is ±120 per notch).</summary>
+    public float ScrollSpeed = 0.1f;
+
     private int _lastWheel;
 
     /// <summary>Current scroll offset in (unscaled) pixels; content moves up by this amount.</summary>
     public float ScrollOffset { get; private set; }
-
-    /// <summary>Pixels scrolled per mouse-wheel unit (wheel delta is ±120 per notch).</summary>
-    public float ScrollSpeed = 0.1f;
 
     /// <summary>Appends a child and remembers its unscrolled slot.</summary>
     public override void Add(UiElement child)

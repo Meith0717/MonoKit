@@ -1,4 +1,4 @@
-// AppHost - UiVariableSelector.cs
+// MonoKit - UiVariableSelector.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -8,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using MonoKit.App.Input;
 
 namespace MonoKit.App.Ui;
 
@@ -21,8 +20,8 @@ public sealed class UiVariableSelector<T> : UiContainer
 {
     private readonly UiButton.Sprite _arrowL;
     private readonly UiButton.Sprite _arrowR;
-    private readonly UiText _text;
     private readonly SpriteFont _font;
+    private readonly UiText _text;
     private List<T> _items;
     private int _selectedIndex;
 
@@ -143,8 +142,10 @@ public sealed class UiVariableSelector<T> : UiContainer
     }
 
     /// <summary>Syncs the label with the selected item.</summary>
-    private void UpdateText() =>
+    private void UpdateText()
+    {
         _text.Text = _items.Count == 0 ? string.Empty : _items[_selectedIndex].ToString();
+    }
 
     /// <summary>Returns the item's index; throws if the value is absent.</summary>
     private int GetIndex(T value)

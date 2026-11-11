@@ -1,4 +1,4 @@
-// AppHost - UiTabView.cs
+// MonoKit - UiTabview.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -29,9 +29,6 @@ public sealed class UiTabView<ButtonType> : UiContainer
     private readonly List<(ButtonType Button, UiContainer Frame)> _tabs = new();
     private UiContainer _activeFrame;
 
-    /// <summary>Highlight color applied to the active tab's button.</summary>
-    public Color ActiveTabColor { get; set; } = Color.Red;
-
     /// <summary>Creates the button bar and content frame containers.</summary>
     public UiTabView(Color color)
     {
@@ -39,6 +36,9 @@ public sealed class UiTabView<ButtonType> : UiContainer
         Add(_buttonBar);
         Add(_contentFrame);
     }
+
+    /// <summary>Highlight color applied to the active tab's button.</summary>
+    public Color ActiveTabColor { get; set; } = Color.Red;
 
     /// <summary>Registers a tab button and its content frame.</summary>
     public void Add(ButtonType button, UiContainer tabFrame)
@@ -103,11 +103,9 @@ public sealed class UiTabView<ButtonType> : UiContainer
         base.Updater(inputHandler);
 
         foreach (var (button, frame) in _tabs)
-        {
             if (_activeFrame == frame)
                 button.OverrideColor(ActiveTabColor, ActiveTabColor);
             else
                 button.ResetColor();
-        }
     }
 }

@@ -1,11 +1,8 @@
-﻿// AppHost - FrameCounter.cs
+﻿// MonoKit - FrameCounter.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
 // all output reviewed and adapted by the author.
-
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace MonoKit.App.Core.Diagnostics;
 
@@ -13,9 +10,9 @@ public class FrameCounter
 {
     private int _samples;
     private double _summedFps;
-    private int _windowFrames;
 
     private double _timeSinceLastSample;
+    private int _windowFrames;
 
     public long TotalFrames { get; private set; }
     public double TotalSeconds { get; private set; }

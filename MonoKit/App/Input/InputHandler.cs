@@ -1,4 +1,4 @@
-﻿// AppHost - InputHandler.cs
+﻿// MonoKit - InputHandler.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -8,7 +8,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
 
 namespace MonoKit.App.Input;
 
@@ -27,11 +26,14 @@ public class InputHandler
 {
     private readonly BitArray _actionsFlags = new(byte.MaxValue + 1);
     private readonly List<IInputDevice> _devices = new();
+    private readonly List<char> _frameCharacters = new();
+    private readonly Queue<char> _pendingCharacters = new();
 
     private readonly object _textLock = new();
-    private readonly Queue<char> _pendingCharacters = new();
-    private readonly List<char> _frameCharacters = new();
     private bool _textSubscribed;
+
+    /// <summary>Characters typed since the last <see cref="Update" />, in input order.</summary>
+    public IReadOnlyList<char> TypedCharacters => _frameCharacters;
 
     /// <summary>Adds an input device polled on every update.</summary>
     public InputHandler RegisterDevice(IInputDevice device)
@@ -56,7 +58,9 @@ public class InputHandler
     private void OnTextInput(object sender, TextInputEventArgs e)
     {
         lock (_textLock)
+        {
             _pendingCharacters.Enqueue(e.Character);
+        }
     }
 
     /// <summary>Clears flags, drains typed characters, then polls all devices.</summary>
@@ -73,9 +77,6 @@ public class InputHandler
         foreach (var device in _devices)
             device.Update(elapsedMilliseconds, _actionsFlags);
     }
-
-    /// <summary>Characters typed since the last <see cref="Update" />, in input order.</summary>
-    public IReadOnlyList<char> TypedCharacters => _frameCharacters;
 
     /// <summary>Returns whether the action fired this frame, without consuming it.</summary>
     public bool IsActionActive(byte actionID)

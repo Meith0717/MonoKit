@@ -1,4 +1,4 @@
-// SpriteDrawSystem2D.cs
+// MonoKit - SpriteDrawSystem2D.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -14,7 +14,10 @@ using MonoKit.Game.Components;
 
 namespace MonoKit.Game.Systems;
 
-/// <summary>Draws all Transform2D+SpriteRenderer entities through the 2D camera, centered on <see cref="Camera2D.Position"/>.</summary>
+/// <summary>
+///     Draws all Transform2D+SpriteRenderer entities through the 2D camera, centered on
+///     <see cref="Camera2D.Position" />.
+/// </summary>
 public class SpriteDrawSystem2D(Camera2D camera) : IDrawSystem
 {
     /// <summary>Hook: called once when the system joins the world.</summary>
@@ -29,7 +32,7 @@ public class SpriteDrawSystem2D(Camera2D camera) : IDrawSystem
     )
     {
         spriteBatch.Begin(transformMatrix: camera.View, sortMode: SpriteSortMode.BackToFront);
-        world.ForEach<Transform2D, SpriteRenderer>(
+        world.ForEach(
             (Entity e, ref Transform2D t, ref SpriteRenderer s) =>
             {
                 var origin = new Vector2(s.TextureWidth, s.TextureHeight) / 2f;

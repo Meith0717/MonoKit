@@ -1,4 +1,4 @@
-﻿// AppHost - UiElement.cs
+﻿// MonoKit - UiElement.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -42,12 +42,20 @@ public enum FillScale
 public abstract class UiElement : IDisposable
 {
     public Align Align = Align.None;
+
+    /// <summary>Ancestor clip rectangle (set by clipping containers during Draw); null = no clip.</summary>
+    internal Rectangle? ClipRect;
+
     public FillScale FillScale = FillScale.None;
 
     public int? HSpace = null;
+    protected int? IntrinsicHeight;
 
-    /// <summary>Explicit height in pixels; when null, derived from <see cref="RelHeight" /> or intrinsic size.</summary>
-    public int? Height { get; set; }
+    /// <summary>
+    ///     Content-derived size, computed by <see cref="MeasureSize" />.
+    ///     Unlike <see cref="Width" />/<see cref="Height" />, a user-assigned explicit size always wins.
+    /// </summary>
+    protected int? IntrinsicWidth;
 
     public float RelHeight = .1f;
     public float RelWidth = .1f;
@@ -56,21 +64,21 @@ public abstract class UiElement : IDisposable
     public float RelY = 0;
     public int? VSpace = null;
 
-    /// <summary>Explicit width in pixels; when null, derived from <see cref="RelWidth" /> or intrinsic size.</summary>
-    public int? Width { get; set; }
-
     public float? X = null;
     public float? Y = null;
+    private bool _pressStartedHere;
+
+    private ButtonState _previousLeft;
+
+    /// <summary>Explicit height in pixels; when null, derived from <see cref="RelHeight" /> or intrinsic size.</summary>
+    public int? Height { get; set; }
+
+    /// <summary>Explicit width in pixels; when null, derived from <see cref="RelWidth" /> or intrinsic size.</summary>
+    public int? Width { get; set; }
 
     public Rectangle Bounds { get; private set; }
     public bool IsDisposed { get; private set; }
     protected float UiScale { get; private set; }
-
-    /// <summary>Ancestor clip rectangle (set by clipping containers during Draw); null = no clip.</summary>
-    internal Rectangle? ClipRect;
-
-    private ButtonState _previousLeft;
-    private bool _pressStartedHere;
 
     /// <summary>True on the frame the left button goes down over this element.</summary>
     internal bool IsMousePressed { get; private set; }
@@ -93,13 +101,6 @@ public abstract class UiElement : IDisposable
 
     /// <summary>Hook: draws the element’s own content.</summary>
     protected abstract void Drawer(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice);
-
-    /// <summary>
-    ///     Content-derived size, computed by <see cref="MeasureSize" />.
-    ///     Unlike <see cref="Width" />/<see cref="Height" />, a user-assigned explicit size always wins.
-    /// </summary>
-    protected int? IntrinsicWidth;
-    protected int? IntrinsicHeight;
 
     /// <summary>
     ///     Computes the element's <see cref="IntrinsicWidth" />/<see cref="IntrinsicHeight" /> before layout.

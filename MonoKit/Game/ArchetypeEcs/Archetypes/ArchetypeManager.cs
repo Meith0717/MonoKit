@@ -1,4 +1,4 @@
-// AppHost - ArchetypeManager.cs
+// MonoKit - ArchetypeManager.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -15,6 +15,7 @@ internal sealed class ArchetypeManager : IDisposable
 
     private readonly Dictionary<Type, Archetype[]> _componentTypeToArchetypeSnapshots = new();
     private readonly Dictionary<Type, HashSet<Archetype>> _componentTypeToArchetypes = new();
+    private int _nextArchetypeId;
     private bool _snapshotsDirty;
 
     /// <summary>Creates the shared empty archetype.</summary>
@@ -46,7 +47,7 @@ internal sealed class ArchetypeManager : IDisposable
         if (_archetypes.TryGetValue(archetypeType, out var archetype))
             return archetype;
 
-        archetype = new Archetype(archetypeType);
+        archetype = new Archetype(archetypeType, _nextArchetypeId++);
         _archetypes[archetypeType] = archetype;
         _snapshotsDirty = true;
 

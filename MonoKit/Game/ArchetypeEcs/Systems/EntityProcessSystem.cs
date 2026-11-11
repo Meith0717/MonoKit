@@ -1,4 +1,4 @@
-// EntityProcessSystem.cs
+// MonoKit - EntityProcessSystem.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -17,6 +17,9 @@ public interface IEntityProcessSystem : ISystem
 public abstract class EntityProcessSystem<T1> : IUpdateSystem, IEntityProcessSystem
     where T1 : struct
 {
+    /// <summary>Hook: reacts when an entity is destroyed.</summary>
+    public abstract void OnEntityDestroyed(Entity entity);
+
     /// <summary>Hook: releases resources held by the derived system.</summary>
     public abstract void Dispose();
 
@@ -59,15 +62,15 @@ public abstract class EntityProcessSystem<T1> : IUpdateSystem, IEntityProcessSys
 
     /// <summary>Hook: runs once after entities are processed.</summary>
     protected abstract void End();
-
-    /// <summary>Hook: reacts when an entity is destroyed.</summary>
-    public abstract void OnEntityDestroyed(Entity entity);
 }
 
 public abstract class EntityProcessSystem<T1, T2> : IUpdateSystem, IEntityProcessSystem
     where T1 : struct
     where T2 : struct
 {
+    /// <summary>Hook: reacts when an entity is destroyed.</summary>
+    public abstract void OnEntityDestroyed(Entity entity);
+
     /// <summary>Hook: releases resources held by the derived system.</summary>
     public abstract void Dispose();
 
@@ -128,9 +131,6 @@ public abstract class EntityProcessSystem<T1, T2> : IUpdateSystem, IEntityProces
 
     /// <summary>Hook: runs once after entities are processed.</summary>
     protected abstract void End();
-
-    /// <summary>Hook: reacts when an entity is destroyed.</summary>
-    public abstract void OnEntityDestroyed(Entity entity);
 }
 
 public abstract class EntityProcessSystem<T1, T2, T3> : IUpdateSystem, IEntityProcessSystem
@@ -138,6 +138,9 @@ public abstract class EntityProcessSystem<T1, T2, T3> : IUpdateSystem, IEntityPr
     where T2 : struct
     where T3 : struct
 {
+    /// <summary>Hook: reacts when an entity is destroyed.</summary>
+    public abstract void OnEntityDestroyed(Entity entity);
+
     /// <summary>Hook: releases resources held by the derived system.</summary>
     public abstract void Dispose();
 
@@ -202,9 +205,6 @@ public abstract class EntityProcessSystem<T1, T2, T3> : IUpdateSystem, IEntityPr
 
     /// <summary>Hook: runs once after entities are processed.</summary>
     protected abstract void End();
-
-    /// <summary>Hook: reacts when an entity is destroyed.</summary>
-    public abstract void OnEntityDestroyed(Entity entity);
 }
 
 public abstract class EntityProcessSystem<T1, T2, T3, T4> : IUpdateSystem, IEntityProcessSystem
@@ -213,6 +213,9 @@ public abstract class EntityProcessSystem<T1, T2, T3, T4> : IUpdateSystem, IEnti
     where T3 : struct
     where T4 : struct
 {
+    /// <summary>Hook: reacts when an entity is destroyed.</summary>
+    public abstract void OnEntityDestroyed(Entity entity);
+
     /// <summary>Hook: releases resources held by the derived system.</summary>
     public abstract void Dispose();
 
@@ -282,7 +285,4 @@ public abstract class EntityProcessSystem<T1, T2, T3, T4> : IUpdateSystem, IEnti
 
     /// <summary>Hook: runs once after entities are processed.</summary>
     protected abstract void End();
-
-    /// <summary>Hook: reacts when an entity is destroyed.</summary>
-    public abstract void OnEntityDestroyed(Entity entity);
 }

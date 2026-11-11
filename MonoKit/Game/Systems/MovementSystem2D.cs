@@ -1,4 +1,4 @@
-// MovementSystem2D.cs
+// MonoKit - MovementSystem2D.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -20,12 +20,14 @@ public class MovementSystem2D : IUpdateSystem
     /// <summary>Moves entities by velocity and rotates by angular velocity.</summary>
     public void Update(double elapsedMs, World world)
     {
-        world.ForEach<Transform2D, Velocity2D>((Entity _, ref Transform2D transform, ref Velocity2D velocity) =>
-        {
-            transform.Position +=
-                velocity.Velocity * velocity.NormalizedMovingDirection * (float)elapsedMs;
-            transform.Rotation += velocity.AngularVelocity * (float)elapsedMs;
-        });
+        world.ForEach(
+            (Entity _, ref Transform2D transform, ref Velocity2D velocity) =>
+            {
+                transform.Position +=
+                    velocity.Velocity * velocity.NormalizedMovingDirection * (float)elapsedMs;
+                transform.Rotation += velocity.AngularVelocity * (float)elapsedMs;
+            }
+        );
     }
 
     /// <summary>Releases system resources; none are held.</summary>

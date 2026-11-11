@@ -1,4 +1,4 @@
-// AppHost - Archetype.cs
+// MonoKit - Archetype.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -7,7 +7,6 @@
 using System;
 using System.Collections.Generic;
 using MonoKit.Game.ArchetypeEcs.Entities;
-using MonoKit.Game.ArchetypeEcs.SpatialQueries;
 
 namespace MonoKit.Game.ArchetypeEcs.Archetypes;
 
@@ -20,11 +19,12 @@ internal sealed class Archetype : IDisposable
     private Entity[] _entityIds;
 
     /// <summary>Builds typed columns and index map for the archetype's component types.</summary>
-    internal Archetype(ArchetypeType type)
+    internal Archetype(ArchetypeType type, int id)
     {
         var componentTypes = type.ComponentTypes;
 
         Type = type;
+        Id = id;
         _columns = new object[componentTypes.Length];
         _entityIds = new Entity[InitialCapacity];
         _capacity = InitialCapacity;
@@ -39,6 +39,11 @@ internal sealed class Archetype : IDisposable
     }
 
     internal ArchetypeType Type { get; }
+    internal int Id { get; }
+
+    /// <summary>Bumped whenever column arrays are replaced, so column caches can detect staleness.</summary>
+    internal int Version { get; private set; }
+
     internal int RowCount { get; private set; }
 
     /// <summary>Clears all component storage held by this archetype.</summary>
@@ -71,6 +76,7 @@ internal sealed class Archetype : IDisposable
 
         Array.Resize(ref _entityIds, newCapacity);
         _capacity = newCapacity;
+        Version++;
     }
 
     /// <summary>Appends a row from boxed components with type validation.</summary>
@@ -178,12 +184,6 @@ internal sealed class Archetype : IDisposable
     internal Entity GetEntityAt(int row)
     {
         return _entityIds[row];
-    }
-
-    /// <summary>Permutes stored entity ids into the given row order.</summary>
-    internal void ApplyEntityIdOrder(int[] order, int rowCount)
-    {
-        RowOrderUtility.PermuteColumn(_entityIds, order, rowCount);
     }
 
     /// <summary>Finds the typed column storing a component type.</summary>

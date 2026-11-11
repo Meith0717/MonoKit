@@ -1,4 +1,4 @@
-// AppHost - UiTextEntry.cs
+// MonoKit - UiTextEntry.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -119,8 +119,10 @@ public sealed class UiTextEntry(SpriteFont spriteFont) : UiElement
 
         return;
 
-        bool IsKeyDownEdge(Keys key) =>
-            keyboardState.IsKeyDown(key) && !_previousKeyboardState.IsKeyDown(key);
+        bool IsKeyDownEdge(Keys key)
+        {
+            return keyboardState.IsKeyDown(key) && !_previousKeyboardState.IsKeyDown(key);
+        }
     }
 
     /// <summary>Draws background, text, and the cursor when focused.</summary>
@@ -166,8 +168,10 @@ public sealed class UiTextEntry(SpriteFont spriteFont) : UiElement
     }
 
     /// <summary>Masks the text with PasswordChar when IsPassword is set.</summary>
-    private string PasswordAware(string text) =>
-        IsPassword ? new string(PasswordChar, text.Length) : text;
+    private string PasswordAware(string text)
+    {
+        return IsPassword ? new string(PasswordChar, text.Length) : text;
+    }
 
     /// <summary>Maps a pixel x-offset to the nearest cursor index.</summary>
     private int GetCursorPositionFromX(float x)

@@ -1,4 +1,4 @@
-// GameScreen.cs
+// MonoKit - GameScreen.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -13,19 +13,12 @@ using MonoKit.Game.Camera;
 namespace MonoKit.Game.Screens;
 
 /// <summary>
-/// Screen hosting a <see cref="GameHost"/> in 2D or 3D. Rendering runs in the world's draw
-/// systems. Override <see cref="Initialize"/> to spawn content and <see cref="Update"/> for
-/// input/game logic. Cameras: <see cref="GameHost.Camera2D"/> / <see cref="GameHost.Camera3D"/>.
+///     Screen hosting a <see cref="GameHost" /> in 2D or 3D. Rendering runs in the world's draw
+///     systems. Override <see cref="Initialize" /> to spawn content and <see cref="Update" /> for
+///     input/game logic. Cameras: <see cref="GameHost.Camera2D" /> / <see cref="GameHost.Camera3D" />.
 /// </summary>
 public class GameScreen : IScreen
 {
-    public GameHost Host { get; }
-
-    /// <summary>The host's camera, dimension-agnostic.</summary>
-    protected ICamera Camera => Host.Camera;
-    public bool UpdateBelow { get; }
-    public bool DrawBelow { get; }
-
     /// <summary>Creates the screen and its game host for the given dimension.</summary>
     public GameScreen(
         GameServiceContainer services,
@@ -38,6 +31,14 @@ public class GameScreen : IScreen
         UpdateBelow = updateBelow;
         DrawBelow = drawBelow;
     }
+
+    public GameHost Host { get; }
+
+    /// <summary>The host's camera, dimension-agnostic.</summary>
+    protected ICamera Camera => Host.Camera;
+
+    public bool UpdateBelow { get; }
+    public bool DrawBelow { get; }
 
     /// <summary>Hook: override to spawn world content when the screen initializes.</summary>
     public virtual void Initialize() { }

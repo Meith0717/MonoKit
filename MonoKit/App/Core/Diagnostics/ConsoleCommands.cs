@@ -1,4 +1,4 @@
-﻿// AppHost - ConsoleCommands.cs
+﻿// MonoKit - ConsoleCommands.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -25,7 +25,9 @@ public class ConsoleCommands
     public void Register(ConsoleCommand command)
     {
         lock (_lock)
+        {
             _commands[command.Name.ToLower()] = command;
+        }
     }
 
     /// <summary>Parses input and runs the matching command, returning success.</summary>
@@ -40,7 +42,9 @@ public class ConsoleCommands
 
         ConsoleCommand? command;
         lock (_lock)
+        {
             _commands.TryGetValue(name, out command);
+        }
 
         if (command != null)
             try
@@ -63,7 +67,9 @@ public class ConsoleCommands
     {
         Console.WriteLine("Available commands:");
         lock (_lock)
+        {
             foreach (var cmd in _commands.Values)
                 Console.WriteLine($"  {cmd.Name} - {cmd.Description}");
+        }
     }
 }

@@ -1,4 +1,4 @@
-// AppHost - ScreenManager.cs
+// MonoKit - ScreenManager.cs
 // Copyright (c) 2026 Thierry Meiers
 // All rights reserved.
 // AI-assisted development using Mistral Vibe Code;
@@ -23,6 +23,8 @@ public class ScreenManager(Microsoft.Xna.Framework.Game game)
     private readonly ConcurrentQueue<Action<float>> _pendingActions = new();
     private readonly PostProcessingRunner _postProcessingRunner = new();
     private readonly Stack<IScreen> _screens = new();
+
+    private readonly List<IScreen> _visibleChain = [];
     private RenderTarget2D _lowerComposite;
     private RenderTarget2D _screenScratch;
 
@@ -80,8 +82,6 @@ public class ScreenManager(Microsoft.Xna.Framework.Game game)
                 break;
         }
     }
-
-    private readonly List<IScreen> _visibleChain = [];
 
     /// <summary>Draws the visible screen chain: lower screens composited (optionally with the effect), top screen last.</summary>
     public void Draw(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice)
