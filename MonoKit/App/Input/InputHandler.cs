@@ -34,9 +34,10 @@ public class InputHandler
     private bool _textSubscribed;
 
     /// <summary>Adds an input device polled on every update.</summary>
-    public void RegisterDevice(IInputDevice device)
+    public InputHandler RegisterDevice(IInputDevice device)
     {
         _devices.Add(device);
+        return this;
     }
 
     /// <summary>
