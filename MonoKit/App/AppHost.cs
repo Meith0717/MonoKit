@@ -19,7 +19,8 @@ using MonoKit.App.Screens;
 
 namespace MonoKit.App;
 
-public class AppHost(Microsoft.Xna.Framework.Game game, GraphicsDeviceManager graphicsDeviceManager) : IDisposable
+public class AppHost(Microsoft.Xna.Framework.Game game, GraphicsDeviceManager graphicsDeviceManager)
+    : IDisposable
 {
     private bool _wasInitialized;
     public readonly FrameCounter FrameCounter = new();
@@ -59,6 +60,7 @@ public class AppHost(Microsoft.Xna.Framework.Game game, GraphicsDeviceManager gr
         services.AddService(InputHandler);
         services.AddService(DisplayController);
         services.AddService(ScreenManager);
+        services.AddService(FrameCounter);
 
         // OS text input (keyboard layout + key repeat) for text entry widgets.
         InputHandler.EnableTextInput(game.Window);
