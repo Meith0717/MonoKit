@@ -6,7 +6,7 @@
 
 MonoKit is **not a complete game engine** — it’s a collection of building blocks meant to help you start small and learn
 how engines are structured.  
-It focuses on:
+It focuses on: 
 
 - Simplicity over performance
 - Readability over abstraction
