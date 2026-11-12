@@ -28,8 +28,11 @@ public sealed class SpatialHash
 
     private readonly float _inverseCellSize;
     private readonly List<Entry> _pending = new();
+    private int _cellCount;
     private int _count;
     private Entry[] _items = [];
+    private bool _mapReallocated;
+    private int[] _occupied = [];
 
     private long[] _keys = [];
     private int[] _mapCounts = new int[16];
@@ -38,6 +41,7 @@ public sealed class SpatialHash
     private long[] _mapKeys = new long[16];
     private int _mapMask = 15;
     private int[] _mapVals = new int[16];
+    private int[] _slots = [];
     private Entry[] _tmp = [];
 
     public SpatialHash(float cellSize)
@@ -55,6 +59,7 @@ public sealed class SpatialHash
     {
         _pending.Clear();
         ResetMap();
+        _cellCount = 0;
         _count = 0;
     }
 
@@ -68,18 +73,15 @@ public sealed class SpatialHash
     public void Rebuild<TPos>(World world, Func<TPos, Vector3> getPosition)
         where TPos : struct
     {
-        EnsureCapacity(world.EntityCount + _pending.Count);
-        ResetMap();
+        EnsureEntryCapacity(world.EntityCount + _pending.Count);
 
         var count = 0;
         world.ForEach(
             (Entity entity, ref TPos pos) =>
             {
                 var p = getPosition(pos);
-                var key = CellKey(ToCell(p.X), ToCell(p.Y), ToCell(p.Z));
-                _keys[count] = key;
+                _keys[count] = CellKey(ToCell(p.X), ToCell(p.Y), ToCell(p.Z));
                 _tmp[count] = new Entry(entity, p);
-                _mapVals[FindSlot(key)]++;
                 count++;
             }
         );
@@ -87,30 +89,47 @@ public sealed class SpatialHash
         foreach (var entry in _pending)
         {
             var p = entry.Position;
-            var key = CellKey(ToCell(p.X), ToCell(p.Y), ToCell(p.Z));
-            _keys[count] = key;
+            _keys[count] = CellKey(ToCell(p.X), ToCell(p.Y), ToCell(p.Z));
             _tmp[count] = entry;
-            _mapVals[FindSlot(key)]++;
             count++;
         }
 
         _pending.Clear();
 
-        var offset = 0;
-        for (var s = 0; s <= _mapMask; s++)
+        EnsureMapCapacity(count);
+        ResetMap();
+
+        _cellCount = 0;
+        for (var i = 0; i < count; i++)
         {
+            var key = _keys[i];
+            var s = Hash(key);
+            while (_mapKeys[s] != EmptySlot && _mapKeys[s] != key)
+                s = (s + 1) & _mapMask;
             if (_mapKeys[s] == EmptySlot)
-                continue;
+            {
+                _mapKeys[s] = key;
+                _occupied[_cellCount++] = s;
+            }
+
+            _mapVals[s]++;
+            _slots[i] = s;
+        }
+
+        var offset = 0;
+        for (var k = 0; k < _cellCount; k++)
+        {
+            var s = _occupied[k];
             var cellCount = _mapVals[s];
             _mapCounts[s] = cellCount;
             _mapVals[s] = offset;
+            _mapCursor[s] = offset;
             offset += cellCount;
         }
 
         _count = offset;
-        Array.Copy(_mapVals, _mapCursor, _mapMask + 1);
         for (var i = 0; i < count; i++)
-            _items[_mapCursor[FindSlot(_keys[i])]++] = _tmp[i];
+            _items[_mapCursor[_slots[i]]++] = _tmp[i];
     }
 
     /// <summary>
@@ -154,19 +173,24 @@ public sealed class SpatialHash
         return results.Count;
     }
 
-    /// <summary>Grows the entry buffers and the cell map (kept at load factor &lt;= 0.5).</summary>
-    private void EnsureCapacity(int minEntries)
+    /// <summary>Grows the per-entity entry buffers. _occupied is resized, not replaced: it carries last frame's cell slots into ResetMap.</summary>
+    private void EnsureEntryCapacity(int minEntries)
     {
-        if (_keys.Length < minEntries)
-        {
-            var capacity = int.Max(minEntries, _keys.Length * 2);
-            _keys = new long[capacity];
-            _tmp = new Entry[capacity];
-            _items = new Entry[capacity];
-        }
+        if (_keys.Length >= minEntries)
+            return;
+        var capacity = int.Max(minEntries, _keys.Length * 2);
+        _keys = new long[capacity];
+        _tmp = new Entry[capacity];
+        _items = new Entry[capacity];
+        _slots = new int[capacity];
+        Array.Resize(ref _occupied, capacity);
+    }
 
+    /// <summary>Grows the cell map to load factor &lt;= 0.5 for count entries.</summary>
+    private void EnsureMapCapacity(int count)
+    {
         var mapSize = 16;
-        while (mapSize < minEntries * 2)
+        while (mapSize < count * 2)
             mapSize <<= 1;
         if (mapSize > _mapKeys.Length)
         {
@@ -175,32 +199,32 @@ public sealed class SpatialHash
             _mapCounts = new int[mapSize];
             _mapCursor = new int[mapSize];
             _mapMask = mapSize - 1;
+            _mapReallocated = true;
         }
     }
 
-    /// <summary>Resets the cell map to empty.</summary>
+    /// <summary>Clears last frame's occupied slots, or the whole map after reallocation.</summary>
     private void ResetMap()
     {
-        Array.Fill(_mapKeys, EmptySlot);
-        Array.Fill(_mapVals, 0);
+        if (_mapReallocated)
+        {
+            Array.Fill(_mapKeys, EmptySlot);
+            _mapReallocated = false;
+            return;
+        }
+
+        for (var k = 0; k < _cellCount; k++)
+        {
+            var s = _occupied[k];
+            _mapKeys[s] = EmptySlot;
+            _mapVals[s] = 0;
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     private int Hash(long key)
     {
         return (int)(((ulong)key * 0x9E3779B97F4A7C15UL) >> 33) & _mapMask;
-    }
-
-    /// <summary>Finds the slot for the key, inserting it when absent.</summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    private int FindSlot(long key)
-    {
-        var s = Hash(key);
-        while (_mapKeys[s] != EmptySlot && _mapKeys[s] != key)
-            s = (s + 1) & _mapMask;
-        if (_mapKeys[s] == EmptySlot)
-            _mapKeys[s] = key;
-        return s;
     }
 
     /// <summary>Finds the slot for the key, or -1 when the cell is not occupied.</summary>
