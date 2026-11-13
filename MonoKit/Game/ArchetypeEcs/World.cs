@@ -661,6 +661,8 @@ public sealed class World : IDisposable
                     continue;
                 var columnArray = (T1[])column;
                 var rowCount = archetype.RowCount;
+                if (rowCount == 0)
+                    continue;
                 Parallel.ForEach(
                     Partitioner.Create(0, rowCount),
                     range =>
@@ -700,6 +702,8 @@ public sealed class World : IDisposable
                 var col1Array = (T1[])column1;
                 var col2Array = (T2[])column2;
                 var rowCount = archetype.RowCount;
+                if (rowCount == 0)
+                    continue;
                 Parallel.ForEach(
                     Partitioner.Create(0, rowCount),
                     range =>
@@ -747,6 +751,8 @@ public sealed class World : IDisposable
                 var col2Array = (T2[])column2;
                 var col3Array = (T3[])column3;
                 var rowCount = archetype.RowCount;
+                if (rowCount == 0)
+                    continue;
                 Parallel.ForEach(
                     Partitioner.Create(0, rowCount),
                     range =>
@@ -799,6 +805,8 @@ public sealed class World : IDisposable
                 var col3Array = (T3[])column3;
                 var col4Array = (T4[])column4;
                 var rowCount = archetype.RowCount;
+                if (rowCount == 0)
+                    continue;
                 Parallel.ForEach(
                     Partitioner.Create(0, rowCount),
                     range =>
