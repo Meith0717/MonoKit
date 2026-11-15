@@ -29,7 +29,7 @@ public class ScreenManager(Microsoft.Xna.Framework.Game game)
     private RenderTarget2D _screenScratch;
 
     /// <summary>Applied to the chain below the top screen, for example a blur behind a menu.</summary>
-    public IPostProcessingEffect PostProcessingEffect { get; init; }
+    public IPostProcessingEffect PostProcessingEffect { get; set; }
 
     /// <summary>Set to false to render the lower chain unblurred, for example during a transition.</summary>
     public bool EffectEnabled { get; set; } = true;
