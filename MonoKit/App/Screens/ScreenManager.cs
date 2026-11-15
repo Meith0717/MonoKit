@@ -56,8 +56,10 @@ public class ScreenManager(Microsoft.Xna.Framework.Game game)
         });
     }
 
-    /// <summary>Pops every screen above the given screen; that screen stays on top.</summary>
-    public void PopScreensUntil(IScreen screen)
+    /// <summary>
+    /// Pops the given screen and every screen above it.
+    /// </summary>
+    public void PopScreenAndAbove(IScreen screen)
     {
         _pendingActions.Enqueue(_ =>
         {
@@ -65,6 +67,7 @@ public class ScreenManager(Microsoft.Xna.Framework.Game game)
                 return;
             while (_screens.Peek() != screen)
                 _screens.Pop().Dispose();
+            _screens.Pop().Dispose();
         });
     }
 
