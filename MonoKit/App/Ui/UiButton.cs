@@ -13,8 +13,6 @@ using MonoKit.App.Input;
 
 namespace MonoKit.App.Ui;
 
-public struct ButtonStyle { }
-
 public interface IButton
 {
     bool Disable { get; set; }
@@ -130,7 +128,7 @@ public static class UiButton
     }
 
     /// <summary>Button rendering just a text label.</summary>
-    public class Text(ButtonStyle? style = null) : UiElement, IButton
+    public class Text() : UiElement, IButton
     {
         private readonly ButtonBehaviour _buttonBehaviour = new();
         public Color TextIdleColor { get; set; } = Color.White;
@@ -164,6 +162,8 @@ public static class UiButton
         protected override void Updater(InputHandler inputHandler)
         {
             UiText.Update(inputHandler, Bounds, UiScale);
+            Width = (int)(UiText.Bounds.Width * 1.1f);
+            Height = (int)(UiText.Bounds.Height * 1.2f);
             _buttonBehaviour.Update(Bounds, IsMouseClicked, Disable, OnClickAction, OnHoverAction);
             UiText.Color =
                 Disable ? TextDisableColor
